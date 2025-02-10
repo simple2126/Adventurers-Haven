@@ -187,7 +187,7 @@
 [노션]()
 
 
-[WireFrame]()
+[WireFrame](https://www.figma.com/board/nkjHNG5vUeuYDzbbwD26tu/%EB%AA%AC%EC%8A%A4%ED%84%B0%EC%9D%98-%EC%95%88%EC%8B%9D%EC%B2%98?node-id=2-20&t=VcwdpdZ7z4wkHvhw-0)
 
 
 [영상]()
