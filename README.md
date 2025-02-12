@@ -194,13 +194,13 @@
 
 
 ## 라이선스
-[타일1](), [타일2]() 
+[타일, 가게](https://gif-superretroworld.itch.io/marketplace), [타일2]() 
 
 
-[사람]()
+[모험가](https://zerie.itch.io/tiny-rpg-character-asset-pack)
 
 
-[몬스터1](), [몬스터2]() 
+[아이템](https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack)
 
 
 [UI]()
