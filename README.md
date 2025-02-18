@@ -203,13 +203,13 @@
 [아이템](https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack)
 
 
-[UI]()
+[UI](https://srtoasty.itch.io/ui-assets-pack-2)
 
 
 [이펙트1](), [이펙트2]()
 
 
-[글씨체]()
+[글씨체](https://noonnu.cc/font_page/435)
 
 
-[사운드]()
+[사운드](https://assetstore.unity.com/packages/audio/music/casual-game-bgm-5-135943)
