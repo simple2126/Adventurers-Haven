@@ -8,4 +8,10 @@ public class DataButtons : UIBase
     {
 
     }
+
+    public void ShowTitle()
+    {
+        UIManager.Instance.Show<TitlePopupMain>();
+        Hide();
+    }
 }
