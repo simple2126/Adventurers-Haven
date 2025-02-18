@@ -10,6 +10,8 @@ public class TitlePopupMain : UIBase
         {
             case 0: UIManager.Instance.Show<DataButtons>();
                 break;
+            case 1: UIManager.Instance.Show<OptionPanel>();
+                break;
         }
     }
 }

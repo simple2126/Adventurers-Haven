@@ -2,29 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class UIManager : SingletonBase<UIManager>
 {
     [SerializeField] private Transform canvas;
 
-    public static UIManager Instance;
     public static float ScreenWidth = 1080;
     public static float ScreenHeight = 1920;
-    private List<UIBase> uiList = new List<UIBase>();
-
-    private void Awake()
-    {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
-    }
+    private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
 
     public T Show<T>(params object[] param) where T : UIBase
     {
         string uiName = typeof(T).ToString();
+        if (uiDict.ContainsKey(uiName)) return default;
         UIBase go = Resources.Load<UIBase>("UI/" + uiName);
         var ui = Load<T>(go, uiName);
-        uiList.Add(ui);
+        //uiList.Add(ui);
+        uiDict[uiName] = ui;
         ui.Opened(param);
         return (T)ui;
     }
@@ -45,7 +38,7 @@ public class UIManager : MonoBehaviour
         UIBase ui = Instantiate(prefab, newCanvasObject.transform);
         ui.name = ui.name.Replace("(Clone)", "");
         ui.canvas = canvas;
-        ui.canvas.sortingOrder = uiList.Count;
+        ui.canvas.sortingOrder = uiDict.Count;
         return (T)ui;
     }
 
@@ -57,8 +50,8 @@ public class UIManager : MonoBehaviour
 
     public void Hide(string uiName)
     {
-        UIBase go = uiList.Find(obj => obj.name == uiName);
-        uiList.Remove(go);
+        UIBase go = uiDict[uiName];
+        uiDict.Remove(uiName);
         Destroy(go.canvas.gameObject);
     }
 }
