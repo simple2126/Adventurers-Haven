@@ -203,7 +203,7 @@
 [아이템](https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack)
 
 
-[UI](https://srtoasty.itch.io/ui-assets-pack-2)
+[UI1](https://srtoasty.itch.io/ui-assets-pack-srt), [UI2](https://srtoasty.itch.io/ui-assets-pack-2)
 
 
 [이펙트1](), [이펙트2]()
