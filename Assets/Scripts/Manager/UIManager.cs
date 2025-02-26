@@ -6,8 +6,9 @@ public class UIManager : SingletonBase<UIManager>
 {
     [SerializeField] private Transform canvas;
 
-    public static float ScreenWidth = 1080;
-    public static float ScreenHeight = 1920;
+    public static float ScreenWidth { get; private set; } = 1080;
+    public static float ScreenHeight { get; private set; } = 1920;
+
     private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
 
     public T Show<T>(params object[] param) where T : UIBase
