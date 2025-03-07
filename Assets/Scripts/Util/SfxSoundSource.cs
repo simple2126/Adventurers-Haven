@@ -4,7 +4,7 @@ using UnityEngine;
 public class SfxSoundSource : MonoBehaviour
 {
     private AudioSource _audioSource;
-    private SfxType _type;
+    [SerializeField] private SfxType _type;
 
     public void Play(AudioClip clip, SfxType sfxType, float soundEffectVolume, float soundEffectPitchVaricance)
     {

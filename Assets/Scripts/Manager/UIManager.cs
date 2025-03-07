@@ -4,21 +4,21 @@ using UnityEngine.UI;
 
 public class UIManager : SingletonBase<UIManager>
 {
-    [SerializeField] private Transform canvas;
+    [SerializeField] private Transform _canvas;
 
     public static float ScreenWidth { get; private set; } = 1080;
     public static float ScreenHeight { get; private set; } = 1920;
 
-    private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
+    private Dictionary<string, UIBase> _uiDict = new Dictionary<string, UIBase>();
 
     public T Show<T>(params object[] param) where T : UIBase
     {
         string uiName = typeof(T).ToString();
-        if (uiDict.ContainsKey(uiName)) return default;
+        if (_uiDict.ContainsKey(uiName)) return default;
         UIBase go = Resources.Load<UIBase>("UI/" + uiName);
         var ui = Load<T>(go, uiName);
         //uiList.Add(ui);
-        uiDict[uiName] = ui;
+        _uiDict[uiName] = ui;
         ui.Opened(param);
         return (T)ui;
     }
@@ -39,7 +39,7 @@ public class UIManager : SingletonBase<UIManager>
         UIBase ui = Instantiate(prefab, newCanvasObject.transform);
         ui.name = ui.name.Replace("(Clone)", "");
         ui.canvas = canvas;
-        ui.canvas.sortingOrder = uiDict.Count;
+        ui.canvas.sortingOrder = _uiDict.Count;
         return (T)ui;
     }
 
@@ -51,8 +51,8 @@ public class UIManager : SingletonBase<UIManager>
 
     public void Hide(string uiName)
     {
-        UIBase go = uiDict[uiName];
-        uiDict.Remove(uiName);
+        UIBase go = _uiDict[uiName];
+        _uiDict.Remove(uiName);
         Destroy(go.canvas.gameObject);
     }
 }

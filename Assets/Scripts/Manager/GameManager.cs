@@ -6,6 +6,8 @@ public class GameManager : SingletonBase<GameManager>
     {
         base.Awake();
 
+        Application.targetFrameRate = 60;
+
         DontDestroyOnLoad(gameObject);
     }
 

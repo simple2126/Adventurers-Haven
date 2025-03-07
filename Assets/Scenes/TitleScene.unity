@@ -380,7 +380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5726a1eeec557449500bea9ad717fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
+  _canvas: {fileID: 0}
 --- !u!1 &1358214113
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,11 +473,16 @@ MonoBehaviour:
   _bgmList:
   - bgmType: 1
     clip: {fileID: 8300000, guid: 475f4837af487ce4a9e68bb227455e4c, type: 3}
-  _sfxList: []
+  _sfxList:
+  - sfxType: 0
+    clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
   bgmVolume: 0.1
   globalSfxVolume: 0.117
   _sfxPitchVariance: 0.16
-  poolconfigs: []
+  poolconfigs:
+  - tag: Click
+    prefab: {fileID: 2461093821013939944, guid: 8e4256a323729ab4ea62341d6f7c05a9, type: 3}
+    size: 20
 --- !u!82 &1592189530
 AudioSource:
   m_ObjectHideFlags: 0
