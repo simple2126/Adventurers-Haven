@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SFXHandler : MonoBehaviour, IPointerClickHandler
+public class ClickHandler : MonoBehaviour, IPointerClickHandler
 {
     public SfxType type;
 
