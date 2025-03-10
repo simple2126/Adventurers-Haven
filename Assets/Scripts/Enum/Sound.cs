@@ -10,4 +10,5 @@ public enum BgmType
 public enum SfxType
 {
     Click,
+    Swap,
 }

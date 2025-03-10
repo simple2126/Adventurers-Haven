@@ -476,13 +476,18 @@ MonoBehaviour:
   _sfxList:
   - sfxType: 0
     clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
+  - sfxType: 1
+    clip: {fileID: 8300000, guid: aa26f3d30ad0d494c90ca6f988ce4a17, type: 3}
   bgmVolume: 0.1
   globalSfxVolume: 1
   _sfxPitchVariance: 0.16
   poolconfigs:
   - tag: Click
     prefab: {fileID: 2461093821013939944, guid: 8e4256a323729ab4ea62341d6f7c05a9, type: 3}
-    size: 20
+    size: 5
+  - tag: Swap
+    prefab: {fileID: 4037558412575938916, guid: a19a1e99ab94e0748a0384cf99258346, type: 3}
+    size: 5
 --- !u!82 &1592189530
 AudioSource:
   m_ObjectHideFlags: 0

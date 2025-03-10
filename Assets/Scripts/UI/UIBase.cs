@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
-using DG.Tweening;
-using System.Collections;
+using System;
 
 public class UIBase : MonoBehaviour, IPointerClickHandler
 {
@@ -22,7 +21,7 @@ public class UIBase : MonoBehaviour, IPointerClickHandler
 
     public List<ButtonSfxPair> buttonSfxPairList = new List<ButtonSfxPair>();
 
-    private void Awake()
+    protected void Awake()
     {
         Button[] allButtons = GetComponentsInChildren<Button>(true);
 
@@ -31,6 +30,7 @@ public class UIBase : MonoBehaviour, IPointerClickHandler
         for (int i = 0; i < allButtons.Length; i++)
         {
             SfxType sfxType = (i < minCount) ? _sfxTypeArr[i] : SfxType.Click;
+            Console.WriteLine($"sfxType == {sfxType}");
             buttonSfxPairList.Add(new ButtonSfxPair { button = allButtons[i], sfxType = sfxType });
 
             ClickHandler clickHandler = allButtons[i].gameObject.AddComponent<ClickHandler>();

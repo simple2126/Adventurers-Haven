@@ -8,6 +8,7 @@ public class TitlePopupMain : UIBase
 
     private void Awake()
     {
+        base.Awake();
         _canvasGroup = GetComponent<CanvasGroup>();
     }
 

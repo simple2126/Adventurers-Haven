@@ -299,7 +299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvas: {fileID: 0}
   renderMode: 0
-  _sfxTypeArr: 0000000000000000
+  _sfxTypeArr: 0100000001000000
   buttonSfxPairList: []
   fadeDuration: 1
 --- !u!1 &7853226393242190140
