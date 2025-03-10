@@ -477,7 +477,7 @@ MonoBehaviour:
   - sfxType: 0
     clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
   bgmVolume: 0.1
-  globalSfxVolume: 0.117
+  globalSfxVolume: 1
   _sfxPitchVariance: 0.16
   poolconfigs:
   - tag: Click
