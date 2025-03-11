@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
 using System;
 
-public class UIBase : MonoBehaviour, IPointerClickHandler
+public class UIBase : MonoBehaviour
 {
     public Canvas canvas;
     public RenderMode renderMode;
@@ -51,17 +50,5 @@ public class UIBase : MonoBehaviour, IPointerClickHandler
     public void Hide()
     {
         UIManager.Instance.Hide(gameObject.name);
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        foreach (var pair in buttonSfxPairList)
-        {
-            if (eventData.pointerClick == pair.button.gameObject)
-            {
-                SoundManager.Instance.PlaySFX(pair.sfxType);
-                break;
-            }
-        }
     }
 }
