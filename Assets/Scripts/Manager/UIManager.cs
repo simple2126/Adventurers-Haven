@@ -4,55 +4,55 @@ using UnityEngine.UI;
 
 public class UIManager : SingletonBase<UIManager>
 {
-    [SerializeField] private Transform _canvas;
+    [SerializeField] private Transform canvas;
 
     public static float ScreenWidth { get; private set; } = 1080;
     public static float ScreenHeight { get; private set; } = 1920;
 
-    private Dictionary<string, UIBase> _uiDict = new Dictionary<string, UIBase>();
+    private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
 
     public T Show<T>(params object[] param) where T : UIBase
     {
-        string uiName = typeof(T).ToString();
-        if (_uiDict.ContainsKey(uiName)) return default;
-        UIBase go = Resources.Load<UIBase>("UI/" + uiName);
-        var ui = Load<T>(go, uiName);
+        string _uiName = typeof(T).ToString();
+        if (uiDict.ContainsKey(_uiName)) return default;
+        UIBase _go = Resources.Load<UIBase>("UI/" + _uiName);
+        var _ui = Load<T>(_go, _uiName);
         //uiList.Add(ui);
-        _uiDict[uiName] = ui;
-        ui.Opened(param);
-        return (T)ui;
+        uiDict[_uiName] = _ui;
+        _ui.Opened(param);
+        return (T)_ui;
     }
 
     private T Load<T>(UIBase prefab, string uiName) where T : UIBase
     {
-        GameObject newCanvasObject = new GameObject(uiName + " Canvas");
+        GameObject _newCanvasObject = new GameObject(uiName + " Canvas");
 
-        var canvas = newCanvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var _canvas = _newCanvasObject.AddComponent<Canvas>();
+        _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
-        var canvasScaler = newCanvasObject.AddComponent<CanvasScaler>();
-        canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        canvasScaler.referenceResolution = Vector2.right * ScreenWidth + Vector2.up * ScreenHeight;
+        var _canvasScaler = _newCanvasObject.AddComponent<CanvasScaler>();
+        _canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        _canvasScaler.referenceResolution = Vector2.right * ScreenWidth + Vector2.up * ScreenHeight;
 
-        newCanvasObject.AddComponent<GraphicRaycaster>();
+        _newCanvasObject.AddComponent<GraphicRaycaster>();
 
-        UIBase ui = Instantiate(prefab, newCanvasObject.transform);
-        ui.name = ui.name.Replace("(Clone)", "");
-        ui.canvas = canvas;
-        ui.canvas.sortingOrder = _uiDict.Count;
-        return (T)ui;
+        UIBase _ui = Instantiate(prefab, _newCanvasObject.transform);
+        _ui.name = _ui.name.Replace("(Clone)", "");
+        _ui.Canvas = _canvas;
+        _ui.Canvas.sortingOrder = uiDict.Count;
+        return (T)_ui;
     }
 
     public void Hide<T>() where T : UIBase
     {
-        string uiName = typeof(T).ToString();
-        Hide(uiName);
+        string _uiName = typeof(T).ToString();
+        Hide(_uiName);
     }
 
     public void Hide(string uiName)
     {
-        UIBase go = _uiDict[uiName];
-        _uiDict.Remove(uiName);
-        Destroy(go.canvas.gameObject);
+        UIBase _go = uiDict[uiName];
+        uiDict.Remove(uiName);
+        Destroy(_go.Canvas.gameObject);
     }
 }

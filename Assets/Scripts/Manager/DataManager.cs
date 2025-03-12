@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DataManager : SingletonBase<DataManager>
 {
-    private Dictionary<SfxType, float> _individualSfxVolumeDict;
+    private Dictionary<SfxType, float> individualSfxVolumeDict;
 
     protected override void Awake()
     {
@@ -15,23 +15,23 @@ public class DataManager : SingletonBase<DataManager>
 
     private void SetIndividualSfxVolumeDict()
     {
-        List<SfxVolume_Data> sfxVolumeDataList = SfxVolume_Data.GetList();
+        List<SfxVolume_Data> _sfxVolumeDataList = SfxVolume_Data.GetList();
 
         Dictionary<SfxType, float> individualSfxVolumeDict = new Dictionary<SfxType, float>();
-        for (int i = 0; i < sfxVolumeDataList.Count; i++)
+        for (int i = 0; i < _sfxVolumeDataList.Count; i++)
         {
-            individualSfxVolumeDict.Add(sfxVolumeDataList[i].sfxType, sfxVolumeDataList[i].volume);
+            individualSfxVolumeDict.Add(_sfxVolumeDataList[i].sfxType, _sfxVolumeDataList[i].volume);
         }
 
-        _individualSfxVolumeDict = individualSfxVolumeDict;
+        this.individualSfxVolumeDict = individualSfxVolumeDict;
     }
 
     public Dictionary<SfxType, float> GetIndvidualSfxVolumeDict()
     {
-        if (_individualSfxVolumeDict == null)
+        if (individualSfxVolumeDict == null)
         {
             SetIndividualSfxVolumeDict();
         }
-        return _individualSfxVolumeDict;
+        return individualSfxVolumeDict;
     }
 }

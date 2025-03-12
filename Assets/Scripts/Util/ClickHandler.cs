@@ -4,15 +4,15 @@ using UnityEngine.EventSystems;
 
 public class ClickHandler : MonoBehaviour, IPointerClickHandler
 {
-    public SfxType type;
+    public SfxType Type;
 
     public void SetSfxType(SfxType sfxType)
     {
-        type = sfxType;
+        Type = sfxType;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        SoundManager.Instance.PlaySFX(type);
+        SoundManager.Instance.PlaySFX(Type);
     }
 }

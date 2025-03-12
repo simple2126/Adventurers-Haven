@@ -2,32 +2,32 @@ using UnityEngine;
 
 public class SingletonBase<T> : MonoBehaviour where T : Component
 {
-    private static T _instance;
+    private static T instance;
     public static T Instance
     {
         get
         {
-            if (_instance != null)
-                return _instance;
+            if (instance != null)
+                return instance;
 
-            _instance = FindObjectOfType<T>();
+            instance = FindObjectOfType<T>();
 
-            if (_instance == null)
+            if (instance == null)
             {
-                GameObject go = new GameObject(typeof(T).Name);
-                _instance = go.AddComponent<T>();
+                GameObject _go = new GameObject(typeof(T).Name);
+                instance = _go.AddComponent<T>();
             }
-            return _instance;
+            return instance;
         }
     }
 
     protected virtual void Awake()
     {
-        if (_instance == null)
+        if (instance == null)
         {
-            _instance = this as T;
+            instance = this as T;
         }
-        else if (_instance != this)
+        else if (instance != this)
         {
             Destroy(gameObject);
         }

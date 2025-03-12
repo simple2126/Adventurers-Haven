@@ -5,96 +5,96 @@ using UnityEngine.EventSystems;
 public class SoundManager : SingletonBase<SoundManager>
 {
     [Header("BGM List")]
-    private Dictionary<BgmType, AudioClip> _bgmDict = new Dictionary<BgmType, AudioClip>();
+    private Dictionary<BgmType, AudioClip> bgmDict = new Dictionary<BgmType, AudioClip>();
 
     [System.Serializable]
     private class BgmKeyValuePair
     {
-        public BgmType bgmType;
-        public AudioClip clip;
+        public BgmType BgmType;
+        public AudioClip Clip;
     }
-    [SerializeField] private List<BgmKeyValuePair> _bgmList;
+    [SerializeField] private List<BgmKeyValuePair> bgmList;
 
     [Header("SFX List")]
-    private Dictionary<SfxType, AudioClip> _sfxDict = new Dictionary<SfxType, AudioClip>();
+    private Dictionary<SfxType, AudioClip> sfxDict = new Dictionary<SfxType, AudioClip>();
 
     [System.Serializable]
     private class SfxKeyValuePair
     {
-        public SfxType sfxType;
-        public AudioClip clip;
+        public SfxType SfxType;
+        public AudioClip Clip;
     }
-    [SerializeField] private List<SfxKeyValuePair> _sfxList;
+    [SerializeField] private List<SfxKeyValuePair> sfxList;
 
-    private AudioSource _audioBgm;
+    private AudioSource audioBgm;
 
     // BGM 볼륨
-    [Range(0f, 1f)] public float bgmVolume;
+    [Range(0f, 1f)] public float BgmVolume;
 
     // SFX 볼륨 및 음 높낮이 조절
-    [Range(0f, 1f)] public float globalSfxVolume;
-    [SerializeField][Range(0f, 1f)] private float _sfxPitchVariance; // 높은 음이 나옴
+    [Range(0f, 1f)] public float GlobalSfxVolume;
+    [SerializeField][Range(0f, 1f)] private float sfxPitchVariance; // 높은 음이 나옴
 
-    private Dictionary<SfxType, float> _individualSfxVolumeDict;
+    private Dictionary<SfxType, float> individualSfxVolumeDict;
 
     public bool IsPlayBGM { get; private set; } // BGM 출력 설정 (On / Off)
     public bool IsPlaySFX { get; private set; } // SFX 출력 설정 (On / Off)
 
-    public PoolManager.PoolConfig[] poolconfigs;
+    public PoolManager.PoolConfig[] Poolconfigs;
 
     protected override void Awake()
     {
         base.Awake();
-        _audioBgm = GetComponent<AudioSource>();
-        _audioBgm.volume = bgmVolume;
-        _audioBgm.loop = true;
+        audioBgm = GetComponent<AudioSource>();
+        audioBgm.volume = BgmVolume;
+        audioBgm.loop = true;
         IsPlayBGM = true;
         IsPlaySFX = true;
 
         SetBgmDictionary();
         SetSfxDictionary();
         SetSfxVolumeDictionary();
-        PoolManager.Instance.AddPools<SfxSoundSource>(poolconfigs);
+        PoolManager.Instance.AddPools<SfxSoundSource>(Poolconfigs);
         DontDestroyOnLoad(gameObject);
     }
 
     private void SetBgmDictionary()
     {
-        if (_bgmList == null) return;
+        if (bgmList == null) return;
 
-        foreach (BgmKeyValuePair bgm in _bgmList)
+        foreach (BgmKeyValuePair bgm in bgmList)
         {
-            if (!_bgmDict.ContainsKey(bgm.bgmType))
+            if (!bgmDict.ContainsKey(bgm.BgmType))
             {
-                _bgmDict.Add(bgm.bgmType, bgm.clip);
+                bgmDict.Add(bgm.BgmType, bgm.Clip);
             }
         }
     }
 
     private void SetSfxDictionary()
     {
-        if (_sfxList == null) return;
+        if (sfxList == null) return;
 
-        foreach (SfxKeyValuePair sfx in _sfxList)
+        foreach (SfxKeyValuePair sfx in sfxList)
         {
-            if (!_sfxDict.ContainsKey(sfx.sfxType))
+            if (!sfxDict.ContainsKey(sfx.SfxType))
             {
-                _sfxDict.Add(sfx.sfxType, sfx.clip);
+                sfxDict.Add(sfx.SfxType, sfx.Clip);
             }
         }
     }
 
     private void SetSfxVolumeDictionary()
     {
-        _individualSfxVolumeDict = DataManager.Instance.GetIndvidualSfxVolumeDict();
+        individualSfxVolumeDict = DataManager.Instance.GetIndvidualSfxVolumeDict();
 
-        foreach (SfxType key in _sfxDict.Keys)
+        foreach (SfxType key in sfxDict.Keys)
         {
             // 해당 키값이 없을 때 개별 볼륨을 1.0 으로 초기화
             // 즉 전체 Sfx 볼륨과 일치
-            if (!_individualSfxVolumeDict.ContainsKey(key))
+            if (!individualSfxVolumeDict.ContainsKey(key))
             {
-                _individualSfxVolumeDict.Add(key, 1.0f);
+                individualSfxVolumeDict.Add(key, 1.0f);
             }
         }
     }
@@ -104,17 +104,17 @@ public class SoundManager : SingletonBase<SoundManager>
     {
         if (IsPlayBGM)
         {
-            _audioBgm.clip = _bgmDict[bgmType];
-            _audioBgm.mute = false;
-            _audioBgm.loop = true;
-            _audioBgm.Play();
+            audioBgm.clip = bgmDict[bgmType];
+            audioBgm.mute = false;
+            audioBgm.loop = true;
+            audioBgm.Play();
         }
     }
 
     // 배경 음악 정지
     public void StopBGM()
     {
-        _audioBgm.Stop();
+        audioBgm.Stop();
     }
 
     // 효과음 재생
@@ -122,11 +122,11 @@ public class SoundManager : SingletonBase<SoundManager>
     {
         if (IsPlaySFX)
         {
-            SfxSoundSource soundSource = PoolManager.Instance.SpawnFromPool<SfxSoundSource>(sfxType.ToString());
+            SfxSoundSource _soundSource = PoolManager.Instance.SpawnFromPool<SfxSoundSource>(sfxType.ToString());
 
-            if (soundSource == null) return;
-            soundSource.gameObject.SetActive(true);
-            soundSource.Play(_sfxDict[sfxType], sfxType, globalSfxVolume * _individualSfxVolumeDict[sfxType], _sfxPitchVariance);
+            if (_soundSource == null) return;
+            _soundSource.gameObject.SetActive(true);
+            _soundSource.Play(sfxDict[sfxType], sfxType, GlobalSfxVolume * individualSfxVolumeDict[sfxType], sfxPitchVariance);
         }
     }
 
@@ -153,12 +153,12 @@ public class SoundManager : SingletonBase<SoundManager>
 
     public void SetSfxVolume(float volume)
     {
-        globalSfxVolume = volume;
+        GlobalSfxVolume = volume;
     }
 
     public void SetBgmVolume(float volume)
     {
-        bgmVolume = volume;
-        _audioBgm.volume = bgmVolume;
+        BgmVolume = volume;
+        audioBgm.volume = BgmVolume;
     }
 }

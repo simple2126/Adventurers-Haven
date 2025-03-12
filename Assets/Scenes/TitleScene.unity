@@ -380,7 +380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5726a1eeec557449500bea9ad717fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canvas: {fileID: 0}
+  canvas: {fileID: 310791369}
 --- !u!1 &1358214113
 GameObject:
   m_ObjectHideFlags: 0
@@ -470,24 +470,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35e011a8ab6cfa349bb5808918845477, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bgmList:
-  - bgmType: 1
-    clip: {fileID: 8300000, guid: 475f4837af487ce4a9e68bb227455e4c, type: 3}
-  _sfxList:
-  - sfxType: 0
-    clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
-  - sfxType: 1
-    clip: {fileID: 8300000, guid: aa26f3d30ad0d494c90ca6f988ce4a17, type: 3}
-  bgmVolume: 0.1
-  globalSfxVolume: 1
-  _sfxPitchVariance: 0.16
-  poolconfigs:
-  - tag: Click
-    prefab: {fileID: 2461093821013939944, guid: 8e4256a323729ab4ea62341d6f7c05a9, type: 3}
-    size: 5
-  - tag: Swap
-    prefab: {fileID: 4037558412575938916, guid: a19a1e99ab94e0748a0384cf99258346, type: 3}
-    size: 5
+  bgmList:
+  - BgmType: 1
+    Clip: {fileID: 8300000, guid: 475f4837af487ce4a9e68bb227455e4c, type: 3}
+  sfxList:
+  - SfxType: 0
+    Clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
+  - SfxType: 1
+    Clip: {fileID: 8300000, guid: e36b7f2055c64fe408fecb2743402c33, type: 3}
+  BgmVolume: 0.1
+  GlobalSfxVolume: 1
+  sfxPitchVariance: 0.5
+  Poolconfigs:
+  - Tag: Click
+    Prefab: {fileID: 2461093821013939944, guid: 8e4256a323729ab4ea62341d6f7c05a9, type: 3}
+    Size: 5
+  - Tag: Swap
+    Prefab: {fileID: 4037558412575938916, guid: a19a1e99ab94e0748a0384cf99258346, type: 3}
+    Size: 5
 --- !u!82 &1592189530
 AudioSource:
   m_ObjectHideFlags: 0

@@ -3,18 +3,18 @@ using UnityEngine;
 
 public class TitlePopupMain : UIBase
 {
-    private CanvasGroup _canvasGroup;
-    public float fadeDuration;
+    private CanvasGroup canvasGroup;
+    public float FadeDuration;
 
     private void Awake()
     {
         base.Awake();
-        _canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup = GetComponent<CanvasGroup>();
     }
 
     private void Start()
     {
-        _canvasGroup.DOFade(1f, fadeDuration).SetLink(gameObject);
+        canvasGroup.DOFade(1f, FadeDuration).SetLink(gameObject);
     }
 
     public void Showpopup(int index)

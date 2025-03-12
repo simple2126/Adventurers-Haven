@@ -5,46 +5,42 @@ using System;
 
 public class UIBase : MonoBehaviour
 {
-    public Canvas canvas;
-    public RenderMode renderMode;
+    public Canvas Canvas;
+    public RenderMode RenderMode;
 
     [System.Serializable]
     public class ButtonSfxPair
     {
-        public Button button;
-        public SfxType sfxType;
+        public Button Button;
+        public SfxType SfxType;
     }
 
     [SerializeField]
-    private SfxType[] _sfxTypeArr;
+    private SfxType[] sfxTypeArr;
 
-    public List<ButtonSfxPair> buttonSfxPairList = new List<ButtonSfxPair>();
+    public List<ButtonSfxPair> ButtonSfxPairList = new List<ButtonSfxPair>();
 
     protected void Awake()
     {
-        Button[] allButtons = GetComponentsInChildren<Button>(true);
+        Button[] _allButtons = GetComponentsInChildren<Button>(true);
 
-        int minCount = Mathf.Min(allButtons.Length, _sfxTypeArr.Length);
+        int _minCount = Mathf.Min(_allButtons.Length, sfxTypeArr.Length);
 
-        for (int i = 0; i < allButtons.Length; i++)
+        for (int i = 0; i < _allButtons.Length; i++)
         {
-            SfxType sfxType = (i < minCount) ? _sfxTypeArr[i] : SfxType.Click;
-            Console.WriteLine($"sfxType == {sfxType}");
-            buttonSfxPairList.Add(new ButtonSfxPair { button = allButtons[i], sfxType = sfxType });
+            SfxType _sfxType = (i < _minCount) ? sfxTypeArr[i] : SfxType.Click;
+            Console.WriteLine($"sfxType == {_sfxType}");
+            
+            ButtonSfxPairList.Add(new ButtonSfxPair { Button = _allButtons[i], SfxType = _sfxType });
 
-            ClickHandler clickHandler = allButtons[i].gameObject.AddComponent<ClickHandler>();
-            clickHandler.SetSfxType(sfxType);
-        }
-
-        if (allButtons.Length != _sfxTypeArr.Length)
-        {
-            Debug.LogWarning($"⚠️ Button 개수({allButtons.Length})와 SfxType 개수({_sfxTypeArr.Length})가 다릅니다!");
+            ClickHandler clickHandler = _allButtons[i].gameObject.AddComponent<ClickHandler>();
+            clickHandler.SetSfxType(_sfxType);
         }
     }
 
     public virtual void Opened(params object[] param)
     {
-        canvas.renderMode = renderMode;
+        Canvas.renderMode = RenderMode;
     }
 
     public void Hide()

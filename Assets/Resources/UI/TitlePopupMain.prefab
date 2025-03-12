@@ -297,11 +297,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 904b1862393afe240a23ea87a807d7fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
-  renderMode: 0
-  _sfxTypeArr: 0100000001000000
-  buttonSfxPairList: []
-  fadeDuration: 1
+  Canvas: {fileID: 0}
+  RenderMode: 0
+  sfxTypeArr: 0100000001000000
+  ButtonSfxPairList: []
+  FadeDuration: 0.5
 --- !u!1 &7853226393242190140
 GameObject:
   m_ObjectHideFlags: 0
