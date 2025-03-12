@@ -1,20 +1,26 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using DG.Tweening;
+using System.Collections;
+using System;
 
 public class DataButtons : UIBase
 {
     [Header("DataButtons")]
-    public Button[] Buttons; 
+    public Button[] Buttons;
 
-    protected void Awake()
+    protected override void Awake()
     {
         base.Awake();
         
         foreach(Button btn in Buttons)
         {
-            btn.onClick.AddListener(() => SceneManager.LoadScene("MainScene"));
+            btn.onClick.AddListener(() =>
+            {
+                SceneManager.sceneLoaded += OnSceneLoaded;
+                SceneManager.LoadSceneAsync("MainScene");
+            });
         }
     }
 
@@ -32,5 +38,12 @@ public class DataButtons : UIBase
     {
         UIManager.Instance.Show<TitlePopupMain>();
         Hide();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        UIManager.Instance.Show<MainPopupMain>();
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

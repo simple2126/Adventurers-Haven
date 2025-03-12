@@ -6,7 +6,7 @@ public class TitlePopupMain : UIBase
     private CanvasGroup canvasGroup;
     public float FadeDuration;
 
-    private void Awake()
+    protected override void Awake()
     {
         base.Awake();
         canvasGroup = GetComponent<CanvasGroup>();

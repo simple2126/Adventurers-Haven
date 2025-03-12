@@ -4,12 +4,16 @@ using UnityEngine.UI;
 
 public class UIManager : SingletonBase<UIManager>
 {
-    [SerializeField] private Transform canvas;
-
     public static float ScreenWidth { get; private set; } = 1080;
     public static float ScreenHeight { get; private set; } = 1920;
 
+    [SerializeField]
     private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
+
+    protected override void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
 
     public T Show<T>(params object[] param) where T : UIBase
     {
@@ -17,7 +21,6 @@ public class UIManager : SingletonBase<UIManager>
         if (uiDict.ContainsKey(_uiName)) return default;
         UIBase _go = Resources.Load<UIBase>("UI/" + _uiName);
         var _ui = Load<T>(_go, _uiName);
-        //uiList.Add(ui);
         uiDict[_uiName] = _ui;
         _ui.Opened(param);
         return (T)_ui;

@@ -20,7 +20,7 @@ public class UIBase : MonoBehaviour
 
     public List<ButtonSfxPair> ButtonSfxPairList = new List<ButtonSfxPair>();
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         Button[] _allButtons = GetComponentsInChildren<Button>(true);
 

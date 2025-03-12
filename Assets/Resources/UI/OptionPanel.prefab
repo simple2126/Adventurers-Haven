@@ -461,10 +461,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0abfddd198bde7479dd187d63519149, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
-  renderMode: 0
-  _sfxTypeArr: 000000000000000000000000
-  buttonSfxPairList: []
+  Canvas: {fileID: 0}
+  RenderMode: 0
+  sfxTypeArr: 
+  ButtonSfxPairList: []
 --- !u!1 &3754391400952630183
 GameObject:
   m_ObjectHideFlags: 0
@@ -1133,8 +1133,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -30, y: 20}
-  m_SizeDelta: {x: 300, y: 180}
+  m_AnchoredPosition: {x: -50, y: 40}
+  m_SizeDelta: {x: 230, y: 140}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &590628904502991422
 CanvasRenderer:
@@ -1173,7 +1173,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 0.1
+  m_PixelsPerUnitMultiplier: 0.3
 --- !u!114 &8803055480026712702
 MonoBehaviour:
   m_ObjectHideFlags: 0
