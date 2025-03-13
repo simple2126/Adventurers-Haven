@@ -13,7 +13,7 @@ public class GameManager : SingletonBase<GameManager>
 
     private void Start()
     {
-        UIManager.Instance.Show<TitlePopupMain>();
+        UIManager.Instance.Show<Title>();
         SoundManager.Instance.PlayBGM(BgmType.Robby);
     }
 }

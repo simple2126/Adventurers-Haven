@@ -1,26 +1,17 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using DG.Tweening;
-using System.Collections;
-using System;
+using UnityEngine.UI;
 
 public class DataButtons : UIBase
 {
-    [Header("DataButtons")]
-    public Button[] Buttons;
-
     protected override void Awake()
     {
         base.Awake();
-        
-        foreach(Button btn in Buttons)
+
+        Button[] buttons = GetComponentsInChildren<Button>();
+        foreach(Button btn in buttons)
         {
-            btn.onClick.AddListener(() =>
-            {
-                SceneManager.sceneLoaded += OnSceneLoaded;
-                SceneManager.LoadSceneAsync("MainScene");
-            });
+            btn.onClick.AddListener(() => UIManager.Instance.Show<StartGamePopup>());
         }
     }
 
@@ -36,14 +27,7 @@ public class DataButtons : UIBase
 
     public void ShowTitle()
     {
-        UIManager.Instance.Show<TitlePopupMain>();
+        UIManager.Instance.Show<Title>();
         Hide();
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        UIManager.Instance.Show<MainPopupMain>();
-
-        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

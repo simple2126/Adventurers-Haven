@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class TitlePopupMain : UIBase
+public class Title : UIBase
 {
     private CanvasGroup canvasGroup;
     public float FadeDuration;

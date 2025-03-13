@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class MainPopupMain : UIBase
+public class Main : UIBase
 {
     public void Showpopup(int index)
     {

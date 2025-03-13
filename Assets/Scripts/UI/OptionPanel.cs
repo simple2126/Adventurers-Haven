@@ -15,7 +15,7 @@ public class OptionPanel : UIBase
 
     public void ShowTitle()
     {
-        UIManager.Instance.Show<TitlePopupMain>();
+        UIManager.Instance.Show<Title>();
         Hide();
     }
 }
