@@ -1,6 +1,8 @@
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
+using System.Linq;
+using System.Collections.Generic;
 
 public class DataButtons : UIBase
 {
@@ -8,8 +10,10 @@ public class DataButtons : UIBase
     {
         base.Awake();
 
-        Button[] buttons = GetComponentsInChildren<Button>();
-        foreach(Button btn in buttons)
+        List<Button> buttonList = GetComponentsInChildren<Button>().ToList<Button>();
+        // 닫기 버튼 제거
+        buttonList.RemoveAt(buttonList.Count - 1);
+        foreach(Button btn in buttonList)
         {
             btn.onClick.AddListener(() => UIManager.Instance.Show<StartGamePopup>());
         }
