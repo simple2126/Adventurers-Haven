@@ -144,6 +144,8 @@ MonoBehaviour:
   bgmList:
   - BgmType: 1
     Clip: {fileID: 8300000, guid: 475f4837af487ce4a9e68bb227455e4c, type: 3}
+  - BgmType: 0
+    Clip: {fileID: 8300000, guid: dfc54f2ef792c1749b9a5aff619a6f41, type: 3}
   sfxList:
   - SfxType: 0
     Clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}

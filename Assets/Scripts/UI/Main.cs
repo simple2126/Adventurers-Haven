@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class Main : UIBase
 {
+    private void Start()
+    {
+        SoundManager.Instance.PlayBGM(BgmType.Main);   
+    }
+
     public void Showpopup(int index)
     {
         switch (index)

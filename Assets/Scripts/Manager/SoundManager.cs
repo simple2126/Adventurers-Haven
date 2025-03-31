@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class SoundManager : SingletonBase<SoundManager>
 {
@@ -102,12 +101,15 @@ public class SoundManager : SingletonBase<SoundManager>
     // 배경 음악 시작
     public void PlayBGM(BgmType bgmType)
     {
+        if (audioBgm.isPlaying) StopBGM();
+
         if (IsPlayBGM)
         {
             audioBgm.clip = bgmDict[bgmType];
             audioBgm.mute = false;
             audioBgm.loop = true;
             audioBgm.Play();
+            Debug.Log(audioBgm.clip.name);
         }
     }
 
@@ -140,15 +142,6 @@ public class SoundManager : SingletonBase<SoundManager>
     public void ChangeIsPlaySFX()
     {
         IsPlaySFX = !IsPlaySFX;
-    }
-
-    public void OnClick()
-    {
-        // IsPointerOverGameObject() -> UI만 작동하도록 제어
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-        {
-            PlaySFX(SfxType.Click);
-        }
     }
 
     public void SetSfxVolume(float volume)
