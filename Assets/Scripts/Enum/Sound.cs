@@ -1,5 +1,6 @@
 using GoogleSheet.Core.Type;
 
+[UGS(typeof(BgmType))]
 public enum BgmType
 { 
     Main,

@@ -151,7 +151,7 @@ MonoBehaviour:
     Clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
   - SfxType: 1
     Clip: {fileID: 8300000, guid: e36b7f2055c64fe408fecb2743402c33, type: 3}
-  BgmVolume: 0.1
+  BgmVolume: 0.5
   GlobalSfxVolume: 1
   sfxPitchVariance: 0.5
   Poolconfigs:
