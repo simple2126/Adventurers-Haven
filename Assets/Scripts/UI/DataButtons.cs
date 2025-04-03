@@ -31,7 +31,7 @@ public class DataButtons : UIBase
 
     public void ShowTitle()
     {
-        UIManager.Instance.Show<Title>();
+        UIManager.Instance.Show<Robby>();
         Hide();
     }
 }

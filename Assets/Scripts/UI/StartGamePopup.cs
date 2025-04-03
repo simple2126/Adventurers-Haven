@@ -12,17 +12,9 @@ public class StartGamePopup : UIBase
 
         YesBtn.onClick.AddListener(() =>
         {
-            SceneManager.sceneLoaded += OnSceneLoaded;
-            SceneManager.LoadSceneAsync("MainScene");
+            GameManager.Instance.LoadSceneAndShowUI<Main>("MainScene");
         });
 
         NoBtn.onClick.AddListener(Hide);
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        UIManager.Instance.Show<Main>();
-
-        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

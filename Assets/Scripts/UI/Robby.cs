@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class Title : UIBase
+public class Robby : UIBase
 {
     private CanvasGroup canvasGroup;
     public float FadeDuration;

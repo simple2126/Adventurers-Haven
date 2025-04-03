@@ -29,7 +29,6 @@ public class UIBase : MonoBehaviour
         for (int i = 0; i < _allButtons.Length; i++)
         {
             SfxType _sfxType = (i < _minCount) ? sfxTypeArr[i] : SfxType.Click;
-            Console.WriteLine($"sfxType == {_sfxType}");
             
             ButtonSfxPairList.Add(new ButtonSfxPair { Button = _allButtons[i], SfxType = _sfxType });
 
