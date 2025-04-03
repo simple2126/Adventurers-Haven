@@ -10,9 +10,4 @@ public class Construction : UIBase
     {
         back.onClick.AddListener(Hide);
     }
-
-    private void Start()
-    {
-        transform.DOLocalMove(Vector3.up * 10, 1).SetAutoKill(true).SetLink(gameObject);
-    }
 }

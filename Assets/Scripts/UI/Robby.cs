@@ -6,15 +6,13 @@ public class Robby : UIBase
     private CanvasGroup canvasGroup;
     public float FadeDuration;
 
-    protected override void Awake()
+    private void OnEnable()
     {
-        base.Awake();
-        canvasGroup = GetComponent<CanvasGroup>();
-    }
-
-    private void Start()
-    {
+        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 0f;
         canvasGroup.DOFade(1f, FadeDuration).SetLink(gameObject);
+
+        SoundManager.Instance.PlayBGM(BgmType.Robby);
     }
 
     public void Showpopup(int index)

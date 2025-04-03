@@ -37,6 +37,12 @@ public class UIBase : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (!UIManager.Instance.ContainsData(gameObject.name)) return;
+        Hide();
+    }
+
     public virtual void Opened(params object[] param)
     {
         Canvas.renderMode = RenderMode;

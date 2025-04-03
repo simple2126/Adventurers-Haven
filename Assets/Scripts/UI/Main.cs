@@ -43,7 +43,6 @@ public class Main : UIBase
             int index = i;
             childBtns[index].onClick.AddListener(() => ClickChildBtn(index));
         }
-
     }
 
     public void Showpopup(int index)

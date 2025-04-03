@@ -17,6 +17,7 @@ public class OptionPanel : UIBase
         bgmVolume.onValueChanged.AddListener(value => SoundManager.Instance.SetBgmVolume(value));
         sfxVolume.onValueChanged.AddListener(value => SoundManager.Instance.SetSfxVolume(value));
         toggleBtn.onClick.AddListener(SwapButtonImage);
+        isFrame30 = GameManager.Instance.IsFrame30;
     }
 
     private void Start()
@@ -24,11 +25,6 @@ public class OptionPanel : UIBase
         transform.DOLocalMove(Vector3.up * 10, 1).SetAutoKill(true).SetLink(gameObject);
         SetVolumeImage();
         SetButtonImage();
-    }
-
-    public void Showpopup(int index)
-    {
-
     }
 
     public void ShowTitle()
@@ -45,13 +41,14 @@ public class OptionPanel : UIBase
 
     private void SetButtonImage()
     {
-        isFrame30 = Application.targetFrameRate == 30;
+        isFrame30 = GameManager.Instance.IsFrame30;
         UpdateButtonImage();
     }
 
     private void SwapButtonImage()
     {
         isFrame30 = !isFrame30;
+        GameManager.Instance.IsFrame30 = isFrame30;
         Application.targetFrameRate = isFrame30 ? 30 : 60;
         UpdateButtonImage();
     }
