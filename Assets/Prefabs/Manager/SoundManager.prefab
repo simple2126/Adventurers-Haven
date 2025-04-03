@@ -145,12 +145,14 @@ MonoBehaviour:
   - BgmType: 1
     Clip: {fileID: 8300000, guid: 475f4837af487ce4a9e68bb227455e4c, type: 3}
   - BgmType: 0
-    Clip: {fileID: 8300000, guid: dfc54f2ef792c1749b9a5aff619a6f41, type: 3}
+    Clip: {fileID: 8300000, guid: 15697f602b3f7f342b1eb0e769e88edd, type: 3}
+  bgmVolumeList: []
   sfxList:
   - SfxType: 0
     Clip: {fileID: 8300000, guid: cf8624bceabcd74459023951e0ce6a7d, type: 3}
   - SfxType: 1
     Clip: {fileID: 8300000, guid: e36b7f2055c64fe408fecb2743402c33, type: 3}
+  sfxVolumeList: []
   BgmVolume: 0.5
   GlobalSfxVolume: 1
   sfxPitchVariance: 0.5

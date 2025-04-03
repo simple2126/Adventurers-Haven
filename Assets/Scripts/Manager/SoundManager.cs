@@ -32,8 +32,11 @@ public class SfxData : SoundData<SfxType>
 [System.Serializable]
 public abstract class SoundVolumeData<TEnum>
 {
-    public TEnum VolumeType { get; protected set; }
-    public float SoundVolume { get; protected set; }
+    [SerializeField] private TEnum volumeType;
+    [SerializeField] private float soundVolume;
+
+    public TEnum VolumeType { get => volumeType; protected set => volumeType = value; }
+    public float SoundVolume { get => soundVolume; protected set => soundVolume = value; }
 
     public SoundVolumeData() { }
 
@@ -70,12 +73,12 @@ public class SoundManager : SingletonBase<SoundManager>
     [Header("BGM List")]
     private Dictionary<BgmType, (AudioClip clip, float volume)> bgmDataDict = new();
     [SerializeField] private List<BgmData> bgmList;
-    [SerializeField] private List<BgmVolume> bgmVolumeList;
+    [SerializeField][Header("UGS 데이터읽기 전용")] private List<BgmVolume> bgmVolumeList = new List<BgmVolume>();
 
     [Header("SFX List")]
     private Dictionary<SfxType, (AudioClip clip, float volume)> sfxDataDict = new();
     [SerializeField] private List<SfxData> sfxList;
-    [SerializeField] private List<SfxVolume> sfxVolumeList;
+    [SerializeField][Header("UGS 데이터 읽기 전용")] private List<SfxVolume> sfxVolumeList = new List<SfxVolume>();
 
     private AudioSource audioBgm;
 
@@ -122,13 +125,12 @@ public class SoundManager : SingletonBase<SoundManager>
         List<TVolume> dataVolumeList,
         Dictionary<TEnum, float> volumeDict = null
     ) where TData : SoundData<TEnum>
-      where TVolume : SoundVolumeData<TEnum>, new()  // 기본 생성자가 필요함
+      where TVolume : SoundVolumeData<TEnum>, new()
     {
         if (dataList == null) return;
 
         soundDict.Clear();
-        if (dataVolumeList != null)
-            dataVolumeList.Clear();
+        dataVolumeList.Clear();
 
         foreach (TData data in dataList)
         {
@@ -142,7 +144,7 @@ public class SoundManager : SingletonBase<SoundManager>
             TVolume volumeData = new TVolume();
             ((SoundVolumeData<TEnum>)volumeData).SetData(data.Type, volume);
 
-            dataVolumeList?.Add(volumeData);
+            dataVolumeList.Add(volumeData);
 
             soundDict.TryAdd(data.Type, (data.SoundClip, volume));
         }
@@ -160,7 +162,6 @@ public class SoundManager : SingletonBase<SoundManager>
             audioBgm.loop = true;
             audioBgm.volume = BgmVolume * bgmData.volume;  // 전역 볼륨과 개별 볼륨 적용
             audioBgm.Play();
-            Debug.Log($"Playing BGM: {audioBgm.volume} bgmData.volume {bgmData.volume}");
         }
     }
 
