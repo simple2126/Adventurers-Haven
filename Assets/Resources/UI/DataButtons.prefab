@@ -324,10 +324,6 @@ MonoBehaviour:
   RenderMode: 0
   sfxTypeArr: 
   ButtonSfxPairList: []
-  Buttons:
-  - {fileID: 6886999282167048136}
-  - {fileID: 5971968823252218135}
-  - {fileID: 1646219954120875088}
 --- !u!1 &3739841219616575837
 GameObject:
   m_ObjectHideFlags: 0
@@ -1123,8 +1119,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 3895392940601934735}
-        m_TargetAssemblyTypeName: DataButtons, Assembly-CSharp
-        m_MethodName: ShowTitle
+        m_TargetAssemblyTypeName: UIBase, Assembly-CSharp
+        m_MethodName: Hide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -34,8 +34,7 @@ public class Main : UIBase
         for (int i = 0; i < childBtns.Length; i++)
         {
             // ❌ 클로저 문제 없음 -> index 없이 i 사용 가능
-            childBtns[i].AddComponent<CanvasGroup>();
-            CanvasGroup group = childBtns[i].GetComponent<CanvasGroup>();
+            CanvasGroup group = childBtns[i].gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;
             canvasGroups[i] = group;
 

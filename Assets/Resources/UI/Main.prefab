@@ -423,7 +423,8 @@ MonoBehaviour:
   ButtonSfxPairList: []
   robbyBtn: {fileID: 6666180733935894995}
   menuBtn: {fileID: 9149322110892171303}
-  childBtn: []
+  childBtns: []
+  canvasGroups: []
 --- !u!1 &4148045715463573319
 GameObject:
   m_ObjectHideFlags: 0

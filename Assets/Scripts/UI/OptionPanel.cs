@@ -27,12 +27,6 @@ public class OptionPanel : UIBase
         SetButtonImage();
     }
 
-    public void ShowTitle()
-    {
-        UIManager.Instance.Show<Robby>();
-        Hide();
-    }
-
     private void SetVolumeImage()
     {
         bgmVolume.value = SoundManager.Instance.BgmVolume;
