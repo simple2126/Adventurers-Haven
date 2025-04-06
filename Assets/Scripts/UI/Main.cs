@@ -33,15 +33,17 @@ public class Main : UIBase
 
         for (int i = 0; i < childBtns.Length; i++)
         {
-            // ❌ 클로저 문제 없음 -> index 없이 i 사용 가능
-            CanvasGroup group = childBtns[i].gameObject.AddComponent<CanvasGroup>();
-            group.alpha = 0f;
-            canvasGroups[i] = group;
-
-            // ✅ 클로저 문제 발생 가능 -> index 사용
-            int index = i;
-            childBtns[index].onClick.AddListener(() => ClickChildBtn(index));
+            InitializeChildButton(i);
         }
+    }
+
+    private void InitializeChildButton(int index)
+    {
+        CanvasGroup group = childBtns[index].gameObject.AddComponent<CanvasGroup>();
+        group.alpha = 0f;
+        canvasGroups[index] = group;
+
+        childBtns[index].onClick.AddListener(() => ClickChildBtn(index));
     }
 
     public void Showpopup(int index)
@@ -61,22 +63,22 @@ public class Main : UIBase
     {
         isVisible = !isVisible;
 
-
         for (int i = 0; i < childBtns.Length; i++)
         {
-            // ❌ 클로저 문제 없음 -> index 없이 i 사용 가능
-            DG.Tweening.Sequence seq = DOTween.Sequence();
-            Vector3 targetPos = childBtns[i].transform.localPosition + ((isVisible ? Vector3.up : Vector3.down) * 10);
-
-            seq.Append(childBtns[i].transform.DOLocalMove(targetPos, 1))
-                .Join(canvasGroups[i].DOFade(isVisible ? 1 : 0, 1f))
-                .SetAutoKill(true)
-                .SetLink(childBtns[i].gameObject);
-
-            // ✅ 클로저 문제 발생 가능 -> index 사용
-            int index = i;
-            seq.OnComplete(() => childBtns[index].gameObject.SetActive(isVisible));
+            AnimateChildButton(i);
         }
+    }
+
+    private void AnimateChildButton(int index)
+    {
+        DG.Tweening.Sequence seq = DOTween.Sequence();
+        Vector3 targetPos = childBtns[index].transform.localPosition + ((isVisible ? Vector3.up : Vector3.down) * 10);
+
+        seq.Append(childBtns[index].transform.DOLocalMove(targetPos, 1))
+            .Join(canvasGroups[index].DOFade(isVisible ? 1 : 0, 1f))
+            .SetLink(childBtns[index].gameObject);
+
+        seq.OnComplete(() => childBtns[index].gameObject.SetActive(isVisible));
     }
 
     private void ClickChildBtn(int index)

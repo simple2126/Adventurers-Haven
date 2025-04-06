@@ -21,6 +21,6 @@ public class DataButtons : UIBase
 
     private void Start()
     {
-        transform.DOLocalMove(Vector3.up * 10, 1).SetAutoKill(true).SetLink(gameObject);
+        transform.DOLocalMove(Vector3.up * 10, 1).SetLink(gameObject);
     }
 }

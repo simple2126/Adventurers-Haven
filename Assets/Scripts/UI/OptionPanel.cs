@@ -9,7 +9,10 @@ public class OptionPanel : UIBase
 
     [SerializeField] private Button toggleBtn;
     [SerializeField] private GameObject[] objs;
+    
     private bool isFrame30;
+    private const int FrameRate30 = 30;
+    private const int FrameRate60 = 60;
 
     protected override void Awake()
     {
@@ -22,7 +25,7 @@ public class OptionPanel : UIBase
 
     private void Start()
     {
-        transform.DOLocalMove(Vector3.up * 10, 1).SetAutoKill(true).SetLink(gameObject);
+        transform.DOLocalMove(Vector3.up * 10, 1).SetLink(gameObject);
         SetVolumeImage();
         SetButtonImage();
     }
@@ -42,8 +45,8 @@ public class OptionPanel : UIBase
     private void SwapButtonImage()
     {
         isFrame30 = !isFrame30;
-        GameManager.Instance.IsFrame30 = isFrame30;
-        Application.targetFrameRate = isFrame30 ? 30 : 60;
+        GameManager.Instance.SetIsFrame30(isFrame30);
+        Application.targetFrameRate = isFrame30 ? FrameRate30 : FrameRate60;
         UpdateButtonImage();
     }
 

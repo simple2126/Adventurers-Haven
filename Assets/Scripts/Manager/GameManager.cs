@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : SingletonBase<GameManager>
 {
-    public bool IsFrame30 = false;
+    public bool IsFrame30 { get; private set; } = false;
 
     protected override void Awake()
     {
@@ -29,5 +29,10 @@ public class GameManager : SingletonBase<GameManager>
         Debug.Log($"OnSceneLoaded 실행됨 - Scene: {scene.name}, UI: {typeof(T).Name}");
         UIManager.Instance.Show<T>();
         SceneManager.sceneLoaded -= OnSceneLoaded<T>;
+    }
+
+    public void SetIsFrame30(bool isFrame30)
+    {
+        IsFrame30 = isFrame30;
     }
 }
