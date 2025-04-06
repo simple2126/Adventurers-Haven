@@ -23,7 +23,6 @@ public class UIManager : SingletonBase<UIManager>
         var _ui = Load<T>(_go, _uiName);
         uiDict[_uiName] = _ui;
         _ui.Opened(param);
-        Debug.Log(_ui.name);
         return (T)_ui;
     }
 

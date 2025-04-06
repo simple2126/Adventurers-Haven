@@ -17,8 +17,8 @@ public class OptionPanel : UIBase
     protected override void Awake()
     {
         base.Awake();
-        bgmVolume.onValueChanged.AddListener(value => SoundManager.Instance.SetBgmVolume(value));
-        sfxVolume.onValueChanged.AddListener(value => SoundManager.Instance.SetSfxVolume(value));
+        bgmVolume.onValueChanged.AddListener(OnBgmVolumeChanged);
+        sfxVolume.onValueChanged.AddListener(OnSfxVolumeChanged);
         toggleBtn.onClick.AddListener(SwapButtonImage);
         isFrame30 = GameManager.Instance.IsFrame30;
     }
@@ -32,8 +32,26 @@ public class OptionPanel : UIBase
 
     private void SetVolumeImage()
     {
+        // 이벤트 리스너를 일시적으로 제거
+        bgmVolume.onValueChanged.RemoveListener(OnBgmVolumeChanged);
+        sfxVolume.onValueChanged.RemoveListener(OnSfxVolumeChanged);
+
         bgmVolume.value = SoundManager.Instance.BgmVolume;
         sfxVolume.value = SoundManager.Instance.GlobalSfxVolume;
+
+        // 이벤트 리스너를 다시 추가
+        bgmVolume.onValueChanged.AddListener(OnBgmVolumeChanged);
+        sfxVolume.onValueChanged.AddListener(OnSfxVolumeChanged);
+    }
+
+    private void OnBgmVolumeChanged(float value)
+    {
+        SoundManager.Instance.SetBgmVolume(value);
+    }
+
+    private void OnSfxVolumeChanged(float value)
+    {
+        SoundManager.Instance.SetSfxVolume(value);
     }
 
     private void SetButtonImage()
@@ -55,5 +73,4 @@ public class OptionPanel : UIBase
         objs[0].SetActive(!isFrame30); // 60
         objs[1].SetActive(isFrame30);  // 30
     }
-
 }

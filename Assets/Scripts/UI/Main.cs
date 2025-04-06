@@ -53,9 +53,6 @@ public class Main : UIBase
             case 0:
                 UIManager.Instance.Show<OptionPanel>();
                 break;
-            case 1:
-                UIManager.Instance.Show<OptionPanel>();
-                break;
         }
     }
 
@@ -71,16 +68,26 @@ public class Main : UIBase
 
     private void AnimateChildButton(int index)
     {
+        childBtns[index].gameObject.SetActive(true);
+
         DG.Tweening.Sequence seq = DOTween.Sequence();
-        Vector3 targetPos = childBtns[index].transform.localPosition + ((isVisible ? Vector3.up : Vector3.down) * 10);
+        Vector3 offsetY = (isVisible ? Vector3.up : Vector3.down) * 10;
+        Vector3 targetPos = childBtns[index].transform.localPosition + offsetY;
+
+        canvasGroups[index].alpha = isVisible ? 0 : 1;
 
         seq.Append(childBtns[index].transform.DOLocalMove(targetPos, 1))
             .Join(canvasGroups[index].DOFade(isVisible ? 1 : 0, 1f))
             .SetLink(childBtns[index].gameObject);
 
-        seq.OnComplete(() => childBtns[index].gameObject.SetActive(isVisible));
+        seq.OnComplete(() =>
+        {
+            if (!isVisible)
+            {
+                childBtns[index].gameObject.SetActive(false);
+            }
+        });
     }
-
     private void ClickChildBtn(int index)
     {
         switch (index)
