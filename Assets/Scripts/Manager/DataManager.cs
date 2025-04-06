@@ -5,18 +5,19 @@ public class DataManager : SingletonBase<DataManager>
 {
     private Dictionary<BgmType, float> individualBgmVolumeDict;
     private Dictionary<SfxType, float> individualSfxVolumeDict;
+    private Dictionary<ConstructionType, List<Construction_Data>> constructionDataDict;
 
     protected override void Awake()
     {
         base.Awake();
 
-        SetIndividualSfxVolumeDict<SfxVolume_Data>();
-        SetIndividualBgmVolumeDict<BgmVolume_Data>();
-
+        SetIndividualSfxVolumeDict();
+        SetIndividualBgmVolumeDict();
+        SetConstructionDataDict();
         DontDestroyOnLoad(gameObject);
     }
 
-    private void SetIndividualSfxVolumeDict<T>()
+    private void SetIndividualSfxVolumeDict()
     {
         List<SfxVolume_Data> _sfxVolumeDataList = SfxVolume_Data.GetList();
 
@@ -33,12 +34,12 @@ public class DataManager : SingletonBase<DataManager>
     {
         if (individualSfxVolumeDict == null)
         {
-            SetIndividualSfxVolumeDict<SfxType>();
+            SetIndividualSfxVolumeDict();
         }
         return individualSfxVolumeDict;
     }
 
-    private void SetIndividualBgmVolumeDict<T>()
+    private void SetIndividualBgmVolumeDict()
     {
         List<BgmVolume_Data> _bgmVolumeDataList = BgmVolume_Data.GetList();
 
@@ -55,8 +56,34 @@ public class DataManager : SingletonBase<DataManager>
     {
         if (individualBgmVolumeDict == null)
         {
-            SetIndividualBgmVolumeDict<BgmType>();
+            SetIndividualBgmVolumeDict();
         }
         return individualBgmVolumeDict;
+    }
+    private void SetConstructionDataDict()
+    {
+        List<Construction_Data> _constructionDataList = Construction_Data.GetList();
+        Dictionary<ConstructionType, List<Construction_Data>> constructionDataDict = new Dictionary<ConstructionType, List<Construction_Data>>();
+
+        foreach (var data in _constructionDataList)
+        {
+            if (!constructionDataDict.ContainsKey(data.ConstructionType))
+            {
+                constructionDataDict[data.ConstructionType] = new List<Construction_Data>();
+            }
+            constructionDataDict[data.ConstructionType].Add(data);
+        }
+
+        this.constructionDataDict = constructionDataDict;
+    }
+
+    public Dictionary<ConstructionType, List<Construction_Data>> GetConstructionDataDict()
+    {
+        if (constructionDataDict == null)
+        {
+            SetConstructionDataDict();
+        }
+
+        return constructionDataDict;
     }
 }

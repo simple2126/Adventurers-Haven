@@ -93,7 +93,7 @@ public class Main : UIBase
         switch (index)
         {
             case 0:
-                UIManager.Instance.Show<Construction>();
+                UIManager.Instance.Show<ConstructionPanel>();
                 break;
         }
     }
