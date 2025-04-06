@@ -775,7 +775,7 @@ MonoBehaviour:
   back: {fileID: 4464128986469754686}
   buildButton: {fileID: 7613663964520899213}
   roadButton: {fileID: 6740526280337665651}
-  Content: {fileID: 0}
+  content: {fileID: 3300435325703244944}
   itemBox: {fileID: 64257019084114016, guid: 97d6f7f709c093e488803ba9b983f7ee, type: 3}
 --- !u!1 &5701450729832287711
 GameObject:

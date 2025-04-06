@@ -33,11 +33,11 @@ public class Main : UIBase
 
         for (int i = 0; i < childBtns.Length; i++)
         {
-            InitializeChildButton(i);
+            SetChildButton(i);
         }
     }
 
-    private void InitializeChildButton(int index)
+    private void SetChildButton(int index)
     {
         CanvasGroup group = childBtns[index].gameObject.AddComponent<CanvasGroup>();
         group.alpha = 0f;
