@@ -159,7 +159,7 @@ MonoBehaviour:
   Poolconfigs:
   - Tag: Click
     Prefab: {fileID: 2461093821013939944, guid: 8e4256a323729ab4ea62341d6f7c05a9, type: 3}
-    Size: 5
+    Size: 0
   - Tag: Swap
     Prefab: {fileID: 4037558412575938916, guid: a19a1e99ab94e0748a0384cf99258346, type: 3}
-    Size: 5
+    Size: 0

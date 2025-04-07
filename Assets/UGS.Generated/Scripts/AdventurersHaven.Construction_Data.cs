@@ -58,6 +58,7 @@ namespace AdventurersHaven
 
 		public System.Int32 id;
 		public ConstructionType ConstructionType;
+		public System.String name;
 		public System.Int32 buildCost;
 		public System.Collections.Generic.List<Int32> sales;
 		public System.Collections.Generic.List<Int32> upgradeCost;

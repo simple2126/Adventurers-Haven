@@ -60,6 +60,7 @@ public class DataManager : SingletonBase<DataManager>
         }
         return individualBgmVolumeDict;
     }
+
     private void SetConstructionDataDict()
     {
         List<Construction_Data> _constructionDataList = Construction_Data.GetList();
