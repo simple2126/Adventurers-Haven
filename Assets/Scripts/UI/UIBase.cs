@@ -39,6 +39,7 @@ public class UIBase : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (!Application.isPlaying) return;
         if (UIManager.Instance == null || !UIManager.Instance.ContainsData(gameObject.name)) return;
         Hide();
     }

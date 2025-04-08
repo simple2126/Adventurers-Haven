@@ -334,6 +334,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3884272463485176617}
   - component: {fileID: 995951701673724973}
+  - component: {fileID: 5765711040650830865}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -380,10 +381,24 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 200, y: 200}
+  m_CellSize: {x: 300, y: 300}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &5765711040650830865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3300435325703244944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &3944311812526546384
 GameObject:
   m_ObjectHideFlags: 0
@@ -783,6 +798,18 @@ MonoBehaviour:
     Size: 0
   - Tag: FishShop
     Prefab: {fileID: 5314264703427847882, guid: ba15f340b21ae374499e8e16afbbb3bf, type: 3}
+    Size: 0
+  - Tag: FruitShop
+    Prefab: {fileID: 194271896791818272, guid: c6e540b7cd3ede948ad550751a65d767, type: 3}
+    Size: 0
+  - Tag: MeetShop
+    Prefab: {fileID: 4217557397128458484, guid: e67462eb7d9552f4eaef766f3cce787e, type: 3}
+    Size: 0
+  - Tag: PotionShop
+    Prefab: {fileID: 8895934983475014776, guid: 195251866bdacd74f9ef96dea0fd7f80, type: 3}
+    Size: 0
+  - Tag: SwordShop
+    Prefab: {fileID: 7925911270134405276, guid: 6d3fe69329cbe364c89d192a5b31fc6f, type: 3}
     Size: 0
 --- !u!1 &5701450729832287711
 GameObject:
@@ -1234,9 +1261,9 @@ MonoBehaviour:
   m_Content: {fileID: 3884272463485176617}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 1
+  m_MovementType: 2
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.135
   m_ScrollSensitivity: 1
   m_Viewport: {fileID: 4830499019214575371}

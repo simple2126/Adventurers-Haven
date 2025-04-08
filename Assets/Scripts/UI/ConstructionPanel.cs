@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using static PoolManager;
-using System.Threading;
 
 public class ConstructionPanel : UIBase
 {
@@ -20,12 +18,15 @@ public class ConstructionPanel : UIBase
     [SerializeField] private PoolManager.PoolConfig[] poolConfigs;
     private Dictionary<string, Sprite> poolSpriteDict = new();
 
+    private ScrollRect scrollRect;
+
     protected override void Awake()
     {
         base.Awake();
         back.onClick.AddListener(Hide);
         buildButton.onClick.AddListener(() => ChangeTab(ConstructionType.Build));
         roadButton.onClick.AddListener(() => ChangeTab(ConstructionType.Road));
+        scrollRect = GetComponentInChildren<ScrollRect>();
         PoolManager.Instance.AddPools<Construction>(poolConfigs);
     }
 
@@ -35,6 +36,7 @@ public class ConstructionPanel : UIBase
         SetItemList(ConstructionType.Build, buildItemList);
         SetItemList(ConstructionType.Road, roadItemList);
         UpdateTabVisibility();
+        scrollRect.verticalNormalizedPosition = 1f;
     }
 
     private void SetSpriteDict()
@@ -64,8 +66,15 @@ public class ConstructionPanel : UIBase
 
     private void ChangeTab(ConstructionType type)
     {
-        isBuildTab = (type == ConstructionType.Build);
+        bool isBuildSelected = (type == ConstructionType.Build);
+
+        if (isBuildTab == isBuildSelected) return;
+
+        isBuildTab = isBuildSelected;
+
         UpdateTabVisibility();
+        Canvas.ForceUpdateCanvases();
+        scrollRect.verticalNormalizedPosition = 1f;
     }
 
     private void UpdateTabVisibility()

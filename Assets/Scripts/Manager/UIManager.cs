@@ -16,6 +16,11 @@ public class UIManager : SingletonBase<UIManager>
         DontDestroyOnLoad(gameObject);
     }
 
+    private void OnDestroy()
+    {
+        ClearUIDict();
+    }
+
     public T Show<T>(params object[] param) where T : UIBase
     {
         string _uiName = typeof(T).ToString();
@@ -63,5 +68,14 @@ public class UIManager : SingletonBase<UIManager>
     public bool ContainsData(string uiName)
     {
         return uiDict.ContainsKey(uiName); 
+    }
+
+    public void ClearUIDict()
+    {
+        foreach (var key in uiDict.Keys)
+        {
+            Hide(key);
+        }
+        uiDict.Clear();
     }
 }
