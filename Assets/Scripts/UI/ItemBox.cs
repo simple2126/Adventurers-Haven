@@ -10,6 +10,13 @@ public class ItemBox : MonoBehaviour
     [SerializeField] private TextMeshProUGUI blockSize;
     [SerializeField] private TextMeshProUGUI buildCost;
 
+    private Construction_Data data;
+
+    private void Awake()
+    {
+        GetComponent<Button>().onClick.AddListener(CreateItem);
+    }
+
     public void SetData(Sprite sprite, Construction_Data data)
     {
         image.sprite = sprite;
@@ -18,6 +25,7 @@ public class ItemBox : MonoBehaviour
         buildCost.text = $"{data.buildCost}G";
         SetOutline(blockSize);
         SetOutline(buildCost);
+        this.data = data;
     }
 
     private void SetOutline(TextMeshProUGUI tmp)
@@ -28,5 +36,11 @@ public class ItemBox : MonoBehaviour
         // Outline 설정
         tmp.fontMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.1f);
         tmp.fontMaterial.SetColor(ShaderUtilities.ID_OutlineColor, Color.black);
+    }
+
+    private void CreateItem()
+    {
+        PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+        UIManager.Instance.Hide<ConstructionPanel>();
     }
 }

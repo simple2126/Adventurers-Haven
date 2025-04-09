@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4162896260179281261}
   - component: {fileID: 2764031721126758619}
+  - component: {fileID: 8517736161624153635}
   m_Layer: 0
   m_Name: SwordShop
   m_TagString: Untagged
@@ -84,3 +85,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8517736161624153635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7925911270134405276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b317b69c0ef427429c95995bf08cbea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
