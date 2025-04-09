@@ -58,8 +58,10 @@ namespace AdventurersHaven
 
 		public System.Int32 id;
 		public ConstructionType ConstructionType;
+		public System.String tag;
 		public System.String name;
 		public System.Int32 buildCost;
+		public System.Int32 blockSize;
 		public System.Collections.Generic.List<Int32> sales;
 		public System.Collections.Generic.List<Int32> upgradeCost;
 		public System.Int32 maxLevel;

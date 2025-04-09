@@ -9,7 +9,7 @@ public class ConstructionPanel : UIBase
     [SerializeField] private Button roadButton;
 
     [SerializeField] private GameObject content;
-    [SerializeField] private GameObject itemBox;
+    [SerializeField] private GameObject itemBoxObj;
 
     private bool isBuildTab = true;
     private List<GameObject> buildItemList = new List<GameObject>();
@@ -54,10 +54,12 @@ public class ConstructionPanel : UIBase
 
         foreach (var data in dataList)
         {
-            var item = Instantiate(itemBox, content.transform);
-            if (poolSpriteDict.ContainsKey(data.name.ToString()))
+            var item = Instantiate(itemBoxObj, content.transform);
+
+            if (poolSpriteDict.ContainsKey(data.tag.ToString()))
             {
-                item.GetComponent<Image>().sprite = poolSpriteDict[data.name.ToString()];
+                ItemBox itemBox = item.GetComponent<ItemBox>();
+                itemBox.SetData(poolSpriteDict[data.tag.ToString()], data);
             }
             itemList.Add(item);
             item.SetActive(type == ConstructionType.Build ? isBuildTab : !isBuildTab);

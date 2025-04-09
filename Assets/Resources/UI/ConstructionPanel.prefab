@@ -791,7 +791,7 @@ MonoBehaviour:
   buildButton: {fileID: 7613663964520899213}
   roadButton: {fileID: 6740526280337665651}
   content: {fileID: 3300435325703244944}
-  itemBox: {fileID: 64257019084114016, guid: 97d6f7f709c093e488803ba9b983f7ee, type: 3}
+  itemBoxObj: {fileID: 64257019084114016, guid: 97d6f7f709c093e488803ba9b983f7ee, type: 3}
   poolConfigs:
   - Tag: ArmorShop
     Prefab: {fileID: 7013512141040750873, guid: 90670c16b572c7946b8d1f7fa408a074, type: 3}
