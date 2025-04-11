@@ -21,7 +21,7 @@ public class ItemBox : MonoBehaviour
     {
         image.sprite = sprite;
         itemName.text = data.name;
-        blockSize.text = $"{data.blockSize}칸";
+        blockSize.text = $"{data.blockSize[0] * data.blockSize[1]}칸";
         buildCost.text = $"{data.buildCost}G";
         SetOutline(blockSize);
         SetOutline(buildCost);
@@ -40,7 +40,9 @@ public class ItemBox : MonoBehaviour
 
     private void CreateItem()
     {
-        PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+        Vector2Int size = Vector2Int.right * data.blockSize[0] + Vector2Int.up * data.blockSize[1];
+        BuildingPlacer.Instance.StartPlacing(data.tag, size);
         UIManager.Instance.Hide<ConstructionPanel>();
+        UIManager.Instance.Hide<Main>();
     }
 }
