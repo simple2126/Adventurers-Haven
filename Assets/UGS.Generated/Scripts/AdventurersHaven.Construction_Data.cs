@@ -62,8 +62,10 @@ namespace AdventurersHaven
 		public System.String name;
 		public System.Int32 buildCost;
 		public System.Collections.Generic.List<Int32> blockSize;
-		public System.Collections.Generic.List<Int32> sales;
-		public System.Collections.Generic.List<Int32> upgradeCost;
+		public System.Int32 sales;
+		public System.Int32 salesIncrement;
+		public System.Int32 upgradeCost;
+		public System.Int32 costIncrement;
 		public System.Int32 maxLevel;
   
 

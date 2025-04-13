@@ -30,9 +30,6 @@ public class ItemBox : MonoBehaviour
 
     private void SetOutline(TextMeshProUGUI tmp)
     {
-        Material newMat = new Material(tmp.fontMaterial);
-        tmp.fontMaterial = newMat;
-
         // Outline 설정
         tmp.fontMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.1f);
         tmp.fontMaterial.SetColor(ShaderUtilities.ID_OutlineColor, Color.black);
