@@ -38,7 +38,7 @@ public class ItemBox : MonoBehaviour
     private void CreateItem()
     {
         Vector2Int size = Vector2Int.right * data.blockSize[0] + Vector2Int.up * data.blockSize[1];
-        BuildingPlacer.Instance.StartPlacing(data.tag, size);
+        BuildingPlacer.Instance.StartPlacing(data, size);
         UIManager.Instance.Hide<ConstructionPanel>();
         UIManager.Instance.Hide<Main>();
     }

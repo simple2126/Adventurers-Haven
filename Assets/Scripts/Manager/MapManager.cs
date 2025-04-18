@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 
 public class TileData
 {
-    public bool Occupied { get; private set; }
+    public bool Occupied { get; private set; } // 사용 여부
     public GameObject Building { get; private set; }
 
     public TileData(bool occupied = false, GameObject building = null)
@@ -17,8 +17,10 @@ public class TileData
 public class MapManager : SingletonBase<MapManager>
 {
     public Tilemap BuildingTilemap;
+    public Tilemap RoadTilemap;
 
-    private Dictionary<Vector3Int, TileData> tileDict = new();
+    private Dictionary<Vector3Int, TileData> buildTileDict = new();
+    private Dictionary<Vector3Int, TileData> roadTileDict = new();
 
     protected override void Awake()
     {
@@ -28,18 +30,19 @@ public class MapManager : SingletonBase<MapManager>
 
     private void Start()
     {
-        SetTIleDict();
+        SetTIleDict(BuildingTilemap, buildTileDict);
+        SetTIleDict(RoadTilemap, roadTileDict);
     }
 
-    private void SetTIleDict()
+    private void SetTIleDict(Tilemap tilemap, Dictionary<Vector3Int, TileData> tileDict)
     {
-        BoundsInt bounds = BuildingTilemap.cellBounds;
+        BoundsInt bounds = tilemap.cellBounds;
         for (int x = bounds.x; x < bounds.xMax; x++)
         {
             for (int y = bounds.y; y < bounds.yMax; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y;
-                if (BuildingTilemap.HasTile(pos))
+                if (tilemap.HasTile(pos))
                 {
                     tileDict[pos] = new TileData(true);
                 }
@@ -51,7 +54,7 @@ public class MapManager : SingletonBase<MapManager>
         }
     }
 
-    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size)
+    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size, ConstructionType type)
     {
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
@@ -61,17 +64,29 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                
-                if (tileDict.ContainsKey(pos) && tileDict[pos].Occupied) return false;
+
+                // 건물일 때 -> 빌딩, 도로 있으면 배치 불가
+                if(type == ConstructionType.Build)
+                {
+                    if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
+                    if (roadTileDict.ContainsKey(pos) && roadTileDict[pos].Occupied) return false;
+                }
+                // 도로일 때 -> 건물 있으면 배치 불가, 도로는 배치 가능
+                else if(type == ConstructionType.Road) 
+                {
+                    if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
+                }
             }
         }
         return true;
     }
 
-    public void SetBuildingArea(Vector3Int origin, Vector2Int size, GameObject building)
+    public void SetBuildingArea(Vector3Int origin, Vector2Int size, GameObject building, ConstructionType type)
     {
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
+
+        var tileDict = type == ConstructionType.Build ? buildTileDict : roadTileDict;
 
         for (int x = -offsetX; x < size.x - offsetX; x++)
         {
