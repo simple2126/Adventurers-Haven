@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemBox : MonoBehaviour
+public class ItemBox : UIBase
 {
     [SerializeField] private Image image;
     [SerializeField] private TextMeshProUGUI itemName;
@@ -12,8 +12,9 @@ public class ItemBox : MonoBehaviour
 
     private Construction_Data data;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         GetComponent<Button>().onClick.AddListener(CreateItem);
     }
 
