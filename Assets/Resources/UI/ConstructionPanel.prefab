@@ -412,7 +412,7 @@ GameObject:
   - component: {fileID: 5989074789028745943}
   - component: {fileID: 4368319056756873608}
   m_Layer: 5
-  m_Name: RoadTxt
+  m_Name: ElementTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -465,7 +465,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uB3C4\uB85C"
+  m_text: "\uC2DC\uC124\uBB3C\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59d7df5b83871ba4ca1bae1a0aebeab6, type: 2}
   m_sharedMaterial: {fileID: -3926759499803948032, guid: 59d7df5b83871ba4ca1bae1a0aebeab6, type: 2}
@@ -561,7 +561,7 @@ GameObject:
   - component: {fileID: 8873496862524090919}
   - component: {fileID: 6740526280337665651}
   m_Layer: 5
-  m_Name: Road
+  m_Name: Element
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -789,7 +789,7 @@ MonoBehaviour:
   ButtonSfxPairList: []
   back: {fileID: 4464128986469754686}
   buildButton: {fileID: 7613663964520899213}
-  roadButton: {fileID: 6740526280337665651}
+  elementButton: {fileID: 6740526280337665651}
   content: {fileID: 3300435325703244944}
   itemBoxObj: {fileID: 64257019084114016, guid: 97d6f7f709c093e488803ba9b983f7ee, type: 3}
   poolConfigs:
@@ -810,6 +810,9 @@ MonoBehaviour:
     Size: 0
   - Tag: SwordShop
     Prefab: {fileID: 7925911270134405276, guid: 6d3fe69329cbe364c89d192a5b31fc6f, type: 3}
+    Size: 0
+  - Tag: GrayRockRoad
+    Prefab: {fileID: 3714722900973354922, guid: f38576ab90630714bb5199df0c5677d1, type: 3}
     Size: 0
   - Tag: WhiteRockRoad
     Prefab: {fileID: 3714722900973354922, guid: 1b3076ffac44c2d42864378c9b5f3bbd, type: 3}

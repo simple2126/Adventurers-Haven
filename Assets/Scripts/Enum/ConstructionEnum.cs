@@ -5,5 +5,5 @@ using GoogleSheet.Core.Type;
 public enum ConstructionType
 {
     Build,
-    Road,
+    Element,
 }

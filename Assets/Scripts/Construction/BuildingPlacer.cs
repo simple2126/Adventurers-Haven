@@ -86,10 +86,10 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
             previewObject.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
             Debug.Log("Building Position: " + previewObject.transform.position);
         }
-        else if (previewConstruction.Type == ConstructionType.Road)
+        else if (previewConstruction.Type == ConstructionType.Element)
         {
-            gridPos = MapManager.Instance.RoadTilemap.WorldToCell(mouseWorld);
-            previewObject.transform.position = GetSnappedPosition(MapManager.Instance.RoadTilemap);
+            gridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
+            previewObject.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
             Debug.Log("Road Position: " + previewObject.transform.position);
         }
     }
@@ -124,9 +124,10 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         Vector2 pos = previewObject.transform.position;
         Vector3 bound = previewRenderer.bounds.size;
         float width = bound.x / 2, height = bound.y / 2;
+        Vector2 upOrDown = transform.position.y > 0 ? Vector2.down : Vector2.up;
 
-        check.transform.position = pos + height * Vector2.down * 0.9f + width * Vector2.right * 0.4f;
-        cancle.transform.position = pos + height * Vector2.down * 0.9f + width * Vector2.left * 0.4f;
+        check.transform.position = pos + height * upOrDown * 0.9f + width * Vector2.right * 0.4f;
+        cancle.transform.position = pos + height * upOrDown * 0.9f + width * Vector2.left * 0.4f;
         notPlaceable.transform.position = pos + height * Vector2.up * 0.9f;
     }
 

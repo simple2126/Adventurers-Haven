@@ -17,10 +17,10 @@ public class TileData
 public class MapManager : SingletonBase<MapManager>
 {
     public Tilemap BuildingTilemap;
-    public Tilemap RoadTilemap;
+    public Tilemap ElementTilemap;
 
     private Dictionary<Vector3Int, TileData> buildTileDict = new();
-    private Dictionary<Vector3Int, TileData> roadTileDict = new();
+    private Dictionary<Vector3Int, TileData> elementTileDict = new();
 
     protected override void Awake()
     {
@@ -31,7 +31,7 @@ public class MapManager : SingletonBase<MapManager>
     private void Start()
     {
         SetTIleDict(BuildingTilemap, buildTileDict);
-        SetTIleDict(RoadTilemap, roadTileDict);
+        SetTIleDict(ElementTilemap, elementTileDict);
     }
 
     private void SetTIleDict(Tilemap tilemap, Dictionary<Vector3Int, TileData> tileDict)
@@ -69,10 +69,10 @@ public class MapManager : SingletonBase<MapManager>
                 if(type == ConstructionType.Build)
                 {
                     if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
-                    if (roadTileDict.ContainsKey(pos) && roadTileDict[pos].Occupied) return false;
+                    if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Occupied) return false;
                 }
                 // 도로일 때 -> 건물 있으면 배치 불가, 도로는 배치 가능
-                else if(type == ConstructionType.Road) 
+                else if(type == ConstructionType.Element) 
                 {
                     if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
                 }
@@ -86,7 +86,7 @@ public class MapManager : SingletonBase<MapManager>
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
 
-        var tileDict = type == ConstructionType.Build ? buildTileDict : roadTileDict;
+        var tileDict = type == ConstructionType.Build ? buildTileDict : elementTileDict;
 
         for (int x = -offsetX; x < size.x - offsetX; x++)
         {

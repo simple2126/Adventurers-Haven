@@ -6,14 +6,14 @@ public class ConstructionPanel : UIBase
 {
     [SerializeField] private Button back;
     [SerializeField] private Button buildButton;
-    [SerializeField] private Button roadButton;
+    [SerializeField] private Button elementButton;
 
     [SerializeField] private GameObject content;
     [SerializeField] private GameObject itemBoxObj;
 
     private bool isBuildTab = true;
     private List<GameObject> buildItemList = new List<GameObject>();
-    private List<GameObject> roadItemList = new List<GameObject>();
+    private List<GameObject> elementItemList = new List<GameObject>();
 
     [SerializeField] private PoolManager.PoolConfig[] poolConfigs;
     private Dictionary<string, Sprite> poolSpriteDict = new();
@@ -25,7 +25,7 @@ public class ConstructionPanel : UIBase
         base.Awake();
         back.onClick.AddListener(Hide);
         buildButton.onClick.AddListener(() => ChangeTab(ConstructionType.Build));
-        roadButton.onClick.AddListener(() => ChangeTab(ConstructionType.Road));
+        elementButton.onClick.AddListener(() => ChangeTab(ConstructionType.Element));
         scrollRect = GetComponentInChildren<ScrollRect>();
         PoolManager.Instance.AddPools<Construction>(poolConfigs);
     }
@@ -34,7 +34,7 @@ public class ConstructionPanel : UIBase
     {
         SetSpriteDict();
         SetItemList(ConstructionType.Build, buildItemList);
-        SetItemList(ConstructionType.Road, roadItemList);
+        SetItemList(ConstructionType.Element, elementItemList);
         UpdateTabVisibility();
         scrollRect.verticalNormalizedPosition = 1f;
     }
@@ -85,7 +85,7 @@ public class ConstructionPanel : UIBase
         {
             item.SetActive(isBuildTab);
         }
-        foreach (var item in roadItemList)
+        foreach (var item in elementItemList)
         {
             item.SetActive(!isBuildTab);
         }
