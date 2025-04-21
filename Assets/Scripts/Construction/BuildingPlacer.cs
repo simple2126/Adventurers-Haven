@@ -1,5 +1,6 @@
 using AdventurersHaven;
 using GoogleSheet.Type;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -8,13 +9,18 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 {
     private Camera mainCamera;
     private SpriteRenderer previewRenderer;
-    
+
+    private Construction_Data data;
     private GameObject previewObject;
     private Construction previewConstruction;
     private Vector2Int buildingSize;
     private Vector3Int gridPos;
 
     private bool isConfirmingPlacement; // 현재 배치 기능인지 여부
+    private Vector3Int roadStartPos;
+    private Vector3Int roadEndPos;
+
+    private RoadPlacementState roadState = RoadPlacementState.None;
 
     [SerializeField] private Button check;
     [SerializeField] private Button cancle;
@@ -35,20 +41,18 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private void Update()
     {
         if (previewObject == null || !previewObject.activeSelf) return;
-        if (isConfirmingPlacement) return;
-        
+        if (isConfirmingPlacement && roadState != RoadPlacementState.ReadyToConfirm) return;
+
         ChangePreviewObjPos();
         ChangeChildPlace();
 
-        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction.Type);
-        ChangeColor(canPlace);
-        notPlaceable.SetActive(!canPlace);
-
-        // 마우스 클릭으로 설치
-        if (Input.GetMouseButton(0) && canPlace)
+        if (!IsRoad())
         {
-            isConfirmingPlacement = true;
-            SetPlacementButtonsActive(true);
+            UpdateDefaultPlacement();
+        }
+        else
+        {
+            UpdateRoadPlacement();
         }
     }
 
@@ -56,76 +60,106 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     {
         if (isCheck)
         {
-            MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObject, previewConstruction.Type);
+            if (IsRoad())
+                PlaceRoadLine(roadStartPos, roadEndPos);
+            else
+                MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObject, previewConstruction.Type);
         }
         else
         {
             PoolManager.Instance.ReturnToPool<Construction>(previewObject.name, previewConstruction);
         }
 
-        previewObject = null;
-        gameObject.SetActive(false);
-        SetPlacementButtonsActive(false);
-        isConfirmingPlacement = false;
+        ExitPlacing();
         UIManager.Instance.Show<Main>();
     }
 
-    // 원하는 건물 클릭 후 건물 배치 시작
     public void StartPlacing(Construction_Data data, Vector2Int size)
     {
+        this.data = data;
         previewConstruction = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
         previewConstruction.SetData(data);
         previewObject = previewConstruction.gameObject;
         previewRenderer = previewObject.GetComponent<SpriteRenderer>();
         buildingSize = size;
         gameObject.SetActive(true);
+        roadState = RoadPlacementState.None;
+    }
+
+    private bool IsRoad()
+    {
+        return previewConstruction.Type == ConstructionType.Element &&
+               previewConstruction.ElementType == ElementType.Road;
+    }
+
+    // 라인에 여러 도로 배치
+    private void PlaceRoadLine(Vector3Int start, Vector3Int end)
+    {
+        Vector3Int direction = end - start;
+
+        if (Mathf.Abs(direction.x) > 0 && Mathf.Abs(direction.y) > 0)
+        {
+            Debug.LogWarning("도로는 직선만 지원됩니다.");
+            return;
+        }
+
+        int stepX = Mathf.Clamp(direction.x, -1, 1);
+        int stepY = Mathf.Clamp(direction.y, -1, 1);
+
+        Vector3Int step = Vector3Int.right * stepX * buildingSize.x +
+                          Vector3Int.up * stepY * buildingSize.y;
+
+        Vector3Int current = start;
+        PoolManager.Instance.ReturnToPool<Construction>(previewObject.name, previewConstruction);
+
+        while (current != end + step)
+        {
+            var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+            obj.SetData(data);
+            obj.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
+            MapManager.Instance.SetBuildingArea(current, Vector2Int.one, obj.gameObject, ConstructionType.Element);
+            Debug.Log($"Placed road at {current}");
+            current += step;
+        }
     }
 
     private void ChangePreviewObjPos()
     {
-        // 스크린 좌표 (픽셀 단위) → 월드 좌표 (3D 공간상 위치) 변환
+        if (IsRoad() && roadState == RoadPlacementState.ReadyToConfirm)
+            return;
+
         Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
 
-        if (previewConstruction.Type == ConstructionType.Build) 
+        if (previewConstruction.Type == ConstructionType.Build)
         {
-            // 월드 좌표를 타일맵 상 몇 번째 셀인지 변환
             gridPos = MapManager.Instance.BuildingTilemap.WorldToCell(mouseWorld);
-            // 셀의 정중앙 월드 위치 반환
             previewObject.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
-            //Debug.Log("Building Position: " + previewObject.transform.position);
         }
         else if (previewConstruction.Type == ConstructionType.Element)
         {
             gridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
             previewObject.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
-            //Debug.Log("Element Position: " + previewObject.transform.position);
         }
     }
 
-    // 프리팹 중앙 값 계산하여 위치 조정
-    public Vector3 GetSnappedPosition(Tilemap tilemap)
+    // 배치 중일 때 그리드 벗어나지 않도록 위치 계산
+    private Vector3 GetSnappedPosition(Tilemap tilemap)
     {
-        // 중심 셀의 실제 월드 중심 좌표
-        Vector3 cellCenter = tilemap.GetCellCenterWorld(gridPos);
+        return GetSnappedPosition(tilemap, gridPos);
+    }
 
-        // 타일 크기 (보통 1x1이지만 다를 수 있음)
+
+    private Vector3 GetSnappedPosition(Tilemap tilemap, Vector3Int pos)
+    {
+        Vector3 cellCenter = tilemap.GetCellCenterWorld(pos);
         Vector3 cellSize = tilemap.cellSize;
 
-        // 오프셋 계산 (짝수일 때 왼쪽/아래로 한 칸 더 가도록 보정)
         float offsetX = (buildingSize.x % 2 == 0) ? 0.5f : 0f;
         float offsetY = (buildingSize.y % 2 == 0) ? 0.5f : 0f;
 
         Vector3 offset = Vector3.right * offsetX * cellSize.x + Vector3.up * offsetY * cellSize.y;
-
-        // 셀 중심에서 오프셋 빼서 실제 좌표 계산
         return cellCenter - offset;
-    }
-
-    private void SetPlacementButtonsActive(bool isActive)
-    {
-        check.gameObject.SetActive(isActive);
-        cancle.gameObject.SetActive(isActive);
     }
 
     private void ChangeChildPlace()
@@ -140,10 +174,77 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         notPlaceable.transform.position = pos + height * Vector2.up * 0.9f;
     }
 
+    private void UpdateDefaultPlacement()
+    {
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction.Type);
+        ChangeColor(canPlace);
+        notPlaceable.SetActive(!canPlace);
+
+        if (Input.GetMouseButton(0) && canPlace)
+        {
+            isConfirmingPlacement = true;
+            SetPlacementButtonsActive(true);
+        }
+    }
+
     private void ChangeColor(bool canPlace)
     {
         Color color = previewRenderer.color;
         color.a = canPlace ? 1.0f : 0.5f;
         previewRenderer.color = color;
+    }
+
+    private void UpdateRoadPlacement()
+    {
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction.Type);
+        ChangeColor(canPlace);
+        notPlaceable.SetActive(!canPlace);
+
+        switch (roadState)
+        {
+            case RoadPlacementState.None:
+                if (Input.GetMouseButtonDown(0))
+                {
+                    roadStartPos = gridPos;
+                    roadState = RoadPlacementState.Dragging;
+                }
+                break;
+
+            case RoadPlacementState.Dragging:
+                roadEndPos = gridPos;
+                PreviewRoadLine(roadStartPos, roadEndPos);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    roadState = RoadPlacementState.ReadyToConfirm;
+                    isConfirmingPlacement = true;
+                    SetPlacementButtonsActive(true);
+                }
+                break;
+
+            case RoadPlacementState.ReadyToConfirm:
+                // 대기 중 (버튼 클릭)
+                break;
+        }
+    }
+
+    private void PreviewRoadLine(Vector3Int start, Vector3Int end)
+    {
+        // 시각적 프리뷰 추가 가능 (예: LineRenderer 등)
+    }
+
+    private void ExitPlacing()
+    {
+        previewObject = null;
+        gameObject.SetActive(false);
+        SetPlacementButtonsActive(false);
+        isConfirmingPlacement = false;
+        roadState = RoadPlacementState.None;
+    }
+
+    private void SetPlacementButtonsActive(bool isActive)
+    {
+        check.gameObject.SetActive(isActive);
+        cancle.gameObject.SetActive(isActive);
     }
 }

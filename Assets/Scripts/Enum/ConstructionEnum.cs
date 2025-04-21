@@ -21,3 +21,11 @@ public enum ElementType
     Road,
     Tree,
 }
+
+// Road 배치 상태 Enum
+public enum RoadPlacementState
+{
+    None,
+    Dragging,
+    ReadyToConfirm
+}
