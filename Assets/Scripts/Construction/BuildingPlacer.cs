@@ -15,7 +15,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private Vector3Int gridPos;
 
     private bool isConfirmingPlacement; // 현재 배치 기능인지 여부
-    private bool isCheck;               // Check, Cancle 어떤 것이 클릭됐는지
+
     [SerializeField] private Button check;
     [SerializeField] private Button cancle;
     [SerializeField] private GameObject notPlaceable;
@@ -54,8 +54,6 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void OnPlacementButtonClicked(bool isCheck)
     {
-        this.isCheck = isCheck;
-
         if (isCheck)
         {
             MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObject, previewConstruction.Type);
@@ -72,6 +70,17 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         UIManager.Instance.Show<Main>();
     }
 
+    // 원하는 건물 클릭 후 건물 배치 시작
+    public void StartPlacing(Construction_Data data, Vector2Int size)
+    {
+        previewConstruction = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+        previewConstruction.SetData(data);
+        previewObject = previewConstruction.gameObject;
+        previewRenderer = previewObject.GetComponent<SpriteRenderer>();
+        buildingSize = size;
+        gameObject.SetActive(true);
+    }
+
     private void ChangePreviewObjPos()
     {
         // 스크린 좌표 (픽셀 단위) → 월드 좌표 (3D 공간상 위치) 변환
@@ -84,13 +93,13 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
             gridPos = MapManager.Instance.BuildingTilemap.WorldToCell(mouseWorld);
             // 셀의 정중앙 월드 위치 반환
             previewObject.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
-            Debug.Log("Building Position: " + previewObject.transform.position);
+            //Debug.Log("Building Position: " + previewObject.transform.position);
         }
         else if (previewConstruction.Type == ConstructionType.Element)
         {
             gridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
             previewObject.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
-            Debug.Log("Road Position: " + previewObject.transform.position);
+            //Debug.Log("Element Position: " + previewObject.transform.position);
         }
     }
 
@@ -136,16 +145,5 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         Color color = previewRenderer.color;
         color.a = canPlace ? 1.0f : 0.5f;
         previewRenderer.color = color;
-    }
-
-    // 원하는 건물 클릭 후 건물 배치 시작
-    public void StartPlacing(Construction_Data data, Vector2Int size)
-    {
-        previewConstruction = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
-        previewConstruction.SetData(data);
-        previewObject = previewConstruction.gameObject;
-        previewRenderer = previewObject.GetComponent<SpriteRenderer>();
-        buildingSize = size;
-        gameObject.SetActive(true);
     }
 }

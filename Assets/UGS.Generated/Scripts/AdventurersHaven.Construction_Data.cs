@@ -57,7 +57,8 @@ namespace AdventurersHaven
 /* Fields. */
 
 		public System.Int32 id;
-		public ConstructionType ConstructionType;
+		public ConstructionType constructionType;
+		public System.String subType;
 		public System.String tag;
 		public System.String name;
 		public System.Int32 buildCost;

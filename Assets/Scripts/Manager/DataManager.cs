@@ -68,11 +68,11 @@ public class DataManager : SingletonBase<DataManager>
 
         foreach (var data in _constructionDataList)
         {
-            if (!constructionDataDict.ContainsKey(data.ConstructionType))
+            if (!constructionDataDict.ContainsKey(data.constructionType))
             {
-                constructionDataDict[data.ConstructionType] = new List<Construction_Data>();
+                constructionDataDict[data.constructionType] = new List<Construction_Data>();
             }
-            constructionDataDict[data.ConstructionType].Add(data);
+            constructionDataDict[data.constructionType].Add(data);
         }
 
         this.constructionDataDict = constructionDataDict;
