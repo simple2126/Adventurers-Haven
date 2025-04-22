@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 
 public class BuildingPlacer : SingletonBase<BuildingPlacer>
 {
@@ -16,11 +15,11 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private Vector3Int gridPos;
 
     private bool isConfirmingPlacement; // 현재 배치 기능인지 여부
+    private bool isRoad;
     private Vector3Int roadStartPos;
     private Vector3Int roadEndPos;
-    private List<Construction> previewRoadList = new List<Construction>(); // 프리뷰 도로 리스트
-
     private RoadPlacementState roadState = RoadPlacementState.None;
+    private List<Construction> previewRoadList = new List<Construction>(); // 프리뷰 도로 리스트
 
     [SerializeField] private Button check;
     [SerializeField] private Button cancle;
@@ -46,7 +45,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         ChangePreviewObjPos();
         ChangeChildPlace();
 
-        if (!IsRoad())
+        if (!isRoad)
         {
             UpdateDefaultPlacement();
         }
@@ -61,14 +60,14 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         var previewObj = previewConstruction.gameObject;
         if (isCheck)
         {
-            if (IsRoad())
+            if (isRoad)
                 PlaceRoadLine(roadStartPos, roadEndPos);
             else
                 MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObj, previewConstruction.Type);
         }
         else
         {
-            if (IsRoad()) ReturnRoadList();
+            if (isRoad) ReturnRoadList();
             PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
         }
 
@@ -85,12 +84,8 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         buildingSize = size;
         gameObject.SetActive(true);
         roadState = RoadPlacementState.None;
-    }
-
-    private bool IsRoad()
-    {
-        return previewConstruction.Type == ConstructionType.Element &&
-               previewConstruction.ElementType == ElementType.Road;
+        isRoad = previewConstruction.Type == ConstructionType.Element &&
+                 previewConstruction.ElementType == ElementType.Road; ;
     }
 
     // 라인에 여러 도로 배치
@@ -139,7 +134,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void ChangePreviewObjPos()
     {
-        if (IsRoad() && roadState == RoadPlacementState.Confirm) return;
+        if (isRoad && roadState == RoadPlacementState.Confirm) return;
 
         var previewObj = previewConstruction.gameObject;
 
