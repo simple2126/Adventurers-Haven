@@ -9,7 +9,6 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private SpriteRenderer previewRenderer;
 
     private Construction_Data data;
-    private GameObject previewObject;
     private Construction previewConstruction;
     private Vector2Int buildingSize;
     private Vector3Int gridPos;
@@ -38,7 +37,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void Update()
     {
-        if (previewObject == null || !previewObject.activeSelf) return;
+        if (previewConstruction == null || !previewConstruction.gameObject.activeSelf) return;
         if (isConfirmingPlacement && roadState != RoadPlacementState.ReadyToConfirm) return;
 
         ChangePreviewObjPos();
@@ -56,16 +55,17 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void OnPlacementButtonClicked(bool isCheck)
     {
+        var previewObj = previewConstruction.gameObject;
         if (isCheck)
         {
             if (IsRoad())
                 PlaceRoadLine(roadStartPos, roadEndPos);
             else
-                MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObject, previewConstruction.Type);
+                MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObj, previewConstruction.Type);
         }
         else
         {
-            PoolManager.Instance.ReturnToPool<Construction>(previewObject.name, previewConstruction);
+            PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
         }
 
         ExitPlacing();
@@ -77,8 +77,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         this.data = data;
         previewConstruction = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
         previewConstruction.SetData(data);
-        previewObject = previewConstruction.gameObject;
-        previewRenderer = previewObject.GetComponent<SpriteRenderer>();
+        previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
         buildingSize = size;
         gameObject.SetActive(true);
         roadState = RoadPlacementState.None;
@@ -95,11 +94,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     {
         Vector3Int direction = end - start;
 
-        if (Mathf.Abs(direction.x) > 0 && Mathf.Abs(direction.y) > 0)
-        {
-            Debug.LogWarning("도로는 직선만 지원됩니다.");
-            return;
-        }
+        if (Mathf.Abs(direction.x) > 0 && Mathf.Abs(direction.y) > 0) return;
 
         int stepX = Mathf.Clamp(direction.x, -1, 1);
         int stepY = Mathf.Clamp(direction.y, -1, 1);
@@ -108,15 +103,14 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
                           Vector3Int.up * stepY * buildingSize.y;
 
         Vector3Int current = start;
-        PoolManager.Instance.ReturnToPool<Construction>(previewObject.name, previewConstruction);
+        PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
 
         while (current != end + step)
         {
-            var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+            var pos = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
+            var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag, pos, Quaternion.identity);
             obj.SetData(data);
-            obj.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
             MapManager.Instance.SetBuildingArea(current, Vector2Int.one, obj.gameObject, ConstructionType.Element);
-            Debug.Log($"Placed road at {current}");
             current += step;
         }
     }
@@ -126,18 +120,20 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         if (IsRoad() && roadState == RoadPlacementState.ReadyToConfirm)
             return;
 
+        var previewObj = previewConstruction.gameObject;
+
         Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
 
         if (previewConstruction.Type == ConstructionType.Build)
         {
             gridPos = MapManager.Instance.BuildingTilemap.WorldToCell(mouseWorld);
-            previewObject.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
+            previewObj.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
         }
         else if (previewConstruction.Type == ConstructionType.Element)
         {
             gridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
-            previewObject.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
+            previewObj.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
         }
     }
 
@@ -162,7 +158,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void ChangeChildPlace()
     {
-        Vector2 pos = previewObject.transform.position;
+        Vector2 pos = previewConstruction.gameObject.transform.position;
         Vector3 bound = previewRenderer.bounds.size;
         float width = bound.x / 2, height = bound.y / 2;
         Vector2 upOrDown = transform.position.y > 0 ? Vector2.down : Vector2.up;
@@ -233,7 +229,6 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void ExitPlacing()
     {
-        previewObject = null;
         gameObject.SetActive(false);
         SetPlacementButtonsActive(false);
         isConfirmingPlacement = false;
