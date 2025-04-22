@@ -1657,8 +1657,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e1931a2b0de0b64c84f29309da9197c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BuildingTilemap: {fileID: 728439265282097174}
-  ElementTilemap: {fileID: 116779739659709482}
+  buildingTilemap: {fileID: 728439265282097174}
+  elementTilemap: {fileID: 116779739659709482}
 --- !u!1 &4104178232649740434
 GameObject:
   m_ObjectHideFlags: 0

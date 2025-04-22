@@ -2,6 +2,8 @@ using AdventurersHaven;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class BuildingPlacer : SingletonBase<BuildingPlacer>
 {
@@ -16,6 +18,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private bool isConfirmingPlacement; // 현재 배치 기능인지 여부
     private Vector3Int roadStartPos;
     private Vector3Int roadEndPos;
+    private List<Construction> previewRoadList = new List<Construction>(); // 프리뷰 도로 리스트
 
     private RoadPlacementState roadState = RoadPlacementState.None;
 
@@ -38,7 +41,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     private void Update()
     {
         if (previewConstruction == null || !previewConstruction.gameObject.activeSelf) return;
-        if (isConfirmingPlacement && roadState != RoadPlacementState.ReadyToConfirm) return;
+        if (isConfirmingPlacement && roadState != RoadPlacementState.Confirm) return;
 
         ChangePreviewObjPos();
         ChangeChildPlace();
@@ -65,6 +68,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         }
         else
         {
+            if (IsRoad()) ReturnRoadList();
             PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
         }
 
@@ -92,33 +96,50 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     // 라인에 여러 도로 배치
     private void PlaceRoadLine(Vector3Int start, Vector3Int end)
     {
-        Vector3Int direction = end - start;
-
-        if (Mathf.Abs(direction.x) > 0 && Mathf.Abs(direction.y) > 0) return;
-
-        int stepX = Mathf.Clamp(direction.x, -1, 1);
-        int stepY = Mathf.Clamp(direction.y, -1, 1);
-
-        Vector3Int step = Vector3Int.right * stepX * buildingSize.x +
-                          Vector3Int.up * stepY * buildingSize.y;
+        Vector3Int step = GetStep(end - start);
+        int stepCount = GetStepCount(step, start, end);
+        if (stepCount == 0) return;
 
         Vector3Int current = start;
-        PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
-
-        while (current != end + step)
+        for (int i = 0; i <= stepCount; i++)
         {
+            current = start + step * i;
             var pos = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
-            var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag, pos, Quaternion.identity);
+            var obj = previewRoadList[i];
             obj.SetData(data);
             MapManager.Instance.SetBuildingArea(current, Vector2Int.one, obj.gameObject, ConstructionType.Element);
-            current += step;
         }
+    }
+
+    private Vector3Int GetStep(Vector3Int direction)
+    {
+        bool isHorizontal = Mathf.Abs(direction.x) >= Mathf.Abs(direction.y);
+
+        if (isHorizontal)
+        {
+            int stepX = Mathf.Clamp(direction.x, -1, 1);
+            return Vector3Int.right * stepX * buildingSize.x;
+        }
+        else
+        {
+            int stepY = Mathf.Clamp(direction.y, -1, 1);
+            return Vector3Int.up * stepY * buildingSize.y;
+        }
+    }
+
+    private int GetStepCount(Vector3Int step, Vector3Int start, Vector3Int end)
+    {
+        if (step == Vector3Int.zero) return 0;
+
+        if (step.x != 0)
+            return Mathf.Abs(end.x - start.x) / Mathf.Abs(step.x);
+        else
+            return Mathf.Abs(end.y - start.y) / Mathf.Abs(step.y);
     }
 
     private void ChangePreviewObjPos()
     {
-        if (IsRoad() && roadState == RoadPlacementState.ReadyToConfirm)
-            return;
+        if (IsRoad() && roadState == RoadPlacementState.Confirm) return;
 
         var previewObj = previewConstruction.gameObject;
 
@@ -142,7 +163,6 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     {
         return GetSnappedPosition(tilemap, gridPos);
     }
-
 
     private Vector3 GetSnappedPosition(Tilemap tilemap, Vector3Int pos)
     {
@@ -210,21 +230,62 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    roadState = RoadPlacementState.ReadyToConfirm;
+                    roadState = RoadPlacementState.Confirm;
                     isConfirmingPlacement = true;
                     SetPlacementButtonsActive(true);
                 }
                 break;
 
-            case RoadPlacementState.ReadyToConfirm:
-                // 대기 중 (버튼 클릭)
+            case RoadPlacementState.Confirm:
                 break;
         }
     }
 
     private void PreviewRoadLine(Vector3Int start, Vector3Int end)
     {
-        // 시각적 프리뷰 추가 가능 (예: LineRenderer 등)
+        Vector3Int step = GetStep(end - start);
+        int stepCount = GetStepCount(step, start, end);
+        if (stepCount == 0)
+        {
+            // 프리뷰 늘렸다가 다시 원점으로 돌아왔을 때
+            int previewCount = previewRoadList.Count;
+            ReturnRoadList();
+            previewRoadList.Clear();
+            if (previewCount > 0) roadState = RoadPlacementState.None;
+            return;
+        }
+
+        Vector3Int current = start;
+        int index = 0;
+        
+        for (int i = 0; i <= stepCount; i++)
+        {
+            current = start + step * i;
+            if (index >= previewRoadList.Count)
+            {
+                var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+                obj.SetData(data);
+                previewRoadList.Add(obj);
+            }
+
+            var preview = previewRoadList[index];
+            preview.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
+            preview.gameObject.SetActive(true);
+            index++;
+        }
+
+        if (previewRoadList.Count > 0) 
+        {
+            previewConstruction.transform.position = previewRoadList[previewRoadList.Count - 1].transform.position;
+        }
+        
+        // 남은 프리뷰 비활성화
+        for (int i = index; i < previewRoadList.Count; i++)
+        {
+            var preview = previewRoadList[i];
+            PoolManager.Instance.ReturnToPool<Construction>(data.tag, preview);
+            previewRoadList.RemoveAt(i);
+        }
     }
 
     private void ExitPlacing()
@@ -233,6 +294,16 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         SetPlacementButtonsActive(false);
         isConfirmingPlacement = false;
         roadState = RoadPlacementState.None;
+        previewConstruction = null;
+        previewRoadList.Clear();
+    }
+
+    private void ReturnRoadList()
+    {
+        if (previewRoadList.Count == 0) return;
+
+        foreach (var obj in previewRoadList)
+            PoolManager.Instance.ReturnToPool<Construction>(data.tag, obj);
     }
 
     private void SetPlacementButtonsActive(bool isActive)

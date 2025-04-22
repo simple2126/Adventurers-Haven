@@ -16,8 +16,11 @@ public class TileData
 
 public class MapManager : SingletonBase<MapManager>
 {
-    public Tilemap BuildingTilemap;
-    public Tilemap ElementTilemap;
+    [SerializeField] private Tilemap buildingTilemap;
+    public Tilemap BuildingTilemap { get; private set; }
+
+    [SerializeField] private Tilemap elementTilemap;
+    public Tilemap ElementTilemap { get; private set; }
 
     private Dictionary<Vector3Int, TileData> buildTileDict = new();
     private Dictionary<Vector3Int, TileData> elementTileDict = new();
@@ -25,6 +28,8 @@ public class MapManager : SingletonBase<MapManager>
     protected override void Awake()
     {
         base.Awake();
+        BuildingTilemap = buildingTilemap;
+        ElementTilemap = elementTilemap;
         DontDestroyOnLoad(gameObject);
     }
 

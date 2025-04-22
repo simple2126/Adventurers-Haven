@@ -27,5 +27,5 @@ public enum RoadPlacementState
 {
     None,
     Dragging,
-    ReadyToConfirm
+    Confirm
 }
