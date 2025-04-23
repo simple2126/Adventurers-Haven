@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Construction : MonoBehaviour
 {
+    // 게임 오브젝트 이름
+    public string Tag { get; private set; }
+
     public ConstructionType Type { get; private set; }
     public string SubType { get; private set; }
 
@@ -11,6 +14,7 @@ public class Construction : MonoBehaviour
 
     public void SetData(Construction_Data data)
     {
+        Tag = data.tag;
         Type = data.constructionType;
         SubType = data.subType;
         SetSubType();

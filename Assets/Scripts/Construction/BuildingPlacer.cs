@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Net;
 
 public class BuildingPlacer : SingletonBase<BuildingPlacer>
 {
@@ -57,13 +58,12 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void OnPlacementButtonClicked(bool isCheck)
     {
-        var previewObj = previewConstruction.gameObject;
         if (isCheck)
         {
             if (isRoad)
                 PlaceRoadLine(roadStartPos, roadEndPos);
             else
-                MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewObj, previewConstruction.Type);
+                MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewConstruction);
         }
         else
         {
@@ -91,20 +91,34 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
     // 라인에 여러 도로 배치
     private void PlaceRoadLine(Vector3Int start, Vector3Int end)
     {
-        Vector3Int step = GetStep(end - start);
-        int stepCount = GetStepCount(step, start, end);
-        if (stepCount == 0) return;
-
-        Vector3Int current = start;
-        for (int i = 0; i <= stepCount; i++)
+        // 단일 도로 배치
+        if (previewRoadList.Count == 0)
         {
-            current = start + step * i;
-            var pos = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
-            var obj = previewRoadList[i];
-            obj.SetData(data);
-            MapManager.Instance.SetBuildingArea(current, Vector2Int.one, obj.gameObject, ConstructionType.Element);
+            Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(start.x) + Vector3Int.up * Mathf.CeilToInt(start.y);
+            MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
         }
+
+        for (int i = 0; i < previewRoadList.Count; i++)
+        {
+            var current = previewRoadList[i].transform.position;
+            current = MapManager.Instance.ElementTilemap.WorldToCell(current);
+            Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(current.x) + Vector3Int.up * Mathf.CeilToInt(current.y);
+
+            if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag))
+            {
+                PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewRoadList[i]);
+                previewRoadList.RemoveAt(i);
+                i--;
+            }
+            else
+            {
+                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewRoadList[i]);
+            }
+        }
+
+        if (previewRoadList.Count > 0) PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
     }
+
 
     private Vector3Int GetStep(Vector3Int direction)
     {
@@ -265,13 +279,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
             var preview = previewRoadList[index];
             preview.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
-            preview.gameObject.SetActive(true);
             index++;
-        }
-
-        if (previewRoadList.Count > 0) 
-        {
-            previewConstruction.transform.position = previewRoadList[previewRoadList.Count - 1].transform.position;
         }
         
         // 남은 프리뷰 비활성화
