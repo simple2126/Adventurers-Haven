@@ -200,7 +200,7 @@
 [모험가](https://zerie.itch.io/tiny-rpg-character-asset-pack)
 
 
-[아이템](https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack)
+[아이템1](https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack) [아이템2](https://domin-dev.itch.io/free-pixel-melee-pack-asset-pack)
 
 
 [UI1](https://srtoasty.itch.io/ui-assets-pack-srt), [UI2](https://srtoasty.itch.io/ui-assets-pack-2)
