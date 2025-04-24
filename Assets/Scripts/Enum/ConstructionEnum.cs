@@ -18,6 +18,7 @@ public enum BuildType
 
 public enum ElementType
 {
+    Demolish, // 철거
     Road,
     Tree,
 }

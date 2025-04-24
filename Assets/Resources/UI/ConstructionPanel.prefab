@@ -817,6 +817,9 @@ MonoBehaviour:
   - Tag: WhiteRockRoad
     Prefab: {fileID: 3714722900973354922, guid: 1b3076ffac44c2d42864378c9b5f3bbd, type: 3}
     Size: 0
+  - Tag: Hammer
+    Prefab: {fileID: 4943180111156111094, guid: c142e730c04b2e947aba9731a50d3c8b, type: 3}
+    Size: 0
 --- !u!1 &5701450729832287711
 GameObject:
   m_ObjectHideFlags: 0
