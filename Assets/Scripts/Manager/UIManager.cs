@@ -64,4 +64,9 @@ public class UIManager : SingletonBase<UIManager>
     {
         return uiDict.ContainsKey(uiName); 
     }
+
+    public bool IsVisible(string uiName)
+    {
+        return uiDict.ContainsKey(uiName) && uiDict[uiName].gameObject.activeSelf;
+    }
 }

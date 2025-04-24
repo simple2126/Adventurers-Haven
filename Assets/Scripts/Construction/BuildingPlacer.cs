@@ -119,52 +119,31 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         if (previewRoadList.Count > 0) PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
     }
 
-
-    private Vector3Int GetStep(Vector3Int direction)
-    {
-        bool isHorizontal = Mathf.Abs(direction.x) >= Mathf.Abs(direction.y);
-
-        if (isHorizontal)
-        {
-            int stepX = Mathf.Clamp(direction.x, -1, 1);
-            return Vector3Int.right * stepX * buildingSize.x;
-        }
-        else
-        {
-            int stepY = Mathf.Clamp(direction.y, -1, 1);
-            return Vector3Int.up * stepY * buildingSize.y;
-        }
-    }
-
-    private int GetStepCount(Vector3Int step, Vector3Int start, Vector3Int end)
-    {
-        if (step == Vector3Int.zero) return 0;
-
-        if (step.x != 0)
-            return Mathf.Abs(end.x - start.x) / Mathf.Abs(step.x);
-        else
-            return Mathf.Abs(end.y - start.y) / Mathf.Abs(step.y);
-    }
-
     private void ChangePreviewObjPos()
     {
         if (isRoad && roadState == RoadPlacementState.Confirm) return;
 
         var previewObj = previewConstruction.gameObject;
-
         Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
 
-        if (previewConstruction.Type == ConstructionType.Build)
+        Tilemap targetTilemap = previewConstruction.Type == ConstructionType.Build
+            ? MapManager.Instance.BuildingTilemap : MapManager.Instance.ElementTilemap;
+
+        if (isRoad && roadState == RoadPlacementState.Dragging)
         {
-            gridPos = MapManager.Instance.BuildingTilemap.WorldToCell(mouseWorld);
-            previewObj.transform.position = GetSnappedPosition(MapManager.Instance.BuildingTilemap);
+            // road 드래깅 중일 때만 buildingSize 단위 스냅 적용
+            Vector3Int rawGridPos = targetTilemap.WorldToCell(mouseWorld);
+            gridPos =
+                Vector3Int.right * Mathf.FloorToInt((float)rawGridPos.x / buildingSize.x) * buildingSize.x +
+                Vector3Int.up * Mathf.FloorToInt((float)rawGridPos.y / buildingSize.y) * buildingSize.y;
         }
-        else if (previewConstruction.Type == ConstructionType.Element)
+        else
         {
-            gridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
-            previewObj.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap);
+            gridPos = targetTilemap.WorldToCell(mouseWorld);
         }
+
+        previewObj.transform.position = GetSnappedPosition(targetTilemap, gridPos);
     }
 
     // 배치 중일 때 그리드 벗어나지 않도록 위치 계산
@@ -270,6 +249,9 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         for (int i = 0; i <= stepCount; i++)
         {
             current = start + step * i;
+            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction.Type);
+            if (notPlace) break;
+
             if (index >= previewRoadList.Count)
             {
                 var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
@@ -281,7 +263,12 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
             preview.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, current);
             index++;
         }
-        
+
+        if (previewRoadList.Count > 0)
+        {
+            previewConstruction.transform.position = previewRoadList[index - 1].transform.position;
+        }
+
         // 남은 프리뷰 비활성화
         for (int i = index; i < previewRoadList.Count; i++)
         {
@@ -289,6 +276,32 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
             PoolManager.Instance.ReturnToPool<Construction>(data.tag, preview);
             previewRoadList.RemoveAt(i);
         }
+    }
+
+    private Vector3Int GetStep(Vector3Int direction)
+    {
+        bool isHorizontal = Mathf.Abs(direction.x) >= Mathf.Abs(direction.y);
+
+        if (isHorizontal)
+        {
+            int stepX = Mathf.Clamp(direction.x, -1, 1);
+            return Vector3Int.right * stepX * buildingSize.x;
+        }
+        else
+        {
+            int stepY = Mathf.Clamp(direction.y, -1, 1);
+            return Vector3Int.up * stepY * buildingSize.y;
+        }
+    }
+
+    private int GetStepCount(Vector3Int step, Vector3Int start, Vector3Int end)
+    {
+        if (step == Vector3Int.zero) return 0;
+
+        if (step.x != 0)
+            return Mathf.Abs(end.x - start.x) / Mathf.Abs(step.x);
+        else
+            return Mathf.Abs(end.y - start.y) / Mathf.Abs(step.y);
     }
 
     private void ExitPlacing()
