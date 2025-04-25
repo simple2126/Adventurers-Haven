@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8897514753340435734}
   - component: {fileID: 6421605375125953647}
   m_Layer: 5
-  m_Name: Cancle
+  m_Name: Cancel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143,7 +143,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5500419397204219277}
-  - component: {fileID: 3193142517096337885}
+  - component: {fileID: 6466661628989026070}
   m_Layer: 0
   m_Name: BuildingPlacer
   m_TagString: Untagged
@@ -167,7 +167,7 @@ Transform:
   - {fileID: 521327498699563752}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3193142517096337885
+--- !u!114 &6466661628989026070
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2621869926860727231}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 048c1f831eb3b64479c5afcdaecae2f6, type: 3}
+  m_Script: {fileID: 11500000, guid: 48a5df343fbbfaf43a76abd01c00f6fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   check: {fileID: 4583749751894188854}

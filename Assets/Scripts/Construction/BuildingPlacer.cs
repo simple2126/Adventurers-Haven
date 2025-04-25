@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Net;
 
 public class BuildingPlacer : SingletonBase<BuildingPlacer>
 {
@@ -85,7 +84,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         gameObject.SetActive(true);
         roadState = RoadPlacementState.None;
         isRoad = previewConstruction.Type == ConstructionType.Element &&
-                 previewConstruction.ElementType == ElementType.Road; ;
+                 previewConstruction.ElementType == ElementType.Road;
     }
 
     // 라인에 여러 도로 배치

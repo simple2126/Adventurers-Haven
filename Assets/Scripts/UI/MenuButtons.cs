@@ -74,8 +74,6 @@ public class MenuButtons : UIBase
 
         canvasGroups[index].alpha = isVisible ? 0 : 1;
 
-        Debug.Log($"AnimateChildButton: {childBtns[idx].name}, isVisible: {isVisible}");
-
         seq.Append(childBtns[idx].transform.DOLocalMove(targetPos, 1))
             .Join(canvasGroups[idx].DOFade(isVisible ? 1 : 0, 1f))
             .SetLink(childBtns[idx].gameObject);
