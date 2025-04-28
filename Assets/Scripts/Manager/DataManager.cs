@@ -1,5 +1,6 @@
 using AdventurersHaven;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class DataManager : SingletonBase<DataManager>
 {
@@ -86,5 +87,26 @@ public class DataManager : SingletonBase<DataManager>
         }
 
         return constructionDataDict;
+    }
+
+    public Construction_Data GetConstructionData(ConstructionType type, string tag)
+    {
+        if (constructionDataDict == null)
+        {
+            SetConstructionDataDict();
+        }
+
+        if (constructionDataDict.ContainsKey(type))
+        {
+            foreach (var data in constructionDataDict[type])
+            {
+                Debug.WriteLine(data.tag);
+                if (data.tag == tag)
+                {
+                    return data;
+                }
+            }
+        }
+        return null;
     }
 }

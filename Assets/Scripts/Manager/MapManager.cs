@@ -1,3 +1,4 @@
+using AdventurersHaven;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -5,12 +6,18 @@ using UnityEngine.Tilemaps;
 public class CustomTileData
 {
     public bool Occupied { get; private set; } // 사용 여부
-    public string Tag { get; private set; }
+    public Construction Construction { get; private set; }
 
-    public void SetData(bool occupied = false, string tag = null)
+    public void SetData(bool occupied = false)
     {
+        this.Construction = null;
         this.Occupied = occupied;
-        this.Tag = tag;
+    }
+
+    public void SetData(Construction construction, bool occupied = false, string tag = null)
+    {
+        this.Construction = construction;
+        this.Occupied = occupied;
     }
 }
 
@@ -25,6 +32,11 @@ public class MapManager : SingletonBase<MapManager>
     private Dictionary<Vector3Int, CustomTileData> buildTileDict = new();
     private Dictionary<Vector3Int, CustomTileData> elementTileDict = new();
 
+    [SerializeField] private GameObject baseRoadPrefab;
+    [SerializeField] private ConstructionType conType;
+    [SerializeField] private string baseRoadTag;
+    private Construction baseRoadCon;
+
     protected override void Awake()
     {
         base.Awake();
@@ -35,6 +47,8 @@ public class MapManager : SingletonBase<MapManager>
 
     private void Start()
     {
+        baseRoadCon = baseRoadPrefab.GetComponent<Construction>();
+        baseRoadCon.SetData(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTIleDict(BuildingTilemap, buildTileDict);
         SetTIleDict(ElementTilemap, elementTileDict);
     }
@@ -53,19 +67,24 @@ public class MapManager : SingletonBase<MapManager>
 
                 if (tilemap.HasTile(pos))
                 {
-                    var tileTag = tilemap == elementTilemap ? "WhiteRockRoad" : null;
-                    tileDict[pos].SetData(true, tileTag);
-                }
-                else
-                {
-                    tileDict[pos].SetData(false);
+                    if (tilemap == ElementTilemap)
+                    {
+                        tileDict[pos].SetData(baseRoadCon, true);
+                    }
+                    else tileDict[pos].SetData(true);
                 }
             }
         }
     }
 
-    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size, ConstructionType type)
+    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size, Construction construction)
     {
+        if (construction.IsDemolish())
+        {
+            Vector3Int pos = Vector3Int.right + Vector3Int.up + origin;
+            return buildTileDict.ContainsKey(pos) && elementTileDict.ContainsKey(pos);
+        }
+
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
 
@@ -76,14 +95,17 @@ public class MapManager : SingletonBase<MapManager>
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
 
                 // 건물일 때 -> 빌딩, 도로 있으면 배치 불가
-                if(type == ConstructionType.Build)
+                if(construction.Type == ConstructionType.Build)
                 {
+                    if (!buildTileDict.ContainsKey(pos)) return false;
                     if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
+                    if (!elementTileDict.ContainsKey(pos)) return false;
                     if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Occupied) return false;
                 }
                 // 도로일 때 -> 건물 있으면 배치 불가, 도로는 배치 가능
-                else if(type == ConstructionType.Element) 
+                else if(construction.Type == ConstructionType.Element) 
                 {
+                    if (!buildTileDict.ContainsKey(pos)) return false;
                     if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
                 }
             }
@@ -107,13 +129,66 @@ public class MapManager : SingletonBase<MapManager>
                 if (!tileDict.ContainsKey(pos))
                     tileDict[pos] = new CustomTileData();
 
-                tileDict[pos].SetData(true, construction.Tag);
+                tileDict[pos].SetData(construction, true);
             }
         }
     }
 
+    public void RemoveBuildingArea(Vector3Int origin, Vector2Int size, Construction construction)
+    {
+        int offsetX = size.x / 2;
+        int offsetY = size.y / 2;
+
+        List<Construction> removedConstructions = new List<Construction>();
+
+        for (int x = -offsetX; x < size.x - offsetX; x++)
+        {
+            for (int y = -offsetY; y < size.y - offsetY; y++)
+            {
+                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
+
+                // 빌딩 타일맵
+                if (buildTileDict.ContainsKey(pos))
+                {
+                    var realConstruction = buildTileDict[pos].Construction;
+                    if (realConstruction != null)
+                    {
+                        buildingTilemap.SetTile(pos, null);
+                        buildTileDict[pos].SetData(false);
+
+                        // 한 번만 ReturnToPool 하기 위해
+                        if (!removedConstructions.Contains(realConstruction))
+                        {
+                            PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
+                            removedConstructions.Add(realConstruction);
+                        }
+                    }
+                }
+
+                // 엘리먼트 타일맵 (도로 등)
+                if (elementTileDict.ContainsKey(pos))
+                {
+                    var realConstruction = elementTileDict[pos].Construction;
+                    if (realConstruction != null)
+                    {
+                        elementTilemap.SetTile(pos, null);
+                        elementTileDict[pos].SetData(false);
+
+                        if (!removedConstructions.Contains(realConstruction))
+                        {
+                            PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
+                            removedConstructions.Add(realConstruction);
+                        }
+                    }
+                }
+            }
+        }
+
+        PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
+    }
+
     // 현재 위치에 같은 도로가 있는지 확인 (같은 도로 배치 불가)
-    public bool IsSameRoadData(Vector3Int origin, Vector2Int size, string objName)
+    public bool IsSameRoadData(Vector3Int origin, Vector2Int size, string tag)
     {
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
@@ -125,11 +200,26 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (!elementTileDict.ContainsKey(pos)) continue;
-                if (elementTileDict[pos].Tag == objName) count++;
+                if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos].Construction == null) continue;
+                if (elementTileDict[pos].Construction.Tag == tag) count++;
             }
         }
         
         return size.x * size.y == count ? true : false;
+    }
+
+    public Vector2Int GetBuildingAre(Vector3Int pos)
+    {
+        if(buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
+        {
+            return buildTileDict[pos].Construction.Size;
+        }
+        
+        if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
+        {
+            return elementTileDict[pos].Construction.Size;
+        }
+
+        return Vector2Int.one;
     }
 }

@@ -15,6 +15,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     // 별도의 Placer 인스턴스들
     private DefaultPlacer defaultPlacer;
     private RoadPlacer roadPlacer;
+    private RemovePlacer removePlacer;
 
     protected override void Awake()
     {
@@ -29,6 +30,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
 
         defaultPlacer = new DefaultPlacer(mainCamera, check, cancle, notPlaceable);
         roadPlacer = new RoadPlacer(mainCamera, check, cancle, notPlaceable);
+        removePlacer = new RemovePlacer(mainCamera, check, cancle, notPlaceable);
     }
 
     private void Update()
@@ -56,17 +58,26 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     // 데이터만으로 타입 판단하는 오버로드 메서드 추가
     public void StartPlacing(Construction_Data data, Vector2Int size)
     {
-        bool isRoad = false;
-        if (data.constructionType == ConstructionType.Element &&
-            Enum.TryParse(data.subType, out ElementType elementType))
-        {
-            isRoad = elementType == ElementType.Road;
-        }
-
+        var prefab = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
+        prefab.SetData(data);
         // 적절한 Placer 선택
-        currentPlacer = isRoad ? roadPlacer : defaultPlacer;
-        currentPlacer.StartPlacing(data, size);
 
+        // Element && Demolish
+        if (prefab.IsDemolish())
+        {
+            currentPlacer = removePlacer;
+        }
+        // Element && Road
+        else if (prefab.IsRoad())
+        {
+            currentPlacer = roadPlacer;
+        }
+        else
+        {
+            currentPlacer = defaultPlacer;
+        }
+        
+        currentPlacer.StartPlacing(data, prefab, size);
         gameObject.SetActive(true);
     }
 

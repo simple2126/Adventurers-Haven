@@ -145,7 +145,7 @@ GameObject:
   - component: {fileID: 5500419397204219277}
   - component: {fileID: 6466661628989026070}
   m_Layer: 0
-  m_Name: BuildingPlacer
+  m_Name: PlacerManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

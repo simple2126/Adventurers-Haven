@@ -15,9 +15,9 @@ public class RoadPlacer : BasePlacer
     {
     }
 
-    public override void StartPlacing(Construction_Data data, Vector2Int size)
+    public override void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
     {
-        base.StartPlacing(data, size);
+        base.StartPlacing(data, construction, size);
         roadState = RoadPlacementState.None;
         previewRoadList.Clear();
     }
@@ -148,7 +148,7 @@ public class RoadPlacer : BasePlacer
         for (int i = 0; i <= stepCount; i++)
         {
             current = start + step * i;
-            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction.Type);
+            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction);
             if (notPlace) break;
 
             if (index >= previewRoadList.Count)

@@ -177,7 +177,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void UpdateDefaultPlacement()
     {
-        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction.Type);
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);
         notPlaceable.SetActive(!canPlace);
 
@@ -197,7 +197,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
 
     private void UpdateRoadPlacement()
     {
-        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction.Type);
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);
         notPlaceable.SetActive(!canPlace);
 
@@ -248,7 +248,7 @@ public class BuildingPlacer : SingletonBase<BuildingPlacer>
         for (int i = 0; i <= stepCount; i++)
         {
             current = start + step * i;
-            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction.Type);
+            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction);
             if (notPlace) break;
 
             if (index >= previewRoadList.Count)
