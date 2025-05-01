@@ -1,4 +1,3 @@
-using AdventurersHaven;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -221,5 +220,23 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         return Vector2Int.one;
+    }
+
+    public void ShowOrHideTileDict(bool isShow)
+    {
+        foreach(var tile in buildTileDict.Values)
+        {
+            if (tile.Construction != null)
+            {
+                tile.Construction.gameObject.SetActive(isShow);
+            }
+        }
+        foreach (var tile in elementTileDict.Values)
+        {
+            if (tile.Construction != null)
+            {
+                tile.Construction.gameObject.SetActive(isShow);
+            }
+        }
     }
 }

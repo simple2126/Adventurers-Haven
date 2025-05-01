@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,15 +18,25 @@ public class GameManager : SingletonBase<GameManager>
         UIManager.Instance.Show<Robby>();
     }
 
-    public void LoadSceneAndShowUI<T>(string sceneName) where T : UIBase
+    public void LoadSceneAndShowUI<T>(SceneName sceneType) where T : UIBase
     {
         SceneManager.sceneLoaded += OnSceneLoaded<T>;
-        SceneManager.LoadSceneAsync(sceneName);
+        SceneManager.LoadSceneAsync(sceneType.ToString());
     }
 
     private void OnSceneLoaded<T>(Scene scene, LoadSceneMode mode) where T : UIBase
     {
         UIManager.Instance.Show<T>();
+        if (scene.name == SceneName.MainScene.ToString())
+        {
+            MapManager.Instance.gameObject?.SetActive(true);
+            MapManager.Instance?.ShowOrHideTileDict(true);
+        }
+        else
+        {
+            MapManager.Instance.gameObject?.SetActive(false);
+            MapManager.Instance?.ShowOrHideTileDict(false);
+        }
         SceneManager.sceneLoaded -= OnSceneLoaded<T>;
     }
 

@@ -14,7 +14,7 @@ public class Main : UIBase
 
         robbyBtn.onClick.AddListener(() =>
         {
-            GameManager.Instance.LoadSceneAndShowUI<Robby>("RobbyScene");
+            GameManager.Instance.LoadSceneAndShowUI<Robby>(SceneName.RobbyScene);
         });
 
         menuBtn.onClick.AddListener(() =>

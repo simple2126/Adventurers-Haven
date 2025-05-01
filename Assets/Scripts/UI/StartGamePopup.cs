@@ -12,7 +12,7 @@ public class StartGamePopup : UIBase
 
         YesBtn.onClick.AddListener(() =>
         {
-            GameManager.Instance.LoadSceneAndShowUI<Main>("MainScene");
+            GameManager.Instance.LoadSceneAndShowUI<Main>(SceneName.MainScene);
         });
 
         NoBtn.onClick.AddListener(Hide);
