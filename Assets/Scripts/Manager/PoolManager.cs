@@ -83,6 +83,14 @@ public class PoolManager : SingletonBase<PoolManager>
         }
     }
 
+    public void AddPools<T>(PoolConfig newPool) where T : Component
+    {
+        if (newPool == null) return;
+
+        if (pools.ContainsKey(newPool.Tag)) return; // 이미 있으면 추가 X
+        poolConfigs.Add(newPool); // 외부 클래스에서 받아온 풀 정보 리스트에 추가
+    }
+
     public void AddPools<T>(PoolConfig[] newPools) where T : Component
     {
         if (newPools == null) return;

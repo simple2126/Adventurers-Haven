@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83e08cc387be2bf478855e85e3d55a9d, type: 3}
+  m_Name: ConstructionList
+  m_EditorClassIdentifier: 
+  poolConfigs:
+  - {fileID: 11400000, guid: 44978f5e3d76c9c439661d73bae15e8a, type: 2}
+  - {fileID: 11400000, guid: 3060b3e7b168cc943be2310e158d150e, type: 2}
+  - {fileID: 11400000, guid: 09cfcb668e6aa024887fadb467103ec6, type: 2}
+  - {fileID: 11400000, guid: 695e2003042000e4ba3f6931b2e764d8, type: 2}
+  - {fileID: 11400000, guid: fdb4867a2e8ccf049be8ae3be2dfe8bf, type: 2}
+  - {fileID: 11400000, guid: d4979b33b7c15d24bb3b26a4a3b37185, type: 2}
+  - {fileID: 11400000, guid: 63f3e79f9006ba641a0a4e0a59ad151d, type: 2}
+  - {fileID: 11400000, guid: 3223e5d31677a6246be55f8172b8a950, type: 2}
+  - {fileID: 11400000, guid: 0b9046087e23d4547b6181f1205f84b0, type: 2}

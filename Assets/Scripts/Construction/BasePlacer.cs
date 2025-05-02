@@ -37,6 +37,10 @@ public abstract class BasePlacer
     public virtual void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
     {
         this.data = data;
+        if(previewConstruction != null)
+        {
+            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
+        }
         previewConstruction = construction;
         previewConstruction.SetData(data);
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();

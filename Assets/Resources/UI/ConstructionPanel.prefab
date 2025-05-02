@@ -811,11 +811,11 @@ MonoBehaviour:
   - Tag: SwordShop
     Prefab: {fileID: 7925911270134405276, guid: 6d3fe69329cbe364c89d192a5b31fc6f, type: 3}
     Size: 0
-  - Tag: GrayRockRoad
-    Prefab: {fileID: 3714722900973354922, guid: f38576ab90630714bb5199df0c5677d1, type: 3}
-    Size: 0
   - Tag: WhiteRockRoad
     Prefab: {fileID: 3714722900973354922, guid: 1b3076ffac44c2d42864378c9b5f3bbd, type: 3}
+    Size: 0
+  - Tag: GrayRockRoad
+    Prefab: {fileID: 3714722900973354922, guid: f38576ab90630714bb5199df0c5677d1, type: 3}
     Size: 0
   - Tag: Hammer
     Prefab: {fileID: 4943180111156111094, guid: c142e730c04b2e947aba9731a50d3c8b, type: 3}

@@ -1,6 +1,8 @@
+using AdventurersHaven;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class CustomTileData
 {
@@ -13,7 +15,7 @@ public class CustomTileData
         this.Occupied = occupied;
     }
 
-    public void SetData(Construction construction, bool occupied = false, string tag = null)
+    public void SetData(Construction construction, bool occupied = false)
     {
         this.Construction = construction;
         this.Occupied = occupied;
@@ -31,7 +33,7 @@ public class MapManager : SingletonBase<MapManager>
     private Dictionary<Vector3Int, CustomTileData> buildTileDict = new();
     private Dictionary<Vector3Int, CustomTileData> elementTileDict = new();
 
-    [SerializeField] private GameObject baseRoadPrefab;
+    [SerializeField] private PoolManager.PoolConfig poolConfig;
     [SerializeField] private ConstructionType conType;
     [SerializeField] private string baseRoadTag;
     private Construction baseRoadCon;
@@ -46,7 +48,8 @@ public class MapManager : SingletonBase<MapManager>
 
     private void Start()
     {
-        baseRoadCon = baseRoadPrefab.GetComponent<Construction>();
+        PoolManager.Instance.AddPools<Construction>(poolConfig);
+        baseRoadCon = poolConfig.Prefab.GetComponent<Construction>();
         baseRoadCon.SetData(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTIleDict(BuildingTilemap, buildTileDict);
         SetTIleDict(ElementTilemap, elementTileDict);
@@ -55,9 +58,12 @@ public class MapManager : SingletonBase<MapManager>
     private void SetTIleDict(Tilemap tilemap, Dictionary<Vector3Int, CustomTileData> tileDict)
     {
         BoundsInt bounds = tilemap.cellBounds;
-        for (int x = bounds.x; x < bounds.xMax; x++)
+        Vector3 cellSize = tilemap.cellSize;
+        var conData = DataManager.Instance.GetConstructionData(conType, baseRoadTag);
+
+        for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
-            for (int y = bounds.y; y < bounds.yMax; y++)
+            for (int y = bounds.yMin; y < bounds.yMax; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y;
 
@@ -68,10 +74,40 @@ public class MapManager : SingletonBase<MapManager>
                 {
                     if (tilemap == ElementTilemap)
                     {
-                        tileDict[pos].SetData(baseRoadCon, true);
+                        Debug.Log($"ElementTilemap Has Tile at {pos}");
+                        int offsetX = x - bounds.xMin;
+                        int offsetY = y - bounds.yMin;
+
+                        // 가로 (왼 -> 오), 세로(아래 -> 위)
+                        if ((offsetX % baseRoadCon.Size.x == 0) && (offsetY % baseRoadCon.Size.y == 0))
+                        {
+                            // 월드 좌표 계산 후 객체 생성
+                            Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
+                            var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
+                            con.SetData(conData);
+                            SetBuildingAreaLeftBottom(pos, con.Size, con); // 타일맵에 도로 배치
+                        }
                     }
                     else tileDict[pos].SetData(true);
                 }
+            }
+        }
+    }
+
+    // 초기화 때만 사용 -> 좌하단 기준
+    public void SetBuildingAreaLeftBottom(Vector3Int origin, Vector2Int size, Construction construction)
+    {
+        var tileDict = construction.Type == ConstructionType.Build ? buildTileDict : elementTileDict;
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
+
+                if (!tileDict.ContainsKey(pos))
+                    tileDict[pos] = new CustomTileData();
+
+                tileDict[pos].SetData(construction, true);
             }
         }
     }
@@ -140,20 +176,27 @@ public class MapManager : SingletonBase<MapManager>
 
         List<Construction> removedConstructions = new List<Construction>();
 
+        // 타겟 건축물을 가져옴
+        Construction targetCon = GetCurrentConstruction(origin);
+        if (targetCon == null) return;
+
         for (int x = -offsetX; x < size.x - offsetX; x++)
         {
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
 
-                // 빌딩 타일맵
-                if (buildTileDict.ContainsKey(pos))
+                // 빌딩 타일맵에서 동일 오브젝트 삭제
+                if (targetCon.Type == ConstructionType.Build && buildTileDict.ContainsKey(pos))
                 {
                     var realConstruction = buildTileDict[pos].Construction;
-                    if (realConstruction != null)
+                    if (realConstruction != null && realConstruction == targetCon) // targetCon과 비교
                     {
                         buildingTilemap.SetTile(pos, null);
+                        buildingTilemap.RefreshTile(pos);
                         buildTileDict[pos].SetData(false);
+
+                        Debug.Log($"GetData {buildingTilemap.GetTile(pos) == null}");
 
                         // 한 번만 ReturnToPool 하기 위해
                         if (!removedConstructions.Contains(realConstruction))
@@ -164,13 +207,14 @@ public class MapManager : SingletonBase<MapManager>
                     }
                 }
 
-                // 엘리먼트 타일맵 (도로 등)
-                if (elementTileDict.ContainsKey(pos))
+                // 엘리먼트 타일맵에서 동일 오브젝트 삭제
+                if (targetCon.Type == ConstructionType.Element && elementTileDict.ContainsKey(pos))
                 {
                     var realConstruction = elementTileDict[pos].Construction;
-                    if (realConstruction != null)
+                    if (realConstruction != null && realConstruction == targetCon) // targetCon과 비교
                     {
                         elementTilemap.SetTile(pos, null);
+                        elementTilemap.RefreshTile(pos);
                         elementTileDict[pos].SetData(false);
 
                         if (!removedConstructions.Contains(realConstruction))
@@ -184,6 +228,19 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
+    }
+
+    private Construction GetCurrentConstruction(Vector3Int pos)
+    {
+        if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
+        {
+            return buildTileDict[pos].Construction;
+        }
+        else if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
+        {
+            return elementTileDict[pos].Construction;
+        }
+        return null;
     }
 
     // 현재 위치에 같은 도로가 있는지 확인 (같은 도로 배치 불가)
@@ -207,7 +264,7 @@ public class MapManager : SingletonBase<MapManager>
         return size.x * size.y == count ? true : false;
     }
 
-    public Vector2Int GetBuildingAre(Vector3Int pos)
+    public Vector2Int GetConstructionSize(Vector3Int pos)
     {
         if(buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
         {
@@ -220,6 +277,38 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         return Vector2Int.one;
+    }
+
+    public bool CurrentSizeInOneObject(Vector3Int origin, Vector2Int size)
+    {
+        int offsetX = size.x / 2;
+        int offsetY = size.y / 2;
+
+        int buildCount = 0;
+        int elementCount = 0;
+
+        Construction con = GetCurrentConstruction(origin);
+
+        for (int x = -offsetX; x < size.x - offsetX; x++)
+        {
+            for (int y = -offsetY; y < size.y - offsetY; y++)
+            {
+                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
+                if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
+                {
+                    if (buildTileDict[pos].Construction.gameObject == con.gameObject) buildCount++;
+                }
+
+                if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
+                {
+                    if (elementTileDict[pos].Construction.gameObject == con.gameObject) elementCount++;
+                }
+            }
+        }
+
+        int maxCount = size.x * size.y;
+        Debug.Log($"maxCount {maxCount} buildCount {buildCount} elementCount {elementCount}");
+        return maxCount == buildCount || maxCount == elementCount ? true : false;
     }
 
     public void ShowOrHideTileDict(bool isShow)
