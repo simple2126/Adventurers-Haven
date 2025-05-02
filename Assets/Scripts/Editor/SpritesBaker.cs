@@ -3,12 +3,9 @@ using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 
-public class SpritesBaker : EditorWindow
+public class SpritesBaker
 {
-    [MenuItem("Tools/Sprite Renderer Baker")]
-    static void ShowWindow() => GetWindow<SpritesBaker>("Sprite Renderer Baker");
-
-    private void OnGUI()
+    public void OnGUI()
     {
         GUILayout.Label("Sprite Renderer Baker", EditorStyles.boldLabel);
 
@@ -35,13 +32,7 @@ public class SpritesBaker : EditorWindow
     static void BakeSpritesToTexture(GameObject root, SpriteRenderer[] renderers)
     {
         int renderLayer = LayerMask.NameToLayer("RenderOnly");
-        if (renderLayer == -1)
-        {
-            Debug.LogError("'RenderOnly' 레이어가 존재하지 않습니다. 프로젝트 설정에서 추가해 주세요.");
-            return;
-        }
-
-        var originalLayers = SetLayerRecursively(root.transform, renderLayer);
+        var originalLayers = GetOriginLayer(root.transform, renderLayer);
 
         Camera cam = CreateRenderCamera(renderLayer);
         Bounds bounds = CalculateBounds(renderers);
@@ -61,7 +52,7 @@ public class SpritesBaker : EditorWindow
         Cleanup(cam.gameObject, rt, tex);
     }
 
-    static Dictionary<Transform, int> SetLayerRecursively(Transform root, int newLayer)
+    static Dictionary<Transform, int> GetOriginLayer(Transform root, int newLayer)
     {
         var map = new Dictionary<Transform, int>();
         foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
@@ -86,6 +77,8 @@ public class SpritesBaker : EditorWindow
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = Color.clear;
         cam.cullingMask = 1 << cullingLayer;
+        // 00000001 (1) << cullingLayer (6)
+        // 01000000 -> 2^6 -> 6번만 확인
         return cam;
     }
 
@@ -162,8 +155,8 @@ public class SpritesBaker : EditorWindow
     static void Cleanup(GameObject camObj, RenderTexture rt, Texture2D tex)
     {
         RenderTexture.active = null;
-        Object.DestroyImmediate(camObj);
-        Object.DestroyImmediate(rt);
-        Object.DestroyImmediate(tex);
+        if(camObj != null) Object.DestroyImmediate(camObj);
+        if(rt != null) Object.DestroyImmediate(rt);
+        if(tex != null) Object.DestroyImmediate(tex);
     }
 }

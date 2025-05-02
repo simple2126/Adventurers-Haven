@@ -4,15 +4,9 @@ using System.IO;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
-public class TilemapBaker : EditorWindow
+public class TilemapBaker
 {
-    [MenuItem("Tools/Tilemap Baker")]
-    static void ShowWindow()
-    {
-        GetWindow<TilemapBaker>("Tilemap Baker");
-    }
-
-    private void OnGUI()
+    public void OnGUI()
     {
         GUILayout.Label("Tilemap Baker", EditorStyles.boldLabel);
 
@@ -25,7 +19,7 @@ public class TilemapBaker : EditorWindow
                 return;
             }
 
-            Grid grid = FindGridComponent(selected);
+            Grid grid = selected.GetComponentInChildren<Grid>(true);
             if (grid == null)
             {
                 EditorUtility.DisplayDialog("오류", "Grid 컴포넌트를 찾을 수 없습니다.", "확인");
@@ -59,15 +53,7 @@ public class TilemapBaker : EditorWindow
         Cleanup(cam.gameObject, rt, tex);
     }
 
-    static Grid FindGridComponent(GameObject selected)
-    {
-        if (selected == null) return null;
-
-        return selected.GetComponent<Grid>() ??
-               selected.GetComponentInParent<Grid>() ??
-               selected.GetComponentInChildren<Grid>();
-    }
-
+    // 정확히 인식되는지 확인
     static void LogTilemapInfo(Grid grid)
     {
         Tilemap[] tilemaps = grid.GetComponentsInChildren<Tilemap>(true);
@@ -88,15 +74,15 @@ public class TilemapBaker : EditorWindow
     {
         GameObject camObj = new GameObject("TempCamera");
         Camera cam = camObj.AddComponent<Camera>();
-        cam.orthographic = true;
-        cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = Color.clear;
+        cam.orthographic = true;                        // 2D 렌더링
+        cam.clearFlags = CameraClearFlags.SolidColor;   // 배경 단색 설정
+        cam.backgroundColor = Color.clear;              // 배경 투명으로 설정
         return cam;
     }
 
     static void ConfigureCamera(Camera cam, Bounds bounds)
     {
-        cam.orthographicSize = bounds.size.y / 2f;
+        cam.orthographicSize = bounds.size.y / 2f; // 카메라 크기 설정(높이)
         Vector3 cameraPos = bounds.center;
         cameraPos.z = -10f;
         cam.transform.position = cameraPos;
@@ -108,26 +94,26 @@ public class TilemapBaker : EditorWindow
         int textureHeight = Mathf.Max(1, Mathf.CeilToInt(bounds.size.y * 100));
         Debug.Log("텍스처 크기: " + textureWidth + "x" + textureHeight);
 
-        return new RenderTexture(textureWidth, textureHeight, 24);
+        return new RenderTexture(textureWidth, textureHeight, 24); // 24비트 깊이 버퍼 (Sorting Order, Z축 차이 대비용)
     }
 
     static Texture2D CaptureTexture(RenderTexture rt)
     {
         RenderTexture prevActive = RenderTexture.active;
-        RenderTexture.active = rt;
+        RenderTexture.active = rt; // 활성 렌더 텍스처로 설정 -> ReadPixels 다른 화면 렌더링 방지
 
         Texture2D tex = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
-        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-        tex.Apply();
+        tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); // Rect 영역을 읽어 0, 0 위치에 복사
+        tex.Apply(); // 텍스처에 적용
 
-        RenderTexture.active = prevActive;
+        RenderTexture.active = prevActive; // 렌더 타겟 초기화
         return tex;
     }
 
     static string SaveTextureAsPNG(Texture2D tex, Grid grid)
     {
         string prefabName = grid.gameObject.name;
-        string path = EditorUtility.SaveFilePanel("Save Sprite", "Assets", prefabName, "png");
+        string path = EditorUtility.SaveFilePanel("Save Sprite", "Assets", prefabName, "png"); // 제목, 기본 경로, 기본 이름, 확장자
         if (string.IsNullOrEmpty(path))
         {
             Debug.LogWarning("저장이 취소되었습니다.");
@@ -152,14 +138,15 @@ public class TilemapBaker : EditorWindow
     {
         if (string.IsNullOrEmpty(savedPath)) return;
 
-        string dataPath = Application.dataPath;
+        string dataPath = Application.dataPath; // Assets까지의 전체 경로 반환
         if (!savedPath.StartsWith(dataPath))
         {
             Debug.Log("Assets 폴더 외부에 저장되었습니다. 에셋으로 임포트하려면 Assets 폴더 내에 저장하세요.");
             return;
         }
 
-        string assetPath = "Assets" + savedPath.Substring(dataPath.Length);
+        string assetPath = "Assets" + savedPath.Substring(dataPath.Length); // Assets 상위 경로 제거
+        // AssetDatabase는 반드시 "Assets/..."부터 시작하는 경로를 사용해야 함
         AssetDatabase.Refresh();
         AssetDatabase.ImportAsset(assetPath);
 
@@ -193,10 +180,11 @@ public class TilemapBaker : EditorWindow
 
         Bounds bounds = new Bounds();
         bool isFirst = true;
+        Vector3 cellSize = grid.cellSize;
 
         foreach (var tilemap in tilemaps)
         {
-            if (!tilemap.gameObject.activeInHierarchy) continue;
+            if (!tilemap.gameObject.activeInHierarchy) continue; // 렌더링을 위해 Scene에 배치되어야 함
 
             List<Vector3> worldPositions = new List<Vector3>();
 
@@ -205,10 +193,9 @@ public class TilemapBaker : EditorWindow
                 if (tilemap.HasTile(cellPosition))
                 {
                     Vector3 worldPos = tilemap.CellToWorld(cellPosition);
-                    worldPositions.Add(worldPos);
-                    worldPositions.Add(worldPos + new Vector3(grid.cellSize.x, 0, 0));
-                    worldPositions.Add(worldPos + new Vector3(0, grid.cellSize.y, 0));
-                    worldPositions.Add(worldPos + new Vector3(grid.cellSize.x, grid.cellSize.y, 0));
+                    worldPositions.Add(worldPos);                               // 셀의 좌하단 (초기값)
+                    worldPositions.Add(worldPos + Vector3.right * cellSize.x);  // 셀의 우하단 (가로 확장용)
+                    worldPositions.Add(worldPos + Vector3.up * cellSize.y);     // 셀의 우상당 (세로 확장용)
                 }
             }
 
@@ -217,7 +204,7 @@ public class TilemapBaker : EditorWindow
             Bounds tilemapBounds = new Bounds(worldPositions[0], Vector3.zero);
             foreach (Vector3 pos in worldPositions)
             {
-                tilemapBounds.Encapsulate(pos);
+                tilemapBounds.Encapsulate(pos); // 타일맵의 모든 타일을 포함하는 경계 계산 -> 점차 증가
             }
 
             if (isFirst)
@@ -237,7 +224,9 @@ public class TilemapBaker : EditorWindow
             return new Bounds(grid.transform.position, Vector3.one * 2f);
         }
 
-        bounds.Expand(grid.cellSize * 2f);
+        bounds.Expand(cellSize * 2f);
+        // 상하좌우 1칸씩 여유 공간 추가
+        // 좌 += cellsize, 우 += cellsize, 상 += cellsize, 하 += cellsize
         return bounds;
     }
 
