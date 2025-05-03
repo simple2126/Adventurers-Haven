@@ -1,8 +1,8 @@
-using AdventurersHaven;
+using NavMeshPlus.Components;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class CustomTileData
 {
@@ -38,11 +38,14 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private string baseRoadTag;
     private Construction baseRoadCon;
 
+    private NavMeshSurface surface;
+
     protected override void Awake()
     {
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
+        surface = GetComponentInChildren<NavMeshSurface>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -53,6 +56,15 @@ public class MapManager : SingletonBase<MapManager>
         baseRoadCon.SetData(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTIleDict(BuildingTilemap, buildTileDict);
         SetTIleDict(ElementTilemap, elementTileDict);
+        StartCoroutine(DelayedNavMeshBuild());
+    }
+
+    private IEnumerator DelayedNavMeshBuild()
+    {
+        yield return null; // 한 프레임 대기
+        surface.BuildNavMesh();
+        Bounds bounds = surface.navMeshData.sourceBounds;
+        Debug.Log($"NavMesh Bounds: Center={bounds.center}, Extents={bounds.extents}");
     }
 
     private void SetTIleDict(Tilemap tilemap, Dictionary<Vector3Int, CustomTileData> tileDict)
@@ -74,7 +86,6 @@ public class MapManager : SingletonBase<MapManager>
                 {
                     if (tilemap == ElementTilemap)
                     {
-                        Debug.Log($"ElementTilemap Has Tile at {pos}");
                         int offsetX = x - bounds.xMin;
                         int offsetY = y - bounds.yMin;
 
@@ -86,6 +97,8 @@ public class MapManager : SingletonBase<MapManager>
                             var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
                             con.SetData(conData);
                             SetBuildingAreaLeftBottom(pos, con.Size, con); // 타일맵에 도로 배치
+                            if (con.GetComponent<NavMeshModifier>() == null)
+                                Debug.LogWarning("❌ 도로에 NavMeshModifier가 없습니다!");
                         }
                     }
                     else tileDict[pos].SetData(true);
@@ -167,6 +180,8 @@ public class MapManager : SingletonBase<MapManager>
                 tileDict[pos].SetData(construction, true);
             }
         }
+
+        surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
     public void RemoveBuildingArea(Vector3Int origin, Vector2Int size, Construction construction)
@@ -228,6 +243,7 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
+        surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
     private Construction GetCurrentConstruction(Vector3Int pos)

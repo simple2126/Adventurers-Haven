@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 6610698959215520369}
   - component: {fileID: 3240969659191132485}
   - component: {fileID: 8880108453628494050}
+  - component: {fileID: 5030104648981441859}
+  - component: {fileID: 7254744017447597569}
   m_Layer: 0
   m_Name: Archer
   m_TagString: Untagged
@@ -27,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 378449449983969704}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.017, y: -1.875, z: -0.0017999988}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -73,8 +75,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 4263181033994473208, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+  m_SortingOrder: 10
+  m_Sprite: {fileID: -537441013, guid: 33f7d759f45a96145a3eb836278a9b4c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -106,3 +108,37 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!195 &5030104648981441859
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 378449449983969704}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.11
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 0.17
+  m_BaseOffset: 0.085
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &7254744017447597569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 378449449983969704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b45f53ed9477e814fb96cd7d790495f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

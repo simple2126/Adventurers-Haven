@@ -7,7 +7,8 @@ public class DataManager : SingletonBase<DataManager>
     private Dictionary<BgmType, float> individualBgmVolumeDict;
     private Dictionary<SfxType, float> individualSfxVolumeDict;
     private Dictionary<ConstructionType, List<Construction_Data>> constructionDataDict;
-
+    private Dictionary<AdventurerType, List<Adventurer_Data>> adventurerDataDict;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -15,6 +16,7 @@ public class DataManager : SingletonBase<DataManager>
         SetIndividualSfxVolumeDict();
         SetIndividualBgmVolumeDict();
         SetConstructionDataDict();
+        SetAdventurerDataDict();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -99,6 +101,42 @@ public class DataManager : SingletonBase<DataManager>
         if (constructionDataDict.ContainsKey(type))
         {
             foreach (var data in constructionDataDict[type])
+            {
+                Debug.WriteLine(data.tag);
+                if (data.tag == tag)
+                {
+                    return data;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void SetAdventurerDataDict()
+    {
+        List<Adventurer_Data> _adventurerDataList = Adventurer_Data.GetList();
+        Dictionary<AdventurerType, List<Adventurer_Data>> adventurerDataDict = new Dictionary<AdventurerType, List<Adventurer_Data>>();
+        foreach (var data in _adventurerDataList)
+        {
+            if (!adventurerDataDict.ContainsKey(data.adventurerType))
+            {
+                adventurerDataDict[data.adventurerType] = new List<Adventurer_Data>();
+            }
+            adventurerDataDict[data.adventurerType].Add(data);
+        }
+        this.adventurerDataDict = adventurerDataDict;
+    }
+
+    public Adventurer_Data GetAdventurerData(AdventurerType type, string tag)
+    {
+        if (adventurerDataDict == null)
+        {
+            SetAdventurerDataDict();
+        }
+
+        if (adventurerDataDict.ContainsKey(type))
+        {
+            foreach (var data in adventurerDataDict[type])
             {
                 Debug.WriteLine(data.tag);
                 if (data.tag == tag)

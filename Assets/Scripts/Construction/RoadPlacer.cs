@@ -73,7 +73,7 @@ public class RoadPlacer : BasePlacer
             gridPos = rawGridPos;
         }
 
-        previewConstruction.gameObject.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, gridPos);
+        previewConstruction.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, gridPos);
     }
 
     public override void OnConfirm()
