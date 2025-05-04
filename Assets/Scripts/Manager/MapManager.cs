@@ -45,7 +45,7 @@ public class MapManager : SingletonBase<MapManager>
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
-        surface = GetComponentInChildren<NavMeshSurface>();
+        //surface = GetComponentInChildren<NavMeshSurface>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -53,10 +53,10 @@ public class MapManager : SingletonBase<MapManager>
     {
         PoolManager.Instance.AddPools<Construction>(poolConfig);
         baseRoadCon = poolConfig.Prefab.GetComponent<Construction>();
-        baseRoadCon.SetData(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
+        baseRoadCon.Init(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTIleDict(BuildingTilemap, buildTileDict);
         SetTIleDict(ElementTilemap, elementTileDict);
-        StartCoroutine(DelayedNavMeshBuild());
+        //StartCoroutine(DelayedNavMeshBuild());
     }
 
     private IEnumerator DelayedNavMeshBuild()
@@ -95,7 +95,7 @@ public class MapManager : SingletonBase<MapManager>
                             // 월드 좌표 계산 후 객체 생성
                             Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
                             var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
-                            con.SetData(conData);
+                            con.Init(conData);
                             SetBuildingAreaLeftBottom(pos, con.Size, con); // 타일맵에 도로 배치
                             if (con.GetComponent<NavMeshModifier>() == null)
                                 Debug.LogWarning("❌ 도로에 NavMeshModifier가 없습니다!");
@@ -130,7 +130,7 @@ public class MapManager : SingletonBase<MapManager>
         if (construction.IsDemolish())
         {
             Vector3Int pos = Vector3Int.right + Vector3Int.up + origin;
-            return buildTileDict.ContainsKey(pos) && elementTileDict.ContainsKey(pos);
+            return buildTileDict.ContainsKey(pos) || elementTileDict.ContainsKey(pos);
         }
 
         int offsetX = size.x / 2;
@@ -181,61 +181,86 @@ public class MapManager : SingletonBase<MapManager>
             }
         }
 
-        surface.BuildNavMesh(); // NavMesh 업데이트
+        //surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
-    public void RemoveBuildingArea(Vector3Int origin, Vector2Int size, Construction construction)
+    public void RemoveBuildingArea(Vector3Int origin, Construction construction)
     {
-        int offsetX = size.x / 2;
-        int offsetY = size.y / 2;
-
-        List<Construction> removedConstructions = new List<Construction>();
-
         // 타겟 건축물을 가져옴
         Construction targetCon = GetCurrentConstruction(origin);
         if (targetCon == null) return;
 
-        for (int x = -offsetX; x < size.x - offsetX; x++)
+        List<Construction> removedConstructions = new List<Construction>();
+        HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
+        Queue<Vector3Int> queue = new Queue<Vector3Int>();
+
+        // 방향: 우, 하, 좌, 상
+        Vector3Int[] directions = 
         {
-            for (int y = -offsetY; y < size.y - offsetY; y++)
+            Vector3Int.right,
+            Vector3Int.down,
+            Vector3Int.left,
+            Vector3Int.up,
+        };
+
+        queue.Enqueue(origin);
+        visited.Add(origin);
+
+        while (queue.Count > 0)
+        {
+            Vector3Int current = queue.Dequeue();
+
+            // 빌딩 타일맵 검사
+            if (targetCon.Type == ConstructionType.Build && buildTileDict.TryGetValue(current, out var buildData))
             {
-                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-
-                // 빌딩 타일맵에서 동일 오브젝트 삭제
-                if (targetCon.Type == ConstructionType.Build && buildTileDict.ContainsKey(pos))
+                var realConstruction = buildData.Construction;
+                if (realConstruction != null && realConstruction.gameObject == targetCon.gameObject)
                 {
-                    var realConstruction = buildTileDict[pos].Construction;
-                    if (realConstruction != null && realConstruction == targetCon) // targetCon과 비교
+                    buildingTilemap.SetTile(current, null);
+                    buildingTilemap.RefreshTile(current);
+                    buildData.SetData(false);
+
+                    if (!removedConstructions.Contains(realConstruction))
                     {
-                        buildingTilemap.SetTile(pos, null);
-                        buildingTilemap.RefreshTile(pos);
-                        buildTileDict[pos].SetData(false);
+                        PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
+                        removedConstructions.Add(realConstruction);
+                    }
 
-                        Debug.Log($"GetData {buildingTilemap.GetTile(pos) == null}");
-
-                        // 한 번만 ReturnToPool 하기 위해
-                        if (!removedConstructions.Contains(realConstruction))
+                    foreach (var dir in directions)
+                    {
+                        Vector3Int next = current + dir;
+                        if (!visited.Contains(next))
                         {
-                            PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
-                            removedConstructions.Add(realConstruction);
+                            visited.Add(next);
+                            queue.Enqueue(next);
                         }
                     }
                 }
+            }
 
-                // 엘리먼트 타일맵에서 동일 오브젝트 삭제
-                if (targetCon.Type == ConstructionType.Element && elementTileDict.ContainsKey(pos))
+            // 엘리먼트 타일맵 검사
+            if (targetCon.Type == ConstructionType.Element && elementTileDict.TryGetValue(current, out var elementData))
+            {
+                var realConstruction = elementData.Construction;
+                if (realConstruction != null && realConstruction.gameObject == targetCon.gameObject)
                 {
-                    var realConstruction = elementTileDict[pos].Construction;
-                    if (realConstruction != null && realConstruction == targetCon) // targetCon과 비교
-                    {
-                        elementTilemap.SetTile(pos, null);
-                        elementTilemap.RefreshTile(pos);
-                        elementTileDict[pos].SetData(false);
+                    elementTilemap.SetTile(current, null);
+                    elementTilemap.RefreshTile(current);
+                    elementData.SetData(false);
 
-                        if (!removedConstructions.Contains(realConstruction))
+                    if (!removedConstructions.Contains(realConstruction))
+                    {
+                        PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
+                        removedConstructions.Add(realConstruction);
+                    }
+
+                    foreach (var dir in directions)
+                    {
+                        Vector3Int next = current + dir;
+                        if (!visited.Contains(next))
                         {
-                            PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
-                            removedConstructions.Add(realConstruction);
+                            visited.Add(next);
+                            queue.Enqueue(next);
                         }
                     }
                 }
@@ -243,7 +268,7 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
-        surface.BuildNavMesh(); // NavMesh 업데이트
+        //surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
     private Construction GetCurrentConstruction(Vector3Int pos)
@@ -282,17 +307,8 @@ public class MapManager : SingletonBase<MapManager>
 
     public Vector2Int GetConstructionSize(Vector3Int pos)
     {
-        if(buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
-        {
-            return buildTileDict[pos].Construction.Size;
-        }
-        
-        if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
-        {
-            return elementTileDict[pos].Construction.Size;
-        }
-
-        return Vector2Int.one;
+        Construction con = GetCurrentConstruction(pos);
+        return con == null ? Vector2Int.zero : con.Size;
     }
 
     public bool CurrentSizeInOneObject(Vector3Int origin, Vector2Int size)
@@ -304,6 +320,7 @@ public class MapManager : SingletonBase<MapManager>
         int elementCount = 0;
 
         Construction con = GetCurrentConstruction(origin);
+        if (con == null) return false;
 
         for (int x = -offsetX; x < size.x - offsetX; x++)
         {

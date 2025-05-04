@@ -58,7 +58,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     public void StartPlacing(Construction_Data data, Vector2Int size)
     {
         var prefab = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
-        prefab.SetData(data);
+        prefab.Init(data);
         // 적절한 Placer 선택
 
         // Element && Demolish

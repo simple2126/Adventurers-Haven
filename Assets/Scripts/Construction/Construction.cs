@@ -11,7 +11,7 @@ public class Construction : MonoBehaviour
     public BuildType? BuildType { get; private set; }
     public ElementType? ElementType { get; private set; }
 
-    public void SetData(Construction_Data data)
+    public void Init(Construction_Data data)
     {
         Size = Vector2Int.right * data.blockSize[0] + Vector2Int.up * data.blockSize[1];
         Tag = data.tag;

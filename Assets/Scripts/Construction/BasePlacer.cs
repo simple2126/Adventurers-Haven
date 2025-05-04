@@ -2,6 +2,8 @@ using AdventurersHaven;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Tilemaps;
+using TMPro;
+using Unity.VisualScripting;
 
 public enum PlacementState
 {
@@ -42,13 +44,13 @@ public abstract class BasePlacer
             PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         }
         previewConstruction = construction;
-        previewConstruction.SetData(data);
+        previewConstruction.Init(data);
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
         buildingSize = size;
         var checkButtonRect = checkButton.GetComponent<RectTransform>();
         checkButtonBound = checkButtonRect.rect.size * checkButtonRect.localScale;
         state = PlacementState.Placing;
-
+        notPlaceableIndicator.GetComponent<TextMeshProUGUI>().text = "배치불가!";
         SetPlacementButtonsActive(false);
     }
 
@@ -60,6 +62,15 @@ public abstract class BasePlacer
         ChangePreviewObjPos();
         ChangeChildPlace();
         UpdatePlacement();
+    }
+
+    private void OnDestroy()
+    {
+        if(previewConstruction != null)
+        {
+            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
+            previewConstruction = null;
+        }
     }
 
     // 배치 확정
