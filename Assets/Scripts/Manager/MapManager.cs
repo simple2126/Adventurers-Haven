@@ -1,26 +1,7 @@
 using NavMeshPlus.Components;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-
-public class CustomTileData
-{
-    public bool Occupied { get; private set; } // 사용 여부
-    public Construction Construction { get; private set; }
-
-    public void SetData(bool occupied = false)
-    {
-        this.Construction = null;
-        this.Occupied = occupied;
-    }
-
-    public void SetData(Construction construction, bool occupied = false)
-    {
-        this.Construction = construction;
-        this.Occupied = occupied;
-    }
-}
 
 public class MapManager : SingletonBase<MapManager>
 {
@@ -30,8 +11,8 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private Tilemap elementTilemap;
     public Tilemap ElementTilemap { get; private set; }
 
-    private Dictionary<Vector3Int, CustomTileData> buildTileDict = new();
-    private Dictionary<Vector3Int, CustomTileData> elementTileDict = new();
+    private Dictionary<Vector3Int, Construction> buildTileDict = new();
+    private Dictionary<Vector3Int, Construction> elementTileDict = new();
 
     [SerializeField] private PoolManager.PoolConfig poolConfig;
     [SerializeField] private ConstructionType conType;
@@ -45,7 +26,7 @@ public class MapManager : SingletonBase<MapManager>
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
-        //surface = GetComponentInChildren<NavMeshSurface>();
+        surface = GetComponentInChildren<NavMeshSurface>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -54,20 +35,13 @@ public class MapManager : SingletonBase<MapManager>
         PoolManager.Instance.AddPools<Construction>(poolConfig);
         baseRoadCon = poolConfig.Prefab.GetComponent<Construction>();
         baseRoadCon.Init(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
-        SetTIleDict(BuildingTilemap, buildTileDict);
-        SetTIleDict(ElementTilemap, elementTileDict);
-        //StartCoroutine(DelayedNavMeshBuild());
+        SetTileDict(BuildingTilemap, buildTileDict);
+        SetTileDict(ElementTilemap, elementTileDict);
+
+        surface.BuildNavMesh(); // NavMesh 빌드
     }
 
-    private IEnumerator DelayedNavMeshBuild()
-    {
-        yield return null; // 한 프레임 대기
-        surface.BuildNavMesh();
-        Bounds bounds = surface.navMeshData.sourceBounds;
-        Debug.Log($"NavMesh Bounds: Center={bounds.center}, Extents={bounds.extents}");
-    }
-
-    private void SetTIleDict(Tilemap tilemap, Dictionary<Vector3Int, CustomTileData> tileDict)
+    private void SetTileDict(Tilemap tilemap, Dictionary<Vector3Int, Construction> tileDict)
     {
         BoundsInt bounds = tilemap.cellBounds;
         Vector3 cellSize = tilemap.cellSize;
@@ -80,7 +54,7 @@ public class MapManager : SingletonBase<MapManager>
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y;
 
                 if (!tileDict.ContainsKey(pos))
-                    tileDict[pos] = new CustomTileData();
+                    tileDict[pos] = null;
 
                 if (tilemap.HasTile(pos))
                 {
@@ -89,25 +63,20 @@ public class MapManager : SingletonBase<MapManager>
                         int offsetX = x - bounds.xMin;
                         int offsetY = y - bounds.yMin;
 
-                        // 가로 (왼 -> 오), 세로(아래 -> 위)
                         if ((offsetX % baseRoadCon.Size.x == 0) && (offsetY % baseRoadCon.Size.y == 0))
                         {
-                            // 월드 좌표 계산 후 객체 생성
                             Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
                             var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
                             con.Init(conData);
-                            SetBuildingAreaLeftBottom(pos, con.Size, con); // 타일맵에 도로 배치
-                            if (con.GetComponent<NavMeshModifier>() == null)
-                                Debug.LogWarning("❌ 도로에 NavMeshModifier가 없습니다!");
+                            SetBuildingAreaLeftBottom(pos, con.Size, con);
                         }
                     }
-                    else tileDict[pos].SetData(true);
+                    else tileDict[pos] = null; // 그냥 타일만 채운 경우
                 }
             }
         }
     }
 
-    // 초기화 때만 사용 -> 좌하단 기준
     public void SetBuildingAreaLeftBottom(Vector3Int origin, Vector2Int size, Construction construction)
     {
         var tileDict = construction.Type == ConstructionType.Build ? buildTileDict : elementTileDict;
@@ -116,11 +85,7 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = 0; y < size.y; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-
-                if (!tileDict.ContainsKey(pos))
-                    tileDict[pos] = new CustomTileData();
-
-                tileDict[pos].SetData(construction, true);
+                tileDict[pos] = construction;
             }
         }
     }
@@ -142,19 +107,14 @@ public class MapManager : SingletonBase<MapManager>
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
 
-                // 건물일 때 -> 빌딩, 도로 있으면 배치 불가
-                if(construction.Type == ConstructionType.Build)
+                if (construction.Type == ConstructionType.Build)
                 {
-                    if (!buildTileDict.ContainsKey(pos)) return false;
-                    if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
-                    if (!elementTileDict.ContainsKey(pos)) return false;
-                    if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Occupied) return false;
+                    if (!buildTileDict.ContainsKey(pos) || buildTileDict[pos] != null) return false;
+                    if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos] != null) return false;
                 }
-                // 도로일 때 -> 건물 있으면 배치 불가, 도로는 배치 가능
-                else if(construction.Type == ConstructionType.Element) 
+                else if (construction.Type == ConstructionType.Element)
                 {
-                    if (!buildTileDict.ContainsKey(pos)) return false;
-                    if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Occupied) return false;
+                    if (!buildTileDict.ContainsKey(pos) || buildTileDict[pos] != null) return false;
                 }
             }
         }
@@ -173,20 +133,13 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-
-                if (!tileDict.ContainsKey(pos))
-                    tileDict[pos] = new CustomTileData();
-
-                tileDict[pos].SetData(construction, true);
+                tileDict[pos] = construction;
             }
         }
-
-        //surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
     public void RemoveBuildingArea(Vector3Int origin, Construction construction)
     {
-        // 타겟 건축물을 가져옴
         Construction targetCon = GetCurrentConstruction(origin);
         if (targetCon == null) return;
 
@@ -194,7 +147,6 @@ public class MapManager : SingletonBase<MapManager>
         HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
         Queue<Vector3Int> queue = new Queue<Vector3Int>();
 
-        // 방향: 우, 하, 좌, 상
         Vector3Int[] directions = 
         {
             Vector3Int.right,
@@ -210,20 +162,18 @@ public class MapManager : SingletonBase<MapManager>
         {
             Vector3Int current = queue.Dequeue();
 
-            // 빌딩 타일맵 검사
-            if (targetCon.Type == ConstructionType.Build && buildTileDict.TryGetValue(current, out var buildData))
+            if (targetCon.Type == ConstructionType.Build && buildTileDict.TryGetValue(current, out var buildCon))
             {
-                var realConstruction = buildData.Construction;
-                if (realConstruction != null && realConstruction.gameObject == targetCon.gameObject)
+                if (buildCon != null && buildCon.gameObject == targetCon.gameObject)
                 {
                     buildingTilemap.SetTile(current, null);
                     buildingTilemap.RefreshTile(current);
-                    buildData.SetData(false);
+                    buildTileDict[current] = null;
 
-                    if (!removedConstructions.Contains(realConstruction))
+                    if (!removedConstructions.Contains(buildCon))
                     {
-                        PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
-                        removedConstructions.Add(realConstruction);
+                        PoolManager.Instance.ReturnToPool<Construction>(buildCon.Tag, buildCon);
+                        removedConstructions.Add(buildCon);
                     }
 
                     foreach (var dir in directions)
@@ -238,20 +188,18 @@ public class MapManager : SingletonBase<MapManager>
                 }
             }
 
-            // 엘리먼트 타일맵 검사
-            if (targetCon.Type == ConstructionType.Element && elementTileDict.TryGetValue(current, out var elementData))
+            if (targetCon.Type == ConstructionType.Element && elementTileDict.TryGetValue(current, out var elemCon))
             {
-                var realConstruction = elementData.Construction;
-                if (realConstruction != null && realConstruction.gameObject == targetCon.gameObject)
+                if (elemCon != null && elemCon.gameObject == targetCon.gameObject)
                 {
                     elementTilemap.SetTile(current, null);
                     elementTilemap.RefreshTile(current);
-                    elementData.SetData(false);
+                    elementTileDict[current] = null;
 
-                    if (!removedConstructions.Contains(realConstruction))
+                    if (!removedConstructions.Contains(elemCon))
                     {
-                        PoolManager.Instance.ReturnToPool<Construction>(realConstruction.Tag, realConstruction);
-                        removedConstructions.Add(realConstruction);
+                        PoolManager.Instance.ReturnToPool<Construction>(elemCon.Tag, elemCon);
+                        removedConstructions.Add(elemCon);
                     }
 
                     foreach (var dir in directions)
@@ -268,23 +216,21 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
-        //surface.BuildNavMesh(); // NavMesh 업데이트
     }
 
     private Construction GetCurrentConstruction(Vector3Int pos)
     {
-        if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
+        if (buildTileDict.TryGetValue(pos, out var buildCon) && buildCon != null)
         {
-            return buildTileDict[pos].Construction;
+            return buildCon;
         }
-        else if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
+        if (elementTileDict.TryGetValue(pos, out var elemCon) && elemCon != null)
         {
-            return elementTileDict[pos].Construction;
+            return elemCon;
         }
         return null;
     }
 
-    // 현재 위치에 같은 도로가 있는지 확인 (같은 도로 배치 불가)
     public bool IsSameRoadData(Vector3Int origin, Vector2Int size, string tag)
     {
         int offsetX = size.x / 2;
@@ -297,12 +243,12 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos].Construction == null) continue;
-                if (elementTileDict[pos].Construction.Tag == tag) count++;
+                if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos] == null) continue;
+                if (elementTileDict[pos].Tag == tag) count++;
             }
         }
-        
-        return size.x * size.y == count ? true : false;
+
+        return size.x * size.y == count;
     }
 
     public Vector2Int GetConstructionSize(Vector3Int pos)
@@ -327,37 +273,37 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].Construction != null)
+                if (buildTileDict.ContainsKey(pos) && buildTileDict[pos] != null)
                 {
-                    if (buildTileDict[pos].Construction.gameObject == con.gameObject) buildCount++;
+                    if (buildTileDict[pos].gameObject == con.gameObject) buildCount++;
                 }
 
-                if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].Construction != null)
+                if (elementTileDict.ContainsKey(pos) && elementTileDict[pos] != null)
                 {
-                    if (elementTileDict[pos].Construction.gameObject == con.gameObject) elementCount++;
+                    if (elementTileDict[pos].gameObject == con.gameObject) elementCount++;
                 }
             }
         }
 
         int maxCount = size.x * size.y;
         Debug.Log($"maxCount {maxCount} buildCount {buildCount} elementCount {elementCount}");
-        return maxCount == buildCount || maxCount == elementCount ? true : false;
+        return maxCount == buildCount || maxCount == elementCount;
     }
 
     public void ShowOrHideTileDict(bool isShow)
     {
-        foreach(var tile in buildTileDict.Values)
+        foreach (var tile in buildTileDict.Values)
         {
-            if (tile.Construction != null)
+            if (tile != null)
             {
-                tile.Construction.gameObject.SetActive(isShow);
+                tile.gameObject.SetActive(isShow);
             }
         }
         foreach (var tile in elementTileDict.Values)
         {
-            if (tile.Construction != null)
+            if (tile != null)
             {
-                tile.Construction.gameObject.SetActive(isShow);
+                tile.gameObject.SetActive(isShow);
             }
         }
     }
