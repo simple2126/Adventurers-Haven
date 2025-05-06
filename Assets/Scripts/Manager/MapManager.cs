@@ -1,6 +1,10 @@
 using NavMeshPlus.Components;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using UnityEditor.AI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
 using UnityEngine.Tilemaps;
 
 public class MapManager : SingletonBase<MapManager>
@@ -19,14 +23,14 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private string baseRoadTag;
     private Construction baseRoadCon;
 
-    private NavMeshSurface surface;
+    private RuntimeNavMeshUpdater runtimeNavMeshUpdater;
 
     protected override void Awake()
     {
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
-        surface = GetComponentInChildren<NavMeshSurface>();
+        runtimeNavMeshUpdater = GetComponentInChildren<RuntimeNavMeshUpdater>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -37,8 +41,7 @@ public class MapManager : SingletonBase<MapManager>
         baseRoadCon.Init(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTileDict(BuildingTilemap, buildTileDict);
         SetTileDict(ElementTilemap, elementTileDict);
-
-        surface.BuildNavMesh(); // NavMesh 빌드
+        runtimeNavMeshUpdater.InitNavMesh();
     }
 
     private void SetTileDict(Tilemap tilemap, Dictionary<Vector3Int, Construction> tileDict)
