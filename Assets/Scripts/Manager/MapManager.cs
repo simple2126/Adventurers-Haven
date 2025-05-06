@@ -14,8 +14,14 @@ public class CustomTileData
     }
     public void SetTileData(Construction construction)
     {
-        IsOccupied = true;
+        IsOccupied = construction != null;
         Construction = construction;
+    }
+
+    public void SetOccupied()
+    {
+        IsOccupied = true;
+        Construction = null;
     }
 }
 
@@ -34,15 +40,12 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private ConstructionType conType;
     [SerializeField] private string baseRoadTag;
     private Construction baseRoadCon;
-
-    private RuntimeNavMeshUpdater runtimeNavMeshUpdater;
-
+    
     protected override void Awake()
     {
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
-        runtimeNavMeshUpdater = GetComponentInChildren<RuntimeNavMeshUpdater>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -53,11 +56,11 @@ public class MapManager : SingletonBase<MapManager>
         baseRoadCon.Init(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
         SetTileDict(BuildingTilemap, buildTileDict);
         SetTileDict(ElementTilemap, elementTileDict);
-        runtimeNavMeshUpdater.InitNavMesh();
     }
 
     private void SetTileDict(Tilemap tilemap, Dictionary<Vector3Int, CustomTileData> tileDict)
     {
+        tilemap.CompressBounds(); // 타일맵의 경계 압축
         BoundsInt bounds = tilemap.cellBounds;
         Vector3 cellSize = tilemap.cellSize;
         var conData = DataManager.Instance.GetConstructionData(conType, baseRoadTag);
@@ -66,9 +69,12 @@ public class MapManager : SingletonBase<MapManager>
         {
             for (int y = bounds.yMin; y < bounds.yMax; y++)
             {
-                Vector3Int pos = new(x, y, 0);
-                if (!tileDict.ContainsKey(pos)) tileDict[pos] = new CustomTileData();
-
+                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y;
+                if (!tileDict.ContainsKey(pos))
+                {
+                    tileDict[pos] = new CustomTileData();
+                    tileDict[pos].ClearTileData();
+                }
                 if (!tilemap.HasTile(pos)) continue;
 
                 if (tilemap == ElementTilemap)
@@ -76,20 +82,41 @@ public class MapManager : SingletonBase<MapManager>
                     int offsetX = x - bounds.xMin;
                     int offsetY = y - bounds.yMin;
 
+                    // 오프셋 계산 및 타일 설정
                     if ((offsetX % baseRoadCon.Size.x == 0) && (offsetY % baseRoadCon.Size.y == 0))
                     {
-                        Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
-                        var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
-                        con.Init(conData);
-                        SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, con);
+                        if (HasTilesInArea(tilemap, pos, baseRoadCon.Size))
+                        {
+                            Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
+                            var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
+                            con.Init(conData);
+                            SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, con);
+                        }
                     }
                 }
                 else
                 {
-                    tileDict[pos].SetTileData(null);
+                    tileDict[pos].SetOccupied();
                 }
             }
         }
+
+    }
+
+    private bool HasTilesInArea(Tilemap tilemap, Vector3Int origin, Vector2Int size)
+    {
+        for (int dx = 0; dx < size.x; dx++)
+        {
+            for (int dy = 0; dy < size.y; dy++)
+            {
+                Vector3Int checkPos = origin + new Vector3Int(dx, dy, 0);
+                if (!tilemap.HasTile(checkPos))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void SetBuildingAreaLeftBottom(Vector3Int origin, Vector2Int size, Construction construction)
@@ -180,9 +207,9 @@ public class MapManager : SingletonBase<MapManager>
 
             if (targetCon.Type == ConstructionType.Build && buildTileDict.TryGetValue(current, out var buildTileData))
             {
-                if(buildTileData == null) continue;
+                if (buildTileData == null) continue;
                 Construction buildCon = buildTileData.Construction;
-                if (buildTileData != null && buildCon.gameObject == targetCon.gameObject)
+                if (buildCon != null && buildCon.gameObject == targetCon.gameObject)
                 {
                     buildingTilemap.SetTile(current, null);
                     buildingTilemap.RefreshTile(current);
@@ -210,7 +237,7 @@ public class MapManager : SingletonBase<MapManager>
             {
                 if (elementTIleData == null) continue;
                 Construction elementCon = elementTIleData.Construction;
-                if (elementTIleData != null && elementCon.gameObject == targetCon.gameObject)
+                if (elementCon != null && elementCon.gameObject == targetCon.gameObject)
                 {
                     elementTilemap.SetTile(current, null);
                     elementTilemap.RefreshTile(current);
@@ -218,6 +245,8 @@ public class MapManager : SingletonBase<MapManager>
 
                     if (!removedConstructions.Contains(elementCon))
                     {
+                        // 도로는 Object 없음
+                        //if(!elementCon.IsRoad()) PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
                         PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
                         removedConstructions.Add(elementCon);
                     }
@@ -240,11 +269,11 @@ public class MapManager : SingletonBase<MapManager>
 
     private Construction GetCurrentConstruction(Vector3Int pos)
     {
-        if (buildTileDict.TryGetValue(pos, out var buildTileData) && buildTileData != null)
+        if (buildTileDict.TryGetValue(pos, out var buildTileData) && buildTileData.Construction != null)
         {
             return buildTileData.Construction;
         }
-        if (elementTileDict.TryGetValue(pos, out var elementTileData) && elementTileData != null)
+        if (elementTileDict.TryGetValue(pos, out var elementTileData) && elementTileData.Construction != null)
         {
             return elementTileData.Construction;
         }
@@ -263,7 +292,7 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos].Construction == null) continue;
+                if (!elementTileDict.ContainsKey(pos) || !elementTileDict[pos].IsOccupied) continue;
                 if (elementTileDict[pos].Construction.Tag == tag) count++;
             }
         }
@@ -293,12 +322,12 @@ public class MapManager : SingletonBase<MapManager>
             for (int y = -offsetY; y < size.y - offsetY; y++)
             {
                 Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (buildTileDict.ContainsKey(pos) && buildTileDict[pos] != null)
+                if (buildTileDict.ContainsKey(pos) && buildTileDict[pos].IsOccupied)
                 {
                     if (buildTileDict[pos].Construction.gameObject == con.gameObject) buildCount++;
                 }
 
-                if (elementTileDict.ContainsKey(pos) && elementTileDict[pos] != null)
+                if (elementTileDict.ContainsKey(pos) && elementTileDict[pos].IsOccupied)
                 {
                     if (elementTileDict[pos].Construction.gameObject == con.gameObject) elementCount++;
                 }
@@ -306,7 +335,7 @@ public class MapManager : SingletonBase<MapManager>
         }
 
         int maxCount = size.x * size.y;
-        Debug.Log($"maxCount {maxCount} buildCount {buildCount} elementCount {elementCount}");
+        //Debug.Log($"maxCount {maxCount} buildCount {buildCount} elementCount {elementCount}");
         return maxCount == buildCount || maxCount == elementCount;
     }
 
@@ -314,14 +343,14 @@ public class MapManager : SingletonBase<MapManager>
     {
         foreach (var tile in buildTileDict.Values)
         {
-            if (tile != null)
+            if (tile.Construction != null)
             {
                 tile.Construction.gameObject.SetActive(isShow);
             }
         }
         foreach (var tile in elementTileDict.Values)
         {
-            if (tile != null)
+            if (tile.Construction != null)
             {
                 tile.Construction.gameObject.SetActive(isShow);
             }
