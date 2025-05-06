@@ -106,15 +106,14 @@ public abstract class BasePlacer
     // 현제 프리뷰 오브젝트의 위치 변경
     protected virtual void ChangePreviewObjPos()
     {
-        Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorld.z = 0f;
+        Vector3 mouseWorld = InputManager.Instance.GetWorldInputPosition(mainCamera);
 
         Tilemap targetTilemap = previewConstruction.Type == ConstructionType.Build
             ? MapManager.Instance.BuildingTilemap : MapManager.Instance.ElementTilemap;
 
         gridPos = targetTilemap.WorldToCell(mouseWorld);
 
-        previewConstruction.gameObject.transform.position = GetSnappedPosition(targetTilemap, gridPos);
+        previewConstruction.transform.position = GetSnappedPosition(targetTilemap, gridPos);
     }
 
     // 사이즈에 맞게 프리뷰 오브젝트의 위치 변경
@@ -133,7 +132,7 @@ public abstract class BasePlacer
     // 프리뷰 오브젝트의 자식 오브젝트의 위치 변경
     protected void ChangeChildPlace()
     {
-        Vector2 pos = previewConstruction.gameObject.transform.position;
+        Vector2 pos = previewConstruction.transform.position;
         float width = checkButtonBound.x / 2, height = buildingSize.y / 2f;
         Vector2 upOrDown = mainCamera.transform.position.y > 0 ? Vector2.down : Vector2.up;
 

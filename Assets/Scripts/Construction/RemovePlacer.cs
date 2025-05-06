@@ -30,7 +30,7 @@ public class RemovePlacer : BasePlacer
         ChangeColor(canRemove);
         notPlaceableIndicator.SetActive(!canRemove);
 
-        if (Input.GetMouseButtonDown(0) && canRemove)
+        if (InputManager.Instance.IsInputDown() && canRemove)
         {
             state = PlacementState.Confirming;
             SetPlacementButtonsActive(true);

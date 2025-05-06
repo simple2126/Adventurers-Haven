@@ -22,6 +22,7 @@ public class RoadPlacer : BasePlacer
         previewRoadList.Clear();
     }
 
+    // Update에서 호출
     protected override void UpdatePlacement()
     {
         bool canPlace = CanPlaceAtCurrentPosition();
@@ -31,7 +32,7 @@ public class RoadPlacer : BasePlacer
         switch (roadState)
         {
             case RoadPlacementState.None:
-                if (Input.GetMouseButtonDown(0) && canPlace)
+                if (InputManager.Instance.IsInputDown() && canPlace)
                 {
                     roadStartPos = gridPos;
                     roadState = RoadPlacementState.Dragging;
@@ -40,41 +41,53 @@ public class RoadPlacer : BasePlacer
 
             case RoadPlacementState.Dragging:
                 roadEndPos = gridPos;
-                PreviewRoadLine(roadStartPos, roadEndPos);
+                bool validDrag = PreviewRoadLine(roadStartPos, roadEndPos);
 
-                if (Input.GetMouseButtonDown(0) && canPlace)
+                if (validDrag && previewRoadList.Count > 0)
+                {
+                    int lastIndex = previewRoadList.Count - 1;
+                    previewConstruction.transform.position = previewRoadList[lastIndex].transform.position;
+                }
+
+                if (InputManager.Instance.IsInputUp() && validDrag)
                 {
                     roadState = RoadPlacementState.Confirm;
                     state = PlacementState.Confirming;
                     SetPlacementButtonsActive(true);
                 }
-                break;
+            break;
         }
     }
 
+    // Update에서 호출
     protected override void ChangePreviewObjPos()
     {
-        if (roadState == RoadPlacementState.Confirm) return;
+        if (roadState == RoadPlacementState.Confirm)
+            return; // Confirm 상태에선 움직이지 않음
 
-        Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorld.z = 0f;
-
+        Vector3 mouseWorld = InputManager.Instance.GetWorldInputPosition(mainCamera);
         Vector3Int rawGridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
 
         if (roadState == RoadPlacementState.Dragging)
         {
-            // 도로 드래깅 중일 때 buildingSize 단위 스냅 적용
-            gridPos =
-                Vector3Int.right * Mathf.FloorToInt((float)rawGridPos.x / buildingSize.x) * buildingSize.x +
-                Vector3Int.up * Mathf.FloorToInt((float)rawGridPos.y / buildingSize.y) * buildingSize.y;
+            gridPos = new Vector3Int(
+                Mathf.FloorToInt((float)rawGridPos.x / buildingSize.x) * buildingSize.x,
+                Mathf.FloorToInt((float)rawGridPos.y / buildingSize.y) * buildingSize.y,
+                0);
         }
         else
         {
             gridPos = rawGridPos;
         }
 
-        previewConstruction.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, gridPos);
+        // 드래깅 중엔 별도 프리뷰 리스트가 보여지고,
+        // NONE 상태일 때만 previewConstruction이 유의미함
+        if (roadState == RoadPlacementState.None)
+        {
+            previewConstruction.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, gridPos);
+        }
     }
+
 
     public override void OnConfirm()
     {
@@ -128,18 +141,16 @@ public class RoadPlacer : BasePlacer
             PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
     }
 
-    private void PreviewRoadLine(Vector3Int start, Vector3Int end)
+
+    private bool PreviewRoadLine(Vector3Int start, Vector3Int end)
     {
         Vector3Int step = GetStep(end - start);
         int stepCount = GetStepCount(step, start, end);
         if (stepCount == 0)
         {
-            // 프리뷰 늘렸다가 다시 원점으로 돌아왔을 때
-            int previewCount = previewRoadList.Count;
             ReturnRoadList();
             previewRoadList.Clear();
-            if (previewCount > 0) roadState = RoadPlacementState.None;
-            return;
+            return false;
         }
 
         Vector3Int current = start;
@@ -148,8 +159,10 @@ public class RoadPlacer : BasePlacer
         for (int i = 0; i <= stepCount; i++)
         {
             current = start + step * i;
-            var notPlace = !MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction);
-            if (notPlace) break;
+            if (!MapManager.Instance.CanPlaceBuilding(current, buildingSize, previewConstruction))
+            {
+                break;
+            }
 
             if (index >= previewRoadList.Count)
             {
@@ -163,20 +176,17 @@ public class RoadPlacer : BasePlacer
             index++;
         }
 
-        if (previewRoadList.Count > 0)
-        {
-            previewConstruction.transform.position = previewRoadList[index - 1].transform.position;
-        }
-
-        // 남은 프리뷰 비활성화
+        // 남은 프리뷰 제거
         for (int i = index; i < previewRoadList.Count; i++)
         {
-            var preview = previewRoadList[i];
-            PoolManager.Instance.ReturnToPool<Construction>(data.tag, preview);
+            PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewRoadList[i]);
             previewRoadList.RemoveAt(i);
-            i--; // 리스트에서 요소를 제거했으므로 인덱스 조정
+            i--;
         }
+
+        return index > 0;
     }
+
 
     private Vector3Int GetStep(Vector3Int direction)
     {

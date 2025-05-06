@@ -14,7 +14,7 @@ public class DefaultPlacer : BasePlacer
         ChangeColor(canPlace);
         notPlaceableIndicator.SetActive(!canPlace);
 
-        if (Input.GetMouseButtonDown(0) && canPlace && state == PlacementState.Placing)
+        if (InputManager.Instance.IsInputDown() && canPlace && state == PlacementState.Placing)
         {
             state = PlacementState.Confirming;
             SetPlacementButtonsActive(true);
