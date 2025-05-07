@@ -860,6 +860,78 @@ Tilemap:
       e31: 0
       e32: 0
       e33: 1
+  - m_RefCount: 0
+    m_Data:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: -2.0009682e+27
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 3.24e-43
+      e20: 0
+      e21: 0
+      e22: 8.8377724e-17
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 4.5905e-41
+      e33: 0
+  - m_RefCount: 0
+    m_Data:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: -2.0009682e+27
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 3.24e-43
+      e20: 0
+      e21: 0
+      e22: 8.8377724e-17
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 4.5905e-41
+      e33: 0
+  - m_RefCount: 0
+    m_Data:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: -2.0009682e+27
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 3.24e-43
+      e20: 0
+      e21: 0
+      e22: 8.8377724e-17
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 4.5905e-41
+      e33: 0
+  - m_RefCount: 0
+    m_Data:
+      e00: 0
+      e01: 0
+      e02: 0
+      e03: -2.0009682e+27
+      e10: 0
+      e11: 0
+      e12: 0
+      e13: 3.24e-43
+      e20: 0
+      e21: 0
+      e22: 8.8377724e-17
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 4.5905e-41
+      e33: 0
   m_TileColorArray:
   - m_RefCount: 0
     m_Data: {r: 4.4945e-41, g: 4.4945e-41, b: 4.4945e-41, a: 4.4945e-41}
@@ -956,6 +1028,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4990463337973253863}
   - component: {fileID: 3709547412155717863}
+  - component: {fileID: 6752257833200930522}
   m_Layer: 0
   m_Name: MapManager
   m_TagString: Untagged
@@ -1000,6 +1073,30 @@ MonoBehaviour:
     Size: 0
   conType: 1
   baseRoadTag: WhiteRockRoad
+--- !u!114 &6752257833200930522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3995542674021233516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5af0a255fd922174ab1074e2967d31bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: {x: 2, y: 2}
+  patternType: 0
+  patternWhiteTiles:
+  - {fileID: 11400000, guid: def4068fc6491bb46b154d12deae7741, type: 2}
+  - {fileID: 11400000, guid: c2269422678953245bdcc3386627b72c, type: 2}
+  - {fileID: 11400000, guid: d24fc9453a40c02499ff7a8d018a9fdd, type: 2}
+  - {fileID: 11400000, guid: 562219af13f1f9d4ebc43e654be6dfa3, type: 2}
+  patternGrayTiles:
+  - {fileID: 11400000, guid: 2f48b0a8c405d1148bf28de6c238aa38, type: 2}
+  - {fileID: 11400000, guid: 823652a8b827b664793e661b979ae423, type: 2}
+  - {fileID: 11400000, guid: 63622ab9710034f4794d3de19d9ec263, type: 2}
+  - {fileID: 11400000, guid: ef59c73db8ae47e4595dbce5a51c6ff8, type: 2}
 --- !u!1 &4104178232649740434
 GameObject:
   m_ObjectHideFlags: 0

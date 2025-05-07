@@ -40,12 +40,15 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private ConstructionType conType;
     [SerializeField] private string baseRoadTag;
     private Construction baseRoadCon;
-    
+
+    private TilemapPainter tilemapPainter;
+
     protected override void Awake()
     {
         base.Awake();
         BuildingTilemap = buildingTilemap;
         ElementTilemap = elementTilemap;
+        tilemapPainter = GetComponent<TilemapPainter>();
         DontDestroyOnLoad(gameObject);
     }
 
@@ -87,10 +90,12 @@ public class MapManager : SingletonBase<MapManager>
                     {
                         if (HasTilesInArea(tilemap, pos, baseRoadCon.Size))
                         {
-                            Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
-                            var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
-                            con.Init(conData);
-                            SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, con);
+                            //Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
+                            //var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
+                            //con.Init(conData);
+                            //tileDict[pos].SetTileData(baseRoadCon);
+                            SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, baseRoadCon);
+                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, PatternType.White, false);
                         }
                     }
                 }
@@ -171,6 +176,11 @@ public class MapManager : SingletonBase<MapManager>
 
         var tileDict = construction.Type == ConstructionType.Build ? buildTileDict : elementTileDict;
 
+        if (construction.IsRoad())
+        {
+            tilemapPainter.PlaceTiles(elementTilemap, origin, size, PatternType.White);
+        }
+
         for (int x = -offsetX; x < size.x - offsetX; x++)
         {
             for (int y = -offsetY; y < size.y - offsetY; y++)
@@ -200,6 +210,11 @@ public class MapManager : SingletonBase<MapManager>
 
         queue.Enqueue(origin);
         visited.Add(origin);
+
+        if (targetCon.IsRoad())
+        {
+            tilemapPainter.PlaceTiles(elementTilemap, origin, targetCon.Size, PatternType.Gray, false);
+        }
 
         while (queue.Count > 0)
         {
@@ -246,8 +261,8 @@ public class MapManager : SingletonBase<MapManager>
                     if (!removedConstructions.Contains(elementCon))
                     {
                         // 도로는 Object 없음
-                        //if(!elementCon.IsRoad()) PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
-                        PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
+                        if(!elementCon.IsRoad()) PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
+                        //PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
                         removedConstructions.Add(elementCon);
                     }
 

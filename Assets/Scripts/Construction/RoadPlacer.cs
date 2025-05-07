@@ -92,6 +92,7 @@ public class RoadPlacer : BasePlacer
     public override void OnConfirm()
     {
         PlaceRoadLine(roadStartPos, roadEndPos);
+        ReturnRoadList();
         Exit();
     }
 

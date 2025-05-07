@@ -31,3 +31,10 @@ public enum RoadPlacementState
     Dragging,
     Confirm
 }
+
+// 도로 Tile 패턴
+public enum PatternType 
+{ 
+    White, 
+    Gray,
+}
