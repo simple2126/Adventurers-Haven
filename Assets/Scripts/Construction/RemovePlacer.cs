@@ -21,7 +21,7 @@ public class RemovePlacer : BasePlacer
 
     protected override void UpdatePlacement()
     {
-        bool canPlace = CanPlaceAtCurrentPosition();
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, removeSize, previewConstruction);
         bool sameObjectInArea = MapManager.Instance.CurrentSizeInOneObject(gridPos, removeSize);
 
         // 두 조건을 모두 만족해야 함

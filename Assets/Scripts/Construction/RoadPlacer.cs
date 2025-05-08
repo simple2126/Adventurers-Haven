@@ -25,7 +25,7 @@ public class RoadPlacer : BasePlacer
     // Update에서 호출
     protected override void UpdatePlacement()
     {
-        bool canPlace = CanPlaceAtCurrentPosition();
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);
         notPlaceableIndicator.SetActive(!canPlace);
 
@@ -58,36 +58,6 @@ public class RoadPlacer : BasePlacer
             break;
         }
     }
-
-    // Update에서 호출
-    protected override void ChangePreviewObjPos()
-    {
-        if (roadState == RoadPlacementState.Confirm)
-            return; // Confirm 상태에선 움직이지 않음
-
-        Vector3 mouseWorld = InputManager.Instance.GetWorldInputPosition(mainCamera);
-        Vector3Int rawGridPos = MapManager.Instance.ElementTilemap.WorldToCell(mouseWorld);
-
-        if (roadState == RoadPlacementState.Dragging)
-        {
-            gridPos = new Vector3Int(
-                Mathf.FloorToInt((float)rawGridPos.x / buildingSize.x) * buildingSize.x,
-                Mathf.FloorToInt((float)rawGridPos.y / buildingSize.y) * buildingSize.y,
-                0);
-        }
-        else
-        {
-            gridPos = rawGridPos;
-        }
-
-        // 드래깅 중엔 별도 프리뷰 리스트가 보여지고,
-        // NONE 상태일 때만 previewConstruction이 유의미함
-        if (roadState == RoadPlacementState.None)
-        {
-            previewConstruction.transform.position = GetSnappedPosition(MapManager.Instance.ElementTilemap, gridPos);
-        }
-    }
-
 
     public override void OnConfirm()
     {

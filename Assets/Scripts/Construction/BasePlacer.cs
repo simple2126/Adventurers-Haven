@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 using TMPro;
-using Unity.VisualScripting;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public enum PlacementState
 {
@@ -27,6 +28,9 @@ public abstract class BasePlacer
     protected Button cancelButton;
     protected GameObject notPlaceableIndicator;
 
+    protected bool isTouchDragging = false;
+    protected bool isLineDragging = false;
+
     public BasePlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
     {
         mainCamera = camera;
@@ -47,11 +51,13 @@ public abstract class BasePlacer
         previewConstruction.Init(data);
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
         buildingSize = size;
+
         var checkButtonRect = checkButton.GetComponent<RectTransform>();
         checkButtonBound = checkButtonRect.rect.size * checkButtonRect.localScale;
-        state = PlacementState.Placing;
         notPlaceableIndicator.GetComponent<TextMeshProUGUI>().text = "배치불가!";
-        SetPlacementButtonsActive(false);
+        SetPlacementButtonsActive(true);
+        
+        state = PlacementState.Placing;
     }
 
     public virtual void Update()
@@ -59,9 +65,13 @@ public abstract class BasePlacer
         if (previewConstruction == null || !previewConstruction.gameObject.activeSelf) return;
         if (state == PlacementState.Confirming) return;
 
-        ChangePreviewObjPos();
-        ChangeChildPlace();
-        UpdatePlacement();
+        // 먼저 클릭 처리 후에 위치 변경을 처리
+        if (state == PlacementState.Placing)
+        {
+            HandleDragInput();
+            ChangeChildPlace();
+            UpdatePlacement();
+        }
     }
 
     private void OnDestroy()
@@ -76,8 +86,13 @@ public abstract class BasePlacer
     // 배치 확정
     public virtual void OnConfirm()
     {
+        state = PlacementState.Confirming;
+        string tag = previewConstruction.Tag;
         Place();
         Exit();
+        var con = PoolManager.Instance.SpawnFromPool<Construction>(tag);
+        con.Init(data);
+        StartPlacing(data, con, con.Size);
     }
 
     // 배치 취소
@@ -101,20 +116,112 @@ public abstract class BasePlacer
         MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewConstruction);
     }
 
-    protected abstract void UpdatePlacement();
-
-    // 현제 프리뷰 오브젝트의 위치 변경
-    protected virtual void ChangePreviewObjPos()
+    private bool IsPointerOverPlacementButtons()
     {
-        Vector3 mouseWorld = InputManager.Instance.GetWorldInputPosition(mainCamera);
+        if (EventSystem.current == null)return false;
+        if (checkButton == null || cancelButton == null)return false;
 
-        Tilemap targetTilemap = previewConstruction.Type == ConstructionType.Build
-            ? MapManager.Instance.BuildingTilemap : MapManager.Instance.ElementTilemap;
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
 
-        gridPos = targetTilemap.WorldToCell(mouseWorld);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
 
+        foreach (RaycastResult result in results)
+        {
+            GameObject hitObject = result.gameObject;
+
+            if (hitObject == checkButton.gameObject || hitObject == cancelButton.gameObject)
+            {
+                return true;
+            }
+
+            // 버튼 내부의 자식 요소 (Text, Image 등)도 체크
+            if (hitObject.transform.IsChildOf(checkButton.transform) || hitObject.transform.IsChildOf(cancelButton.transform))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    // 드래그 입력 처리(오브젝트 위치 변경 -> TouchDrag, 오브젝트 연속 배치 -> LineDrag)
+    private void HandleDragInput()
+    {
+        if (state != PlacementState.Placing) return;
+
+        Tilemap tilemap = previewConstruction.Type == ConstructionType.Build
+            ? MapManager.Instance.BuildingTilemap
+            : MapManager.Instance.ElementTilemap;
+
+        if (InputManager.Instance.IsInputDown() && !IsPointerOverPlacementButtons())
+        {
+            isTouchDragging = true;
+            InputManager.Instance.BeginDrag();
+            gridPos = tilemap.WorldToCell(InputManager.Instance.GetWorldInputPosition(mainCamera));
+        }
+
+        if (InputManager.Instance.IsInputHeld())
+        {
+            if (isTouchDragging)
+            {
+                InputManager.Instance.UpdateDrag();
+                OnTouchDragUpdate(tilemap, gridPos);  // ✅ 이 안에서 gridPos += 방향으로 이동
+            }
+            if (isLineDragging)
+                OnLineDragUpdate(gridPos);
+        }
+
+        if (InputManager.Instance.IsInputUp())
+        {
+            InputManager.Instance.EndDrag();
+            if (isTouchDragging)
+            {
+                isTouchDragging = false;
+                OnTouchDragEnd(gridPos);
+            }
+
+            if (isLineDragging)
+            {
+                isLineDragging = false;
+                OnLineDragEnd(gridPos);
+            }
+        }
+    }
+
+    // 터치로 오브젝트 이동할 때
+    protected virtual void OnTouchDragUpdate(Tilemap targetTilemap, Vector3Int pos)
+    {
+        Vector2 dragDir = InputManager.Instance.GetDragDirection();
+
+        // 너무 작은 움직임 무시 (cellSize 기준)
+        float minDragDistance = (targetTilemap.cellSize.x + targetTilemap.cellSize.y);
+        if (dragDir.magnitude < minDragDistance)
+            return;
+
+        Vector3Int offset = Vector3Int.zero;
+
+        // 더 큰 방향으로 이동 (수평 or 수직)
+        if (Mathf.Abs(dragDir.x) > Mathf.Abs(dragDir.y))
+            offset.x = (int)Mathf.Sign(dragDir.x);
+        else
+            offset.y = (int)Mathf.Sign(dragDir.y);
+
+        gridPos += offset;
         previewConstruction.transform.position = GetSnappedPosition(targetTilemap, gridPos);
     }
+
+    protected virtual void OnTouchDragEnd(Vector3Int pos) { }
+
+    // 라인 드래그로 여러 배치/제거할 때
+    protected virtual void OnLineDragUpdate(Vector3Int pos) { }
+    protected virtual void OnLineDragEnd(Vector3Int pos) { }
+
+    protected virtual void UpdatePlacement() { }
 
     // 사이즈에 맞게 프리뷰 오브젝트의 위치 변경
     protected virtual Vector3 GetSnappedPosition(Tilemap tilemap, Vector3Int pos)
@@ -154,11 +261,5 @@ public abstract class BasePlacer
     {
         checkButton.gameObject.SetActive(isActive);
         cancelButton.gameObject.SetActive(isActive);
-    }
-
-    // 프리뷰 오브젝트의 배치 가능 여부를 판단
-    protected bool CanPlaceAtCurrentPosition()
-    {
-        return MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
     }
 }

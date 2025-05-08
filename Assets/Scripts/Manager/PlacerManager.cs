@@ -1,4 +1,5 @@
 using AdventurersHaven;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     private BasePlacer currentPlacer;
 
     [SerializeField] private Button check;
-    [SerializeField] private Button cancle;
+    [SerializeField] private Button cancel;
     [SerializeField] private GameObject notPlaceable;
 
     // 별도의 Placer 인스턴스들
@@ -20,16 +21,16 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     {
         base.Awake();
         check.onClick.AddListener(() => OnPlacementButtonClicked(true));
-        cancle.onClick.AddListener(() => OnPlacementButtonClicked(false));
+        cancel.onClick.AddListener(() => OnPlacementButtonClicked(false));
     }
 
     private void Start()
     {
         mainCamera = Camera.main;
 
-        defaultPlacer = new DefaultPlacer(mainCamera, check, cancle, notPlaceable);
-        roadPlacer = new RoadPlacer(mainCamera, check, cancle, notPlaceable);
-        removePlacer = new RemovePlacer(mainCamera, check, cancle, notPlaceable);
+        defaultPlacer = new DefaultPlacer(mainCamera, check, cancel, notPlaceable);
+        roadPlacer = new RoadPlacer(mainCamera, check, cancel, notPlaceable);
+        removePlacer = new RemovePlacer(mainCamera, check, cancel, notPlaceable);
     }
 
     private void Update()
@@ -42,17 +43,21 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
 
     private void OnPlacementButtonClicked(bool isCheck)
     {
+        // 먼저 버튼 클릭 처리를 완료
         if (currentPlacer != null)
         {
             if (isCheck)
-                currentPlacer.OnConfirm();
+            {
+                currentPlacer.OnConfirm(); // 배치 확인
+            }
             else
-                currentPlacer.OnCancel();
+            {
+                currentPlacer.OnCancel(); // 배치 취소
+                ExitPlacing(); // 배치 취소 후, 처리
+            }
         }
-
-        ExitPlacing();
-        UIManager.Instance.Show<Main>();
     }
+
 
     // 데이터만으로 타입 판단하는 오버로드 메서드 추가
     public void StartPlacing(Construction_Data data, Vector2Int size)
@@ -84,5 +89,6 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     {
         gameObject.SetActive(false);
         currentPlacer = null;
+        UIManager.Instance.Show<Main>();
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class DefaultPlacer : BasePlacer
@@ -10,14 +11,15 @@ public class DefaultPlacer : BasePlacer
 
     protected override void UpdatePlacement()
     {
-        bool canPlace = CanPlaceAtCurrentPosition();
+        if(state != PlacementState.Placing) return;
+
+        Tilemap tilemap = previewConstruction.Type == ConstructionType.Build
+            ? MapManager.Instance.BuildingTilemap
+            : MapManager.Instance.ElementTilemap;
+
+        previewConstruction.transform.position = GetSnappedPosition(tilemap, gridPos);
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);
         notPlaceableIndicator.SetActive(!canPlace);
-
-        if (InputManager.Instance.IsInputDown() && canPlace && state == PlacementState.Placing)
-        {
-            state = PlacementState.Confirming;
-            SetPlacementButtonsActive(true);
-        }
     }
 }
