@@ -236,6 +236,7 @@ GameObject:
   - component: {fileID: 6867519131509286650}
   - component: {fileID: 3375438136091865513}
   - component: {fileID: -7198095134530244167}
+  - component: {fileID: 173592187401070504}
   m_Layer: 5
   m_Name: Robby
   m_TagString: Untagged
@@ -302,6 +303,36 @@ MonoBehaviour:
   sfxTypeArr: 0100000001000000
   ButtonSfxPairList: []
   FadeDuration: 0.5
+--- !u!114 &173592187401070504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7390789497050068630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 5f6912948ec24cf47aa5da4c1cc74a8c, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7853226393242190140
 GameObject:
   m_ObjectHideFlags: 0
