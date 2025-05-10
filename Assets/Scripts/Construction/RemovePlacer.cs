@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class RemovePlacer : BasePlacer
 {
     private Vector2Int removeSize;
+    public override bool RequiresPreview => true;
 
     public RemovePlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
         : base(camera, check, cancel, notPlaceable)
@@ -19,7 +20,7 @@ public class RemovePlacer : BasePlacer
         notPlaceableIndicator.GetComponent<TextMeshProUGUI>().text = "제거불가!";
     }
 
-    protected override void UpdatePlacement()
+    public override void UpdatePlacementInternal()
     {
         bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, removeSize, previewConstruction);
         bool sameObjectInArea = MapManager.Instance.CurrentSizeInOneObject(gridPos, removeSize);
@@ -32,7 +33,6 @@ public class RemovePlacer : BasePlacer
 
         if (InputManager.Instance.IsInputDown() && canRemove)
         {
-            state = PlacementState.Confirming;
             SetPlacementButtonsActive(true);
         }
     }

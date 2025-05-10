@@ -10,6 +10,8 @@ public class RoadPlacer : BasePlacer
     private Vector3Int roadEndPos;
     private List<Construction> previewRoadList = new List<Construction>();
 
+    public override bool RequiresPreview => true;
+
     public RoadPlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
     : base(camera, check, cancel, notPlaceable)
     {
@@ -23,7 +25,7 @@ public class RoadPlacer : BasePlacer
     }
 
     // Update에서 호출
-    protected override void UpdatePlacement()
+    public override void UpdatePlacementInternal()
     {
         bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);
@@ -52,7 +54,6 @@ public class RoadPlacer : BasePlacer
                 if (InputManager.Instance.IsInputUp() && validDrag)
                 {
                     roadState = RoadPlacementState.Confirm;
-                    state = PlacementState.Confirming;
                     SetPlacementButtonsActive(true);
                 }
             break;
