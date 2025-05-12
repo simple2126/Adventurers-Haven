@@ -7,33 +7,29 @@ using System.Collections.Generic;
 
 public enum PlacementState
 {
-    None,
     Placing,
     Preview,
-    Confirming
 }
 
 // Placer 상태 클래스들이 사용할 최소한의 기능만 정의한 인터페이스
 public interface IPlacerContext
 {
     void SetPlacementButtonsActive(bool show);  // 확인/취소 버튼 보이기/숨기기
-    Vector3Int GetGridPos();                    // 현재 격자 위치 반환
     Tilemap GetTilemap();                       // 현재 사용 중인 Tilemap 반환
 
     bool RequiresPreview { get; }               // Preview 단계 필요 여부
     void UpdatePlacement();                     // DefaultPlacer 용 위치/색상 갱신
     // 드래그 처리용 메서드
     void OnTouchDragUpdate(); // 터치 드래그 시 호출
-    void OnLineDragUpdate(Vector3Int pos);                  // 라인 드래그 시 호출
+    void OnLineDragUpdate();
+    void OnInitialDragEnd();
 }
 
 // Placer의 상태를 표현하는 State 패턴용 인터페이스
 interface IPlacerState
 {
-    void Enter();       // 상태 진입 시 초기화
     void HandleInput(); // 입력 처리
     void UpdateLogic(); // 상태별 매 프레임 로직
-    void Exit();        // 상태 종료 시 정리
 }
 
 /// 건물/도로/제거 배치 공통 로직
@@ -76,7 +72,6 @@ public abstract class BasePlacer : IPlacerContext
             { PlacementState.Placing, new PlacingState(this) },
             { PlacementState.Preview, new PreviewState(this) }
         };
-        TransitionTo(PlacementState.Placing);
     }
 
     public void SetPlacementButtonsActive(bool show)
@@ -84,7 +79,7 @@ public abstract class BasePlacer : IPlacerContext
         checkButton.gameObject.SetActive(show);
         cancelButton.gameObject.SetActive(show);
     }
-    public Vector3Int GetGridPos() => gridPos;
+
     public Tilemap GetTilemap()
     {
         return previewConstruction.Type == ConstructionType.Build
@@ -92,8 +87,7 @@ public abstract class BasePlacer : IPlacerContext
             : MapManager.Instance.ElementTilemap;
     }
 
-    public void UpdatePlacement() => UpdatePlacementInternal();
-    public abstract void UpdatePlacementInternal();
+    public abstract void UpdatePlacement();
 
     bool IPlacerContext.RequiresPreview => RequiresPreview;
 
@@ -116,7 +110,8 @@ public abstract class BasePlacer : IPlacerContext
 
         Vector2 pos = previewConstruction.transform.position;
         gridPos = Vector3Int.right * Mathf.CeilToInt(pos.x) + Vector3Int.up * Mathf.CeilToInt(pos.y);
-        UpdatePlacementInternal();
+        UpdatePlacement();
+        TransitionTo(PlacementState.Placing);
     }
 
     /// 매 프레임 호출: 상태별 입력/로직 실행 후 자식 위치 갱신
@@ -132,9 +127,7 @@ public abstract class BasePlacer : IPlacerContext
     /// 상태 전환 헬퍼
     public void TransitionTo(PlacementState next)
     {
-        currentState?.Exit();
         currentState = states[next];
-        currentState.Enter();
     }
 
     // 배치 확정: MapManager에 저장, 새 preview 생성
@@ -218,8 +211,7 @@ public abstract class BasePlacer : IPlacerContext
         previewConstruction.transform.position = GetSnappedPosition(tilemap, gridPos);
     }
 
-    public virtual void OnLineDragUpdate(Vector3Int pos)
-    {
-        // 기본 구현: 서브클래스에서 override하여 preview 처리
-    }
+    public virtual void OnInitialDragEnd() { }
+
+    public virtual void OnLineDragUpdate() { }
 }

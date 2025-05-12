@@ -10,7 +10,7 @@ public class DefaultPlacer : BasePlacer
     {
     }
 
-    public override void UpdatePlacementInternal()
+    public override void UpdatePlacement()
     {
         bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
         ChangeColor(canPlace);

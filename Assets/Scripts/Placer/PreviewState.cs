@@ -1,16 +1,9 @@
 using UnityEngine.EventSystems;
 
-// PreviewState.cs
-/// 영역/라인 드래그(Preview) 로직 처리 상태
 public class PreviewState : IPlacerState
 {
     private readonly BasePlacer ctx;
     public PreviewState(BasePlacer context) { ctx = context; }
-
-    public void Enter()
-    {
-        // Preview 진입 시 초기화(예: roadStartPos 저장)
-    }
 
     public void HandleInput()
     {
@@ -19,16 +12,22 @@ public class PreviewState : IPlacerState
 
         if (InputManager.Instance.IsInputHeld())
         {
-            ctx.OnLineDragUpdate(ctx.GetGridPos());
+            InputManager.Instance.UpdateDrag();         // 누적 드래그량 계산
+            ctx.OnTouchDragUpdate();                    // gridPos 업데이트 & 스냅 이동
+            ctx.OnLineDragUpdate();     // updated gridPos로 프리뷰
         }
 
         if (InputManager.Instance.IsInputUp())
         {
             InputManager.Instance.EndDrag();
+            ctx.OnTouchDragUpdate();
+            ctx.OnLineDragUpdate();
             ctx.SetPlacementButtonsActive(true);
         }
     }
 
-    public void UpdateLogic() { /* 필요시 추가 로직 */ }
-    public void Exit() { /* 정리 */ }
+    public void UpdateLogic() 
+    {
+        ctx.UpdatePlacement();
+    }
 }

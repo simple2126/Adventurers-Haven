@@ -5,64 +5,53 @@ using UnityEngine.UI;
 
 public class RoadPlacer : BasePlacer
 {
-    private RoadPlacementState roadState = RoadPlacementState.None;
-    private Vector3Int roadStartPos;
-    private Vector3Int roadEndPos;
+    private Vector3Int roadStart;
+    private Vector3Int roadEnd;
     private List<Construction> previewRoadList = new List<Construction>();
 
     public override bool RequiresPreview => true;
 
     public RoadPlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
-    : base(camera, check, cancel, notPlaceable)
+        : base(camera, check, cancel, notPlaceable)
     {
     }
 
     public override void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
     {
         base.StartPlacing(data, construction, size);
-        roadState = RoadPlacementState.None;
         previewRoadList.Clear();
+        SetPlacementButtonsActive(true);
     }
 
-    // Update에서 호출
-    public override void UpdatePlacementInternal()
+    // 첫 번째 드래그 끝났을 때 호출할 메서드
+    // 첫 드래그 끝났을 때
+    public override void OnInitialDragEnd()
     {
-        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
-        ChangeColor(canPlace);
-        notPlaceableIndicator.SetActive(!canPlace);
+        roadStart = gridPos;
+    }
 
-        switch (roadState)
-        {
-            case RoadPlacementState.None:
-                if (InputManager.Instance.IsInputDown() && canPlace)
-                {
-                    roadStartPos = gridPos;
-                    roadState = RoadPlacementState.Dragging;
-                }
-                break;
+    // PreviewState.HandleInput()에서 드래그 중 매 프레임 호출
+    public override void OnLineDragUpdate()
+    {
+        roadEnd = gridPos;                     // ← 반드시 기록
+        PreviewRoadLine(roadStart, roadEnd);
 
-            case RoadPlacementState.Dragging:
-                roadEndPos = gridPos;
-                bool validDrag = PreviewRoadLine(roadStartPos, roadEndPos);
+        // 마지막 프리뷰 위치로 previewConstruction 이동
+        if (previewRoadList.Count > 0)
+            previewConstruction.transform.position = previewRoadList[^1].transform.position;
+    }
 
-                if (validDrag && previewRoadList.Count > 0)
-                {
-                    int lastIndex = previewRoadList.Count - 1;
-                    previewConstruction.transform.position = previewRoadList[lastIndex].transform.position;
-                }
-
-                if (InputManager.Instance.IsInputUp() && validDrag)
-                {
-                    roadState = RoadPlacementState.Confirm;
-                    SetPlacementButtonsActive(true);
-                }
-            break;
-        }
+    public override void UpdatePlacement()
+    {
+        // 단순 색상/indicator 갱신
+        bool can = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
+        ChangeColor(can);
+        notPlaceableIndicator.SetActive(!can);
     }
 
     public override void OnConfirm()
     {
-        PlaceRoadLine(roadStartPos, roadEndPos);
+        PlaceRoadLine(roadStart, roadEnd);
         ReturnRoadList();
         Exit();
     }
@@ -77,7 +66,6 @@ public class RoadPlacer : BasePlacer
     protected override void Exit()
     {
         base.Exit();
-        roadState = RoadPlacementState.None;
         previewRoadList.Clear();
     }
 
@@ -86,6 +74,7 @@ public class RoadPlacer : BasePlacer
         // 단일 도로 배치
         if (previewRoadList.Count == 0)
         {
+            roadEnd = roadStart;
             Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(start.x) + Vector3Int.up * Mathf.CeilToInt(start.y);
             MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
             return;
@@ -112,7 +101,6 @@ public class RoadPlacer : BasePlacer
         if (previewRoadList.Count > 0)
             PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
     }
-
 
     private bool PreviewRoadLine(Vector3Int start, Vector3Int end)
     {
@@ -158,7 +146,6 @@ public class RoadPlacer : BasePlacer
 
         return index > 0;
     }
-
 
     private Vector3Int GetStep(Vector3Int direction)
     {

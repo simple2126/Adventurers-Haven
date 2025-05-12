@@ -142,8 +142,7 @@ public class MapManager : SingletonBase<MapManager>
     {
         if (construction.IsDemolish())
         {
-            Vector3Int pos = Vector3Int.right + Vector3Int.up + origin;
-            return buildTileDict.ContainsKey(pos) || elementTileDict.ContainsKey(pos);
+            return buildTileDict.ContainsKey(origin) || elementTileDict.ContainsKey(origin);
         }
 
         int offsetX = size.x / 2;
@@ -162,6 +161,7 @@ public class MapManager : SingletonBase<MapManager>
                 }
                 else if (construction.Type == ConstructionType.Element)
                 {
+                    Debug.Log("Element CanBuilding");
                     if (!buildTileDict.ContainsKey(pos) || buildTileDict[pos].IsOccupied) return false;
                 }
             }
@@ -210,11 +210,6 @@ public class MapManager : SingletonBase<MapManager>
 
         queue.Enqueue(origin);
         visited.Add(origin);
-
-        if (targetCon.IsRoad())
-        {
-            tilemapPainter.PlaceTiles(elementTilemap, origin, targetCon.Size, PatternType.Gray, false);
-        }
 
         while (queue.Count > 0)
         {
@@ -278,8 +273,6 @@ public class MapManager : SingletonBase<MapManager>
                 }
             }
         }
-
-        PoolManager.Instance.ReturnToPool<Construction>(construction.Tag, construction);
     }
 
     private Construction GetCurrentConstruction(Vector3Int pos)

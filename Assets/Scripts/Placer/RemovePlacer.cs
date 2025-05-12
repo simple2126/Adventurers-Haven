@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class RemovePlacer : BasePlacer
 {
-    private Vector2Int removeSize;
-    public override bool RequiresPreview => true;
+    public override bool RequiresPreview => false;
 
     public RemovePlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
         : base(camera, check, cancel, notPlaceable)
@@ -16,14 +15,14 @@ public class RemovePlacer : BasePlacer
     public override void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
     {
         base.StartPlacing(data, construction, size);
-        removeSize = Vector2Int.right * size.x + Vector2Int.up * size.y;
         notPlaceableIndicator.GetComponent<TextMeshProUGUI>().text = "제거불가!";
+        UpdatePlacement();
     }
 
-    public override void UpdatePlacementInternal()
+    public override void UpdatePlacement()
     {
-        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, removeSize, previewConstruction);
-        bool sameObjectInArea = MapManager.Instance.CurrentSizeInOneObject(gridPos, removeSize);
+        bool canPlace = MapManager.Instance.CanPlaceBuilding(gridPos, buildingSize, previewConstruction);
+        bool sameObjectInArea = MapManager.Instance.CurrentSizeInOneObject(gridPos, buildingSize);
 
         // 두 조건을 모두 만족해야 함
         bool canRemove = canPlace && sameObjectInArea;
@@ -35,6 +34,13 @@ public class RemovePlacer : BasePlacer
         {
             SetPlacementButtonsActive(true);
         }
+    }
+
+    public override void OnConfirm()
+    {
+        Place();
+        PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
+        Exit();
     }
 
     protected override void Place()
