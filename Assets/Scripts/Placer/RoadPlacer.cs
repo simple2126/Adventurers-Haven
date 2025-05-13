@@ -20,10 +20,11 @@ public class RoadPlacer : BasePlacer
     {
         base.StartPlacing(data, construction, size);
         previewRoadList.Clear();
+        roadStart = Vector3Int.zero;
+        roadEnd = Vector3Int.zero;
         SetPlacementButtonsActive(true);
     }
 
-    // 첫 번째 드래그 끝났을 때 호출할 메서드
     // 첫 드래그 끝났을 때
     public override void OnInitialDragEnd()
     {
@@ -53,20 +54,16 @@ public class RoadPlacer : BasePlacer
     {
         PlaceRoadLine(roadStart, roadEnd);
         ReturnRoadList();
+        notPlaceableIndicator.SetActive(false);
         Exit();
     }
 
     public override void OnCancel()
     {
-        ReturnRoadList();
         PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
+        ReturnRoadList();
+        notPlaceableIndicator.SetActive(false);
         Exit();
-    }
-
-    protected override void Exit()
-    {
-        base.Exit();
-        previewRoadList.Clear();
     }
 
     private void PlaceRoadLine(Vector3Int start, Vector3Int end)
@@ -74,9 +71,12 @@ public class RoadPlacer : BasePlacer
         // 단일 도로 배치
         if (previewRoadList.Count == 0)
         {
-            roadEnd = roadStart;
-            Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(start.x) + Vector3Int.up * Mathf.CeilToInt(start.y);
-            MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
+            if(!MapManager.Instance.CanPlaceBuilding(roadStart, buildingSize, previewConstruction))
+            {
+                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
+                return;
+            }
+            MapManager.Instance.SetBuildingArea(roadStart, buildingSize, previewConstruction);
             return;
         }
 

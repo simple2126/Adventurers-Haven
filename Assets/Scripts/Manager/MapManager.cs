@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -138,56 +139,82 @@ public class MapManager : SingletonBase<MapManager>
         }
     }
 
-    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size, Construction construction)
+    /// 지정된 origin/size 영역의 셀 좌표를 열거
+    private IEnumerable<Vector3Int> GetCells(Vector3Int origin, Vector2Int size)
     {
-        if (construction.IsDemolish())
-        {
-            return buildTileDict.ContainsKey(origin) || elementTileDict.ContainsKey(origin);
-        }
-
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;
-
         for (int x = -offsetX; x < size.x - offsetX; x++)
-        {
             for (int y = -offsetY; y < size.y - offsetY; y++)
-            {
-                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
+                yield return origin + new Vector3Int(x, y, 0);
+    }
 
-                if (construction.Type == ConstructionType.Build)
-                {
-                    if (!buildTileDict.ContainsKey(pos) || buildTileDict[pos].IsOccupied) return false;
-                    if (!elementTileDict.ContainsKey(pos) || elementTileDict[pos].IsOccupied) return false;
-                }
-                else if (construction.Type == ConstructionType.Element)
-                {
-                    Debug.Log("Element CanBuilding");
-                    if (!buildTileDict.ContainsKey(pos) || buildTileDict[pos].IsOccupied) return false;
-                }
+    /// 공통 체크 루틴: 테스트 함수를 넘겨주면 false 반환 지점이 있으면 바로 빠져나옴
+    private bool CheckArea(Vector3Int origin, Vector2Int size, Construction construction,
+                           Func<Vector3Int, bool> cellTest)
+    {
+        foreach (var pos in GetCells(origin, size))
+        {
+            // 철거 모드면 있는지만 보면 되고
+            if (construction.IsDemolish())
+            {
+                if (buildTileDict.ContainsKey(pos) || elementTileDict.ContainsKey(pos))
+                    return true;
+                continue;
             }
+
+            // 일반 배치/요소 모드면 각 셀마다 테스트
+            if (!cellTest(pos))
+                return false;
         }
-        return true;
+
+        // 철거인데 한 번도 발견 못했으면 false
+        return !construction.IsDemolish();
+    }
+
+    /// 영역 안에 타일(오브젝트)이 있는지만 볼 때
+    public bool InBounds(Vector3Int origin, Vector2Int size, Construction construction)
+    {
+        return CheckArea(origin, size, construction, pos =>
+        {
+            if (construction.Type == ConstructionType.Build)
+                return buildTileDict.ContainsKey(pos) && elementTileDict.ContainsKey(pos);
+            else // Element 타입
+                return buildTileDict.ContainsKey(pos);
+        });
+    }
+
+    /// 실제 배치 가능 여부 (존재 + 비어있음) 체크
+    public bool CanPlaceBuilding(Vector3Int origin, Vector2Int size, Construction construction)
+    {
+        return CheckArea(origin, size, construction, pos =>
+        {
+            if (construction.Type == ConstructionType.Build)
+            {
+                var bOk = buildTileDict.TryGetValue(pos, out var b) && !b.IsOccupied;
+                var eOk = elementTileDict.TryGetValue(pos, out var e) && !e.IsOccupied;
+                return bOk && eOk;
+            }
+            else // Element 타입
+            {
+                return buildTileDict.TryGetValue(pos, out var b) && !b.IsOccupied;
+            }
+        });
     }
 
     public void SetBuildingArea(Vector3Int origin, Vector2Int size, Construction construction)
     {
-        int offsetX = size.x / 2;
-        int offsetY = size.y / 2;
-
-        var tileDict = construction.Type == ConstructionType.Build ? buildTileDict : elementTileDict;
+        var tileDict = construction.Type == ConstructionType.Build
+                       ? buildTileDict
+                       : elementTileDict;
 
         if (construction.IsRoad())
-        {
             tilemapPainter.PlaceTiles(elementTilemap, origin, size, PatternType.White);
-        }
 
-        for (int x = -offsetX; x < size.x - offsetX; x++)
+        foreach (var pos in GetCells(origin, size))
         {
-            for (int y = -offsetY; y < size.y - offsetY; y++)
-            {
-                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                tileDict[pos].SetTileData(construction);
-            }
+            // 사전에 무조건 key가 있다고 가정(이미 CanPlaceBuilding 으로 검증됨)
+            tileDict[pos].SetTileData(construction);
         }
     }
 
@@ -290,22 +317,16 @@ public class MapManager : SingletonBase<MapManager>
 
     public bool IsSameRoadData(Vector3Int origin, Vector2Int size, string tag)
     {
-        int offsetX = size.x / 2;
-        int offsetY = size.y / 2;
-
-        int count = 0;
-
-        for (int x = -offsetX; x < size.x - offsetX; x++)
+        foreach (var pos in GetCells(origin, size))
         {
-            for (int y = -offsetY; y < size.y - offsetY; y++)
+            if (!elementTileDict.TryGetValue(pos, out var tile)
+                || !tile.IsOccupied
+                || tile.Construction.Tag != tag)
             {
-                Vector3Int pos = Vector3Int.right * x + Vector3Int.up * y + origin;
-                if (!elementTileDict.ContainsKey(pos) || !elementTileDict[pos].IsOccupied) continue;
-                if (elementTileDict[pos].Construction.Tag == tag) count++;
+                return false;
             }
         }
-
-        return size.x * size.y == count;
+        return true;
     }
 
     public Vector2Int GetConstructionSize(Vector3Int pos)

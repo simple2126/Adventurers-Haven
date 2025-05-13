@@ -99,6 +99,7 @@ public abstract class BasePlacer : IPlacerContext
             PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
 
         previewConstruction = construction;
+        previewConstruction.transform.position = Vector3.zero;
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
         buildingSize = size;
 
@@ -197,17 +198,23 @@ public abstract class BasePlacer : IPlacerContext
         accumulatedDrag += InputManager.Instance.GetDragDirection();
 
         float cellDist = tilemap.cellSize.x * 10f;
+        Vector3Int offset = Vector3Int.zero;
+
         if (Mathf.Abs(accumulatedDrag.x) >= cellDist)
         {
-            gridPos.x += (int)Mathf.Sign(accumulatedDrag.x);
+            offset.x = (int)Mathf.Sign(accumulatedDrag.x);
             accumulatedDrag.x = 0;
         }
         if (Mathf.Abs(accumulatedDrag.y) >= cellDist)
         {
-            gridPos.y += (int)Mathf.Sign(accumulatedDrag.y);
+            offset.y += (int)Mathf.Sign(accumulatedDrag.y);
             accumulatedDrag.y = 0;
         }
 
+        bool isBounds = MapManager.Instance.InBounds(gridPos + offset, buildingSize, previewConstruction);
+        if (!isBounds) return;
+
+        gridPos += offset;
         previewConstruction.transform.position = GetSnappedPosition(tilemap, gridPos);
     }
 
