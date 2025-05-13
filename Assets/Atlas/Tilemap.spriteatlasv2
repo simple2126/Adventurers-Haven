@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!612988286 &1
+SpriteAtlasAsset:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 2
+  m_MasterAtlas: {fileID: 0}
+  m_ImporterData:
+    packables:
+    - {fileID: 21300000, guid: 9cec7573a876aec4eb9d6ffa81e6706a, type: 3}
+    - {fileID: 21300000, guid: 9e8635ece2997b747a94f2f4da8f3b24, type: 3}
+    - {fileID: -42248173, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -232091554, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: 728816121, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: 1618865376, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: 1877223056, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: -864033024, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: 1862466203, guid: a51cb528a7520dd4699a4f3f7f9ca693, type: 3}
+    - {fileID: 126760897, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 1196035150, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -578509866, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 554549782, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -1030631579, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -1767073727, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 1379416031, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 990923774, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -1175703296, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 504651670, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -2007254695, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -1331782904, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -17307572, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 1963258726, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: 503167818, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+    - {fileID: -803973354, guid: 4211f56bda902194ba170aecfa655833, type: 3}
+  m_IsVariant: 0

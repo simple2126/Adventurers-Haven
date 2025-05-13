@@ -58,6 +58,8 @@ public abstract class BasePlacer : IPlacerContext
     /// 각 Placer가 Preview 단계를 사용하는지 여부
     public abstract bool RequiresPreview { get; }
 
+    private float swipeThresholdPixels = 50f;
+
     /// 생성자: 상태 객체 등록 및 초기 상태 세팅
     public BasePlacer(Camera camera, Button check, Button cancel, GameObject notPlaceable)
     {
@@ -195,24 +197,29 @@ public abstract class BasePlacer : IPlacerContext
     public virtual void OnTouchDragUpdate()
     {
         var tilemap = GetTilemap();
-        accumulatedDrag += InputManager.Instance.GetDragDirection();
 
-        float cellDist = tilemap.cellSize.x * 10f;
+        Vector2 dragDeltaPixels = InputManager.Instance.GetDragDirection();
+        accumulatedDrag += dragDeltaPixels;
+
+        float worldHeight = mainCamera.orthographicSize * 2f;
+        float pixelToWorld = worldHeight / Screen.height;
+        float thresholdWorld = swipeThresholdPixels * pixelToWorld;
+
         Vector3Int offset = Vector3Int.zero;
-
-        if (Mathf.Abs(accumulatedDrag.x) >= cellDist)
+        if (Mathf.Abs(accumulatedDrag.x) >= swipeThresholdPixels)
         {
             offset.x = (int)Mathf.Sign(accumulatedDrag.x);
             accumulatedDrag.x = 0;
         }
-        if (Mathf.Abs(accumulatedDrag.y) >= cellDist)
+        if (Mathf.Abs(accumulatedDrag.y) >= swipeThresholdPixels)
         {
-            offset.y += (int)Mathf.Sign(accumulatedDrag.y);
+            offset.y = (int)Mathf.Sign(accumulatedDrag.y);
             accumulatedDrag.y = 0;
         }
 
-        bool isBounds = MapManager.Instance.InBounds(gridPos + offset, buildingSize, previewConstruction);
-        if (!isBounds) return;
+        if (offset == Vector3Int.zero) return;
+        if (!MapManager.Instance.InBounds(gridPos + offset, buildingSize, previewConstruction))
+            return;
 
         gridPos += offset;
         previewConstruction.transform.position = GetSnappedPosition(tilemap, gridPos);
