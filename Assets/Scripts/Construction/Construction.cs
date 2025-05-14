@@ -10,6 +10,7 @@ public class Construction : MonoBehaviour
     public string SubType { get; private set; }
     public BuildType? BuildType { get; private set; }
     public ElementType? ElementType { get; private set; }
+    public PatternType PatternType { get; private set; }
 
     public void Init(Construction_Data data)
     {
@@ -18,6 +19,7 @@ public class Construction : MonoBehaviour
         Type = data.constructionType;
         SubType = data.subType;
         SetSubType();
+        SetPatternType();
     }
 
     private void SetSubType()
@@ -33,6 +35,40 @@ public class Construction : MonoBehaviour
         }
     }
 
+    private void SetPatternType()
+    {
+        if (IsRoad())
+        {
+            // Tag WhiteRockRoad, GrayRockRoad
+            int count = 0;
+            string pattern = null;
+            for (int i = 0; i < Tag.Length; i++)
+            {
+                if (char.IsUpper(Tag[i]))
+                {
+                    count++;
+                    if (count == 2)
+                    {
+                        pattern = Tag.Substring(0, i);
+                    }
+                }
+            }
+
+            if (pattern == "White")
+            {
+                PatternType = PatternType.White;
+            }
+            else if (pattern == "Gray")
+            {
+                PatternType = PatternType.Gray;
+            }
+            else
+            {
+                PatternType = PatternType.White; // 기본값
+            }
+        }
+    }
+
     public bool IsRoad()
     {
         return Type == ConstructionType.Element &&
@@ -43,37 +79,5 @@ public class Construction : MonoBehaviour
     {
         return Type == ConstructionType.Element &&
             this.ElementType == global::ElementType.Demolish;
-    }
-
-    public PatternType GetPattern()
-    {
-        // Tag WhiteRockRoad, GrayRockRoad
-        int count = 0;
-        string pattern = null;
-        for (int i = 0; i < Tag.Length; i++)
-        {
-            if (char.IsUpper(Tag[i]))
-            {
-                count++;
-                if (count == 2)
-                {
-                    pattern = Tag.Substring(0, i);
-                }
-            }
-        }
-
-        if (pattern == "White")
-        {
-            return PatternType.White;
-        }
-        else if (pattern == "Gray")
-        {
-            return PatternType.Gray;
-        }
-        else
-        {
-            Debug.LogError("Invalid pattern type");
-            return PatternType.White; // 기본값
-        }
     }
 }

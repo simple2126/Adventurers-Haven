@@ -97,7 +97,7 @@ public class MapManager : SingletonBase<MapManager>
                             //con.Init(conData);
                             tileDict[pos].SetTileData(baseRoadCon);
                             SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, baseRoadCon);
-                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, baseRoadCon.GetPattern(), false);
+                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, baseRoadCon.PatternType, false);
                         }
                     }
                 }
@@ -212,7 +212,7 @@ public class MapManager : SingletonBase<MapManager>
         if (construction.IsRoad())
         {
             //Debug.Log($"SetBuildingArea {construction.Tag} {construction.Type} {construction.SubType} {construction.GetPattern()}");
-            tilemapPainter.PlaceTiles(elementTilemap, origin, size, construction.GetPattern());
+            tilemapPainter.PlaceTiles(elementTilemap, origin, size, construction.PatternType);
         }
 
         foreach (var pos in GetCells(origin, size))
