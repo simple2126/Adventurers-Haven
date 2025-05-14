@@ -1,5 +1,4 @@
 using AdventurersHaven;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -81,7 +80,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManagerë¡œ ì
             currentPlacer = defaultPlacer;
         }
         
-        currentPlacer.StartPlacing(data, prefab, size);
+        currentPlacer.StartPlacing(prefab);
         gameObject.SetActive(true);
     }
 

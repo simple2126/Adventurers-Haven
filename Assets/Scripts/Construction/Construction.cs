@@ -44,4 +44,36 @@ public class Construction : MonoBehaviour
         return Type == ConstructionType.Element &&
             this.ElementType == global::ElementType.Demolish;
     }
+
+    public PatternType GetPattern()
+    {
+        // Tag WhiteRockRoad, GrayRockRoad
+        int count = 0;
+        string pattern = null;
+        for (int i = 0; i < Tag.Length; i++)
+        {
+            if (char.IsUpper(Tag[i]))
+            {
+                count++;
+                if (count == 2)
+                {
+                    pattern = Tag.Substring(0, i);
+                }
+            }
+        }
+
+        if (pattern == "White")
+        {
+            return PatternType.White;
+        }
+        else if (pattern == "Gray")
+        {
+            return PatternType.Gray;
+        }
+        else
+        {
+            Debug.LogError("Invalid pattern type");
+            return PatternType.White; // 기본값
+        }
+    }
 }

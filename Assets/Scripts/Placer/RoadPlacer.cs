@@ -16,9 +16,9 @@ public class RoadPlacer : BasePlacer
     {
     }
 
-    public override void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
+    public override void StartPlacing(Construction construction)
     {
-        base.StartPlacing(data, construction, size);
+        base.StartPlacing(construction);
         previewRoadList.Clear();
         roadStart = Vector3Int.zero;
         roadEnd = Vector3Int.zero;
@@ -60,7 +60,7 @@ public class RoadPlacer : BasePlacer
 
     public override void OnCancel()
     {
-        PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
+        PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         ReturnRoadList();
         notPlaceableIndicator.SetActive(false);
         Exit();
@@ -88,18 +88,18 @@ public class RoadPlacer : BasePlacer
 
             if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag))
             {
-                PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewRoadList[i]);
+                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
                 previewRoadList.RemoveAt(i);
                 i--;
             }
             else
             {
-                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewRoadList[i]);
+                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
             }
         }
 
         if (previewRoadList.Count > 0)
-            PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
+            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
     }
 
     private bool PreviewRoadLine(Vector3Int start, Vector3Int end)
@@ -126,9 +126,9 @@ public class RoadPlacer : BasePlacer
 
             if (index >= previewRoadList.Count)
             {
-                var obj = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
-                obj.Init(data);
-                previewRoadList.Add(obj);
+                var con = PoolManager.Instance.SpawnFromPool<Construction>(previewConstruction.Tag);
+                //con.Init(data);
+                previewRoadList.Add(con);
             }
 
             var preview = previewRoadList[index];
@@ -139,7 +139,7 @@ public class RoadPlacer : BasePlacer
         // 남은 프리뷰 제거
         for (int i = index; i < previewRoadList.Count; i++)
         {
-            PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewRoadList[i]);
+            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewRoadList[i]);
             previewRoadList.RemoveAt(i);
             i--;
         }
@@ -178,7 +178,7 @@ public class RoadPlacer : BasePlacer
         if (previewRoadList.Count == 0) return;
 
         foreach (var obj in previewRoadList)
-            PoolManager.Instance.ReturnToPool<Construction>(data.tag, obj);
+            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, obj);
 
         previewRoadList.Clear();
     }

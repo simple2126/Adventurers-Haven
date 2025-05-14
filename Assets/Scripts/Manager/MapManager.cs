@@ -13,6 +13,7 @@ public class CustomTileData
         IsOccupied = false;
         Construction = null;
     }
+
     public void SetTileData(Construction construction)
     {
         IsOccupied = construction != null;
@@ -94,9 +95,9 @@ public class MapManager : SingletonBase<MapManager>
                             //Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
                             //var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
                             //con.Init(conData);
-                            //tileDict[pos].SetTileData(baseRoadCon);
+                            tileDict[pos].SetTileData(baseRoadCon);
                             SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, baseRoadCon);
-                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, PatternType.White, false);
+                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, baseRoadCon.GetPattern(), false);
                         }
                     }
                 }
@@ -209,7 +210,10 @@ public class MapManager : SingletonBase<MapManager>
                        : elementTileDict;
 
         if (construction.IsRoad())
-            tilemapPainter.PlaceTiles(elementTilemap, origin, size, PatternType.White);
+        {
+            //Debug.Log($"SetBuildingArea {construction.Tag} {construction.Type} {construction.SubType} {construction.GetPattern()}");
+            tilemapPainter.PlaceTiles(elementTilemap, origin, size, construction.GetPattern());
+        }
 
         foreach (var pos in GetCells(origin, size))
         {
@@ -248,8 +252,8 @@ public class MapManager : SingletonBase<MapManager>
                 Construction buildCon = buildTileData.Construction;
                 if (buildCon != null && buildCon.gameObject == targetCon.gameObject)
                 {
-                    buildingTilemap.SetTile(current, null);
-                    buildingTilemap.RefreshTile(current);
+                    //buildingTilemap.SetTile(current, null);
+                    //buildingTilemap.RefreshTile(current);
                     buildTileDict[current].ClearTileData();
 
                     if (!removedConstructions.Contains(buildCon))

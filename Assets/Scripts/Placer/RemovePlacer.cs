@@ -12,9 +12,9 @@ public class RemovePlacer : BasePlacer
     {
     }
 
-    public override void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
+    public override void StartPlacing(Construction construction)
     {
-        base.StartPlacing(data, construction, size);
+        base.StartPlacing(construction);
         notPlaceableIndicator.GetComponent<TextMeshProUGUI>().text = "제거불가!";
         UpdatePlacement();
     }
@@ -39,7 +39,7 @@ public class RemovePlacer : BasePlacer
     public override void OnConfirm()
     {
         Place();
-        PoolManager.Instance.ReturnToPool<Construction>(data.tag, previewConstruction);
+        PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         Exit();
     }
 

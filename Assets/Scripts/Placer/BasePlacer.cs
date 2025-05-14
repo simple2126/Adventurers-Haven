@@ -42,7 +42,6 @@ public abstract class BasePlacer : IPlacerContext
     protected Construction previewConstruction;
     protected Vector2Int buildingSize;
     protected Vector3Int gridPos;
-    protected Construction_Data data;
 
     protected Vector2 checkButtonBound;
     protected Button checkButton;
@@ -94,16 +93,15 @@ public abstract class BasePlacer : IPlacerContext
     bool IPlacerContext.RequiresPreview => RequiresPreview;
 
     /// 배치 시작: Pool 반환, preview 초기화, 버튼 활성화
-    public virtual void StartPlacing(Construction_Data data, Construction construction, Vector2Int size)
+    public virtual void StartPlacing(Construction construction)
     {
-        this.data = data;
         if (previewConstruction != null)
             PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
 
         previewConstruction = construction;
         previewConstruction.transform.position = Vector3.zero;
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
-        buildingSize = size;
+        buildingSize = construction.Size;
 
         // 버튼 범위 계산 및 메시 설정
         var checkButtonRect = checkButton.GetComponent<RectTransform>();
@@ -136,13 +134,12 @@ public abstract class BasePlacer : IPlacerContext
     // 배치 확정: MapManager에 저장, 새 preview 생성
     public virtual void OnConfirm()
     {
-        string tag = previewConstruction.Tag;
+        Construction con = previewConstruction;
         Place();
         Exit();
         // 새 preview 인스턴스 즉시 재시작
-        var con = PoolManager.Instance.SpawnFromPool<Construction>(tag);
-        con.Init(data);
-        StartPlacing(data, con, con.Size);
+        PoolManager.Instance.SpawnFromPool<Construction>(con.Tag);
+        StartPlacing(con);
     }
 
     public virtual void OnCancel()
