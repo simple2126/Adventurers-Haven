@@ -80,7 +80,7 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManagerë¡œ ì
             currentPlacer = defaultPlacer;
         }
         
-        currentPlacer.StartPlacing(prefab);
+        currentPlacer.StartPlacing(data, prefab);
         gameObject.SetActive(true);
     }
 

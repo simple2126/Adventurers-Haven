@@ -16,9 +16,9 @@ public class RoadPlacer : BasePlacer
     {
     }
 
-    public override void StartPlacing(Construction construction)
+    public override void StartPlacing(Construction_Data data, Construction construction)
     {
-        base.StartPlacing(construction);
+        base.StartPlacing(data, construction);
         previewRoadList.Clear();
         roadStart = Vector3Int.zero;
         roadEnd = Vector3Int.zero;

@@ -37,6 +37,7 @@ interface IPlacerState
 public abstract class BasePlacer : IPlacerContext
 {
     // ----- protected 필드 -----
+    protected Construction_Data data;
     protected Camera mainCamera;
     protected SpriteRenderer previewRenderer;
     protected Construction previewConstruction;
@@ -93,8 +94,9 @@ public abstract class BasePlacer : IPlacerContext
     bool IPlacerContext.RequiresPreview => RequiresPreview;
 
     /// 배치 시작: Pool 반환, preview 초기화, 버튼 활성화
-    public virtual void StartPlacing(Construction construction)
+    public virtual void StartPlacing(Construction_Data data, Construction construction)
     {
+        this.data = data;
         if (previewConstruction != null)
             PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
 
@@ -134,12 +136,14 @@ public abstract class BasePlacer : IPlacerContext
     // 배치 확정: MapManager에 저장, 새 preview 생성
     public virtual void OnConfirm()
     {
-        Construction con = previewConstruction;
+        string conTag = data.tag;
         Place();
         Exit();
         // 새 preview 인스턴스 즉시 재시작
-        PoolManager.Instance.SpawnFromPool<Construction>(con.Tag);
-        StartPlacing(con);
+        var con = PoolManager.Instance.SpawnFromPool<Construction>(conTag);
+        con.Init(data);
+        Debug.Log($"{con.Tag} {con.Type} {con.SubType}");
+        StartPlacing(data, con);
     }
 
     public virtual void OnCancel()
