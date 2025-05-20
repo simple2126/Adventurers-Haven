@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SpawnerManager : MonoBehaviour
+public class SpawnerManager : SingletonBase<SpawnerManager>
 {
     [SerializeField] private PoolManager.PoolConfig poolConfigs;
     [SerializeField] private Transform[] spawnPositions;
@@ -9,9 +9,11 @@ public class SpawnerManager : MonoBehaviour
     private float spawnTime = 1f;
     private int spawnCount = 0;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         PoolManager.Instance.AddPools<Adventurer>(poolConfigs);
+        gameObject.SetActive(false); // 스폰 매니저는 비활성화 상태로 시작
     }
 
     private void Update()
@@ -19,12 +21,13 @@ public class SpawnerManager : MonoBehaviour
         spawnInterval += Time.deltaTime;
         if(spawnCount < 1 && spawnInterval > spawnTime)
         {
+            if (!SpawnerManager.Instance.gameObject.activeSelf) return;
             spawnInterval = 0f;
             int rand = Random.Range(0, spawnPositions.Length);
             var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs.Tag, spawnPositions[rand].position, Quaternion.identity);
-            int other = rand == 0 ? 1 : 0;
-            obj.Init(spawnPositions[other].position);
+            obj.InitRandomBuildPath();
             spawnCount++;
+            Debug.Log($"Spawne");
         }
     }
 }
