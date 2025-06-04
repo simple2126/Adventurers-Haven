@@ -1029,6 +1029,7 @@ GameObject:
   - component: {fileID: 4990463337973253863}
   - component: {fileID: 3709547412155717863}
   - component: {fileID: 6752257833200930522}
+  - component: {fileID: -6305231699276337688}
   m_Layer: 0
   m_Name: MapManager
   m_TagString: Untagged
@@ -1097,6 +1098,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 823652a8b827b664793e661b979ae423, type: 2}
   - {fileID: 11400000, guid: 63622ab9710034f4794d3de19d9ec263, type: 2}
   - {fileID: 11400000, guid: ef59c73db8ae47e4595dbce5a51c6ff8, type: 2}
+--- !u!114 &-6305231699276337688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3995542674021233516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 433dad4212c8986429c32398658ec330, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onlyPlayMode: 1
+  cubeSize: 0.15
+  elementColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  buildColor: {r: 0.3, g: 0.8, b: 1, a: 1}
 --- !u!1 &4104178232649740434
 GameObject:
   m_ObjectHideFlags: 0
