@@ -92,12 +92,12 @@ public class MapManager : SingletonBase<MapManager>
                     {
                         if (HasTilesInArea(tilemap, pos, baseRoadCon.Size))
                         {
-                            //Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
-                            //var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
-                            //con.Init(conData);
-                            tileDict[pos].SetTileData(baseRoadCon);
-                            SetBuildingAreaLeftBottom(pos, baseRoadCon.Size, baseRoadCon);
-                            tilemapPainter.PlaceTiles(tilemap, pos, baseRoadCon.Size, baseRoadCon.PatternType, false);
+                            Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
+                            var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
+                            con.Init(conData);
+                            tileDict[pos].SetTileData(con);
+                            SetBuildingAreaLeftBottom(pos, con.Size, con);
+                            tilemapPainter.PlaceTiles(tilemap, pos, con.Size, con.PatternType, false);
                         }
                     }
                 }
