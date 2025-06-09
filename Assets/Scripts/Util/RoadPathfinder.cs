@@ -217,25 +217,4 @@ public class RoadPathfinder
         }
         return outerRoads;
     }
-
-    Vector3Int GetNeighborRoadCell(Vector3Int start, List<Vector3Int> buildCells)
-    {
-        var outerRoads = GetOuterRoadCells(buildCells);
-        Vector3Int best = default;
-        int bestLen = int.MaxValue;
-        foreach (var road in outerRoads)
-        {
-            // 실제 경로가 존재하는지 체크
-            if (AStar(start, road, out var path))
-            {
-                if (path.Count < bestLen)
-                {
-                    best = road;
-                    bestLen = path.Count;
-                }
-            }
-        }
-        return best; // 경로 있는 것 중 가장 가까운 도로
-    }
-
 }
