@@ -89,13 +89,13 @@ public class RoadPlacer : BasePlacer
             if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag))
             {
                 PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
-                previewRoadList.RemoveAt(i);
-                i--;
             }
             else
             {
                 MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
             }
+            previewRoadList.RemoveAt(i);
+            i--;
         }
 
         if (previewRoadList.Count > 0)

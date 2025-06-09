@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7587735740129992115}
   - component: {fileID: 7415644870567981536}
-  - component: {fileID: 5368616411264555993}
   - component: {fileID: 5981185394433473019}
   m_Layer: 0
   m_Name: GrayRockRoad
@@ -86,22 +85,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5368616411264555993
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3714722900973354922}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_OverrideArea: 1
-  m_Area: 0
-  m_IgnoreFromBuild: 0
-  m_AffectedAgents: 00000000
 --- !u!114 &5981185394433473019
 MonoBehaviour:
   m_ObjectHideFlags: 0

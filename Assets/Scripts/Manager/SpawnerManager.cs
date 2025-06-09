@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SpawnerManager : SingletonBase<SpawnerManager>
@@ -5,6 +6,7 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
     [SerializeField] private PoolManager.PoolConfig poolConfigs;
     [SerializeField] private Transform[] spawnPositions;
 
+    private List<Adventurer> adventurerList = new List<Adventurer>();
     private float spawnInterval = 0f;
     private float spawnTime = 1f;
     private int spawnCount = 0;
@@ -25,9 +27,24 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
             spawnInterval = 0f;
             int rand = Random.Range(0, spawnPositions.Length);
             var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs.Tag, spawnPositions[rand].position, Quaternion.identity);
+            adventurerList.Add(obj);
             obj.InitRandomBuildPath();
             spawnCount++;
-            Debug.Log($"Spawne");
+            Debug.Log($"Spawn");
+        }
+    }
+
+    public void SearchPathAllAdventurer()
+    {
+        if (adventurerList.Count == 0) return;
+
+        for (int i = 0; i < adventurerList.Count; i++)
+        {
+            var adventurer = adventurerList[i];
+            if (adventurer != null && !adventurer.gameObject.activeSelf)
+            {
+                adventurer.InitRandomBuildPath();
+            }
         }
     }
 }

@@ -57,9 +57,6 @@ public class TileDictGizmos : MonoBehaviour
             Gizmos.color = buildColor;
             DrawDict(map.BuildTileDict, map.BuildingTilemap);
         }
-
-        // (아무 영향 없음, 그냥 잔여 코드)
-        // MapManager.Instance.ElementTilemap.GetCellCenterWorld(Vector3Int.zero);
     }
 
     /// <summary>
