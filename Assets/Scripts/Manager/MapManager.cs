@@ -292,9 +292,8 @@ public class MapManager : SingletonBase<MapManager>
 
                     if (!removedConstructions.Contains(elementCon))
                     {
-                        // 도로는 Object 없음
                         if(!elementCon.IsRoad()) PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
-                        //PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
+                        PoolManager.Instance.ReturnToPool<Construction>(elementCon.Tag, elementCon);
                         removedConstructions.Add(elementCon);
                     }
 

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 public enum PlacementState
 {
+    Idle,
     Placing,
     Preview,
 }
@@ -71,6 +72,7 @@ public abstract class BasePlacer : IPlacerContext
         // 상태 딕셔너리 초기화
         states = new Dictionary<PlacementState, IPlacerState>
         {
+            { PlacementState.Idle,    new IdleState(this) },
             { PlacementState.Placing, new PlacingState(this) },
             { PlacementState.Preview, new PreviewState(this) }
         };
@@ -114,7 +116,7 @@ public abstract class BasePlacer : IPlacerContext
         Vector2 pos = previewConstruction.transform.position;
         gridPos = Vector3Int.right * Mathf.CeilToInt(pos.x) + Vector3Int.up * Mathf.CeilToInt(pos.y);
         UpdatePlacement();
-        TransitionTo(PlacementState.Placing);
+        TransitionTo(PlacementState.Idle); // 초기 상태 설정
     }
 
     /// 매 프레임 호출: 상태별 입력/로직 실행 후 자식 위치 갱신

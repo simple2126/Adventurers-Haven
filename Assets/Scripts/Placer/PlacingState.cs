@@ -11,12 +11,6 @@ public class PlacingState : IPlacerState
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             return;
 
-        // 마우스/터치 Down 은 두 번째 드래그(Preview 시작) 신호로만 쓸 거면 여기선 생략 가능
-        if (InputManager.Instance.IsInputDown())
-        {
-            InputManager.Instance.BeginDrag();
-        }
-
         if (InputManager.Instance.IsInputHeld())
         {
             InputManager.Instance.UpdateDrag();
@@ -25,8 +19,6 @@ public class PlacingState : IPlacerState
 
         if (InputManager.Instance.IsInputUp())
         {
-            InputManager.Instance.EndDrag();
-
             if (ctx.RequiresPreview)
             {
                 // 첫 드래그 끝났을 때: 시작점 저장

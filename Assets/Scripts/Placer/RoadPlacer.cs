@@ -86,13 +86,14 @@ public class RoadPlacer : BasePlacer
             current = MapManager.Instance.ElementTilemap.WorldToCell(current);
             Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(current.x) + Vector3Int.up * Mathf.CeilToInt(current.y);
 
-            if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag))
+            if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag)
+                || !MapManager.Instance.CanPlaceBuilding(vecInt, buildingSize, previewConstruction))
             {
                 PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
             }
             else
             {
-                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewConstruction);
+                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewRoadList[i]);
             }
             previewRoadList.RemoveAt(i);
             i--;
@@ -127,7 +128,7 @@ public class RoadPlacer : BasePlacer
             if (index >= previewRoadList.Count)
             {
                 var con = PoolManager.Instance.SpawnFromPool<Construction>(previewConstruction.Tag);
-                //con.Init(data);
+                con.Init(data);
                 previewRoadList.Add(con);
             }
 
