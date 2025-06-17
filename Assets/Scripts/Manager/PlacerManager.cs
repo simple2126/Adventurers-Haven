@@ -61,8 +61,10 @@ public class PlacerManager : SingletonBase<PlacerManager>  // PlacerManager로 �
     // 데이터만으로 타입 판단하는 오버로드 메서드 추가
     public void StartPlacing(Construction_Data data, Vector2Int size)
     {
-        var prefab = PoolManager.Instance.SpawnFromPool<Construction>(data.tag);
-        prefab.Init(data);
+        var subData = DataManager.Instance.GetDeepConstructionData(data.constructionType, data.subTypeID);
+
+        var prefab = PoolManager.Instance.SpawnFromPool<Construction>(subData.Tag);
+        prefab.Init(data.constructionType, data.subTypeID);
         // 적절한 Placer 선택
 
         // Element && Demolish

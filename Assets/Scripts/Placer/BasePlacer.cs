@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 using TMPro;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public enum PlacementState
 {
@@ -138,12 +139,13 @@ public abstract class BasePlacer : IPlacerContext
     // 배치 확정: MapManager에 저장, 새 preview 생성
     public virtual void OnConfirm()
     {
-        string conTag = data.tag;
+        var subData = DataManager.Instance.GetDeepConstructionData(data.constructionType, data.subTypeID);
+        string conTag = subData.Tag;
         Place();
         Exit();
         // 새 preview 인스턴스 즉시 재시작
         var con = PoolManager.Instance.SpawnFromPool<Construction>(conTag);
-        con.Init(data);
+        con.Init(data.constructionType, data.subTypeID);
         Debug.Log($"{con.Tag} {con.Type} {con.SubType}");
         StartPlacing(data, con);
     }

@@ -128,7 +128,7 @@ public class RoadPlacer : BasePlacer
             if (index >= previewRoadList.Count)
             {
                 var con = PoolManager.Instance.SpawnFromPool<Construction>(previewConstruction.Tag);
-                con.Init(data);
+                con.Init(data.constructionType, data.subTypeID);
                 previewRoadList.Add(con);
             }
 

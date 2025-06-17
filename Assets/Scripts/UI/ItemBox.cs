@@ -11,6 +11,7 @@ public class ItemBox : UIBase
     [SerializeField] private TextMeshProUGUI buildCost;
 
     private Construction_Data data;
+    private IConstructionSubData subData;
 
     protected override void Awake()
     {
@@ -21,12 +22,16 @@ public class ItemBox : UIBase
     public void SetData(Sprite sprite, Construction_Data data)
     {
         image.sprite = sprite;
-        itemName.text = data.name;
-        blockSize.text = $"{data.blockSize[0] * data.blockSize[1]}칸";
-        buildCost.text = $"{data.buildCost}G";
+
+        var subDate = DataManager.Instance.GetDeepConstructionData(data.constructionType, data.subTypeID);
+
+        itemName.text = subDate.Name;
+        blockSize.text = $"{subDate.BlockSize[0] * subDate.BlockSize[1]}칸";
+        buildCost.text = $"{subDate.BuildCost}G";
         SetOutline(blockSize);
         SetOutline(buildCost);
         this.data = data;
+        this.subData = subDate;
     }
 
     private void SetOutline(TextMeshProUGUI tmp)
@@ -38,7 +43,7 @@ public class ItemBox : UIBase
 
     private void CreateItem()
     {
-        Vector2Int size = Vector2Int.right * data.blockSize[0] + Vector2Int.up * data.blockSize[1];
+        Vector2Int size = Vector2Int.right * subData.BlockSize[0] + Vector2Int.up * subData.BlockSize[1];
         PlacerManager.Instance.StartPlacing(data, size);
         UIManager.Instance.Hide<ConstructionPanel>();
         UIManager.Instance.Hide<MenuButtons>();

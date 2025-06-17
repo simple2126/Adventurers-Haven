@@ -1073,6 +1073,7 @@ MonoBehaviour:
     Size: 0
   conType: 1
   baseRoadTag: WhiteRockRoad
+  typeID: E02
 --- !u!114 &6752257833200930522
 MonoBehaviour:
   m_ObjectHideFlags: 0

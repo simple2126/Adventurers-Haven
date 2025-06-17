@@ -17,39 +17,39 @@ using UnityEngine;
 namespace AdventurersHaven
 {
     [GoogleSheet.Attribute.TableStruct]
-    public partial class Construction_Data : ITable
+    public partial class RoadCon_Data : ITable, IConstructionSubData
     { 
 
-        public delegate void OnLoadedFromGoogleSheets(List<Construction_Data> loadedList, Dictionary<string, Construction_Data> loadedDictionary);
+        public delegate void OnLoadedFromGoogleSheets(List<RoadCon_Data> loadedList, Dictionary<string, RoadCon_Data> loadedDictionary);
 
         static bool isLoaded = false;
         static string spreadSheetID = "1DE69qF4w2rp6ZoH9e1cs3t_OK4SO1F7KoRRX16lpkog"; // it is file id
-        static string sheetID = "281517133"; // it is sheet id
+        static string sheetID = "1925023650"; // it is sheet id
         static UnityFileReader reader = new UnityFileReader();
 
 /* Your Loaded Data Storage. */
     
-        public static Dictionary<string, Construction_Data> Construction_DataMap = new Dictionary<string, Construction_Data>();  
-        public static List<Construction_Data> Construction_DataList = new List<Construction_Data>();   
+        public static Dictionary<string, RoadCon_Data> RoadCon_DataMap = new Dictionary<string, RoadCon_Data>();  
+        public static List<RoadCon_Data> RoadCon_DataList = new List<RoadCon_Data>();   
 
         /// <summary>
-        /// Get Construction_Data List 
+        /// Get RoadCon_Data List 
         /// Auto Load
         /// </summary>
-        public static List<Construction_Data> GetList()
+        public static List<RoadCon_Data> GetList()
         {{
            if (isLoaded == false) Load();
-           return Construction_DataList;
+           return RoadCon_DataList;
         }}
 
         /// <summary>
-        /// Get Construction_Data Dictionary, keyType is your sheet A1 field type.
+        /// Get RoadCon_Data Dictionary, keyType is your sheet A1 field type.
         /// - Auto Load
         /// </summary>
-        public static Dictionary<string, Construction_Data>  GetDictionary()
+        public static Dictionary<string, RoadCon_Data>  GetDictionary()
         {{
            if (isLoaded == false) Load();
-           return Construction_DataMap;
+           return RoadCon_DataMap;
         }}
 
     
@@ -57,11 +57,28 @@ namespace AdventurersHaven
 /* Fields. */
 
 		public System.String id;
-		public ConstructionType constructionType;
-		public System.String subTypeID;
-  
+		public System.String tag;
+		public System.String name;
+		public System.Int32 buildCost;
+		public System.Collections.Generic.List<Int32> blockSize;
+		public System.Int32 sales;
+		public System.Int32 salesIncrement;
+		public System.Int32 upgradeCost;
+		public System.Int32 costIncrement;
+		public System.Int32 maxLevel;
 
-#region fuctions
+        public string ID => id;
+        public string Tag => tag;
+        public string Name => name;
+        public int[] BlockSize => blockSize?.ToArray() ?? new int[0];
+        public int BuildCost => buildCost;
+        public int Sales => sales;
+        public int SalesIncrement => salesIncrement;
+        public int UpgradeCost => upgradeCost;
+        public int CostIncrement => costIncrement;
+        public int MaxLevel => maxLevel;
+
+        #region fuctions
 
 
         public static void Load(bool forceReload = false)
@@ -69,7 +86,7 @@ namespace AdventurersHaven
             if(isLoaded && forceReload == false)
             {
 #if UGS_DEBUG
-                 Debug.Log("Construction_Data is already loaded! if you want reload then, forceReload parameter set true");
+                 Debug.Log("RoadCon_Data is already loaded! if you want reload then, forceReload parameter set true");
 #endif
                  return;
             }
@@ -85,7 +102,7 @@ namespace AdventurersHaven
         }
  
 
-        public static void LoadFromGoogle(System.Action<List<Construction_Data>, Dictionary<string, Construction_Data>> onLoaded, bool updateCurrentData = false)
+        public static void LoadFromGoogle(System.Action<List<RoadCon_Data>, Dictionary<string, RoadCon_Data>> onLoaded, bool updateCurrentData = false)
         {      
                 IHttpProtcol webInstance = null;
     #if UNITY_EDITOR
@@ -113,14 +130,14 @@ namespace AdventurersHaven
                
 
 
-    public static (List<Construction_Data> list, Dictionary<string, Construction_Data> map) CommonLoad(Dictionary<string, Dictionary<string, List<string>>> jsonObject, bool forceReload){
-            Dictionary<string, Construction_Data> Map = new Dictionary<string, Construction_Data>();
-            List<Construction_Data> List = new List<Construction_Data>();     
+    public static (List<RoadCon_Data> list, Dictionary<string, RoadCon_Data> map) CommonLoad(Dictionary<string, Dictionary<string, List<string>>> jsonObject, bool forceReload){
+            Dictionary<string, RoadCon_Data> Map = new Dictionary<string, RoadCon_Data>();
+            List<RoadCon_Data> List = new List<RoadCon_Data>();     
             TypeMap.Init();
-            FieldInfo[] fields = typeof(Construction_Data).GetFields(BindingFlags.Public | BindingFlags.Instance);
+            FieldInfo[] fields = typeof(RoadCon_Data).GetFields(BindingFlags.Public | BindingFlags.Instance);
             List<(string original, string propertyName, string type)> typeInfos = new List<(string, string, string)>(); 
             List<List<string>> rows = new List<List<string>>();
-            var sheet = jsonObject["Construction_Data"];
+            var sheet = jsonObject["RoadCon_Data"];
 
             foreach (var column in sheet.Keys)
             {
@@ -139,7 +156,7 @@ namespace AdventurersHaven
                         int rowCount = rows[0].Count;
                         for (int i = 0; i < rowCount; i++)
                         {
-                            Construction_Data instance = new Construction_Data();
+                            RoadCon_Data instance = new RoadCon_Data();
                             for (int j = 0; j < typeInfos.Count; j++)
                             {
                                 try
@@ -180,8 +197,8 @@ namespace AdventurersHaven
                         }
                         if(isLoaded == false || forceReload)
                         { 
-                            Construction_DataList = List;
-                            Construction_DataMap = Map;
+                            RoadCon_DataList = List;
+                            RoadCon_DataMap = Map;
                             isLoaded = true;
                         }
                     } 
@@ -191,10 +208,10 @@ namespace AdventurersHaven
 
  
 
-        public static void Write(Construction_Data data, System.Action<WriteObjectResult> onWriteCallback = null)
+        public static void Write(RoadCon_Data data, System.Action<WriteObjectResult> onWriteCallback = null)
         { 
             TypeMap.Init();
-            FieldInfo[] fields = typeof(Construction_Data).GetFields(BindingFlags.Public | BindingFlags.Instance);
+            FieldInfo[] fields = typeof(RoadCon_Data).GetFields(BindingFlags.Public | BindingFlags.Instance);
             var datas = new string[fields.Length];
             for (int i = 0; i < fields.Length; i++)
             {

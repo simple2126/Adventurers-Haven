@@ -1,4 +1,3 @@
-using AdventurersHaven;
 using UnityEngine;
 
 public class Construction : MonoBehaviour
@@ -12,12 +11,26 @@ public class Construction : MonoBehaviour
     public ElementType? ElementType { get; private set; }
     public PatternType PatternType { get; private set; }
 
-    public void Init(Construction_Data data)
+    public void Init(ConstructionType type, string typeID)
     {
-        Size = Vector2Int.right * data.blockSize[0] + Vector2Int.up * data.blockSize[1];
-        Tag = data.tag;
-        Type = data.constructionType;
-        SubType = data.subType;
+        Debug.Log($"Init 시작: type = {type}, subTypeID = {typeID}");
+
+        var data = DataManager.Instance.GetDeepConstructionData(type, typeID);
+        var subType = DataManager.Instance.GetMiddleSubType(type, typeID);
+
+        if (data == null)
+        {
+            Debug.LogError($"[Init 오류] 데이터를 찾지 못했습니다. Type: {type}, subTypeID: {typeID}");
+            return;
+        }
+
+        if (data == null || subType == null) return;
+
+        Size = Vector2Int.right * data.BlockSize[0] + Vector2Int.up * data.BlockSize[1];
+        Debug.Log($"Size {Size.x} x {Size.y}");
+        Tag = data.Tag;
+        Type = type;
+        SubType = subType;
         SetSubType();
         SetPatternType();
     }

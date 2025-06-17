@@ -41,6 +41,7 @@ public class MapManager : SingletonBase<MapManager>
     [SerializeField] private PoolManager.PoolConfig poolConfig;
     [SerializeField] private ConstructionType conType;
     [SerializeField] private string baseRoadTag;
+    [SerializeField] private string typeID;
     private Construction baseRoadCon;
 
     private TilemapPainter tilemapPainter;
@@ -58,7 +59,7 @@ public class MapManager : SingletonBase<MapManager>
     {
         PoolManager.Instance.AddPools<Construction>(poolConfig);
         baseRoadCon = poolConfig.Prefab.GetComponent<Construction>();
-        baseRoadCon.Init(DataManager.Instance.GetConstructionData(conType, baseRoadTag));
+        baseRoadCon.Init(conType, typeID);
         SetTileDict(BuildingTilemap, BuildTileDict);
         SetTileDict(ElementTilemap, ElementTileDict);
     }
@@ -68,7 +69,6 @@ public class MapManager : SingletonBase<MapManager>
         tilemap.CompressBounds(); // 타일맵의 경계 압축
         BoundsInt bounds = tilemap.cellBounds;
         Vector3 cellSize = tilemap.cellSize;
-        var conData = DataManager.Instance.GetConstructionData(conType, baseRoadTag);
 
         for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
@@ -94,7 +94,7 @@ public class MapManager : SingletonBase<MapManager>
                         {
                             Vector3 worldPos = tilemap.GetCellCenterWorld(pos) + new Vector3(cellSize.x / 2f, cellSize.y / 2f, 0f);
                             var con = PoolManager.Instance.SpawnFromPool<Construction>(baseRoadTag, worldPos, Quaternion.identity);
-                            con.Init(conData);
+                            con.Init(conType, typeID);
                             tileDict[pos].SetTileData(con);
                             SetBuildingAreaLeftBottom(pos, con.Size, con);
                             tilemapPainter.PlaceTiles(tilemap, pos, con.Size, con.PatternType, false);

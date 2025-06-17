@@ -9,16 +9,15 @@ public enum ConstructionType
 }
 
 // ConstructionType 하위 타입
-
 public enum BuildType
 {
     Equipment,
     Restaurant,
 }
 
+// ConstructionType 하위 타입
 public enum ElementType
 {
-    None,
     Demolish, // 철거
     Road,
     Tree,

@@ -50,16 +50,16 @@ public class ConstructionPanel : UIBase
 
     private void SetItemList(ConstructionType type, List<GameObject> itemList)
     {
-        var dataList = DataManager.Instance.GetConstructionDataDict()[type];
+        var dataList = DataManager.Instance.GetConstructionDataList(type);
 
         foreach (var data in dataList)
         {
             var item = Instantiate(itemBoxObj, content.transform);
-
-            if (poolSpriteDict.ContainsKey(data.tag.ToString()))
+            var subData = DataManager.Instance.GetDeepConstructionData(type, data.subTypeID);
+            if (poolSpriteDict.ContainsKey(subData.Tag))
             {
                 ItemBox itemBox = item.GetComponent<ItemBox>();
-                itemBox.SetData(poolSpriteDict[data.tag.ToString()], data);
+                itemBox.SetData(poolSpriteDict[subData.Tag], data);
             }
             itemList.Add(item);
             item.SetActive(type == ConstructionType.Build ? isBuildTab : !isBuildTab);
