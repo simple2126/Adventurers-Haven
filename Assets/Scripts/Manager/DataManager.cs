@@ -106,55 +106,55 @@ public class DataManager : SingletonBase<DataManager>
         demolishDict = DemolishCon_Data.GetList().ToDictionary(d => d.id);
         roadDict = RoadCon_Data.GetList().ToDictionary(r => r.id);
 
-        // Construction 데이터
-        Debug.Log("==== ConstructionCon_Data ====");
-        foreach (var kvp in constructionDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, Type: {kvp.Value.constructionType}, SubTypeID: {kvp.Value.subTypeID}");
-        }
+        //// Construction 데이터
+        //Debug.Log("==== ConstructionCon_Data ====");
+        //foreach (var kvp in constructionDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, Type: {kvp.Value.constructionType}, SubTypeID: {kvp.Value.subTypeID}");
+        //}
 
-        // Build 데이터
-        Debug.Log("==== BuildCon_Data ====");
-        foreach (var kvp in buildDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, SubType: {kvp.Value.subType}, SubTypeID: {kvp.Value.subTypeID}");
-        }
+        //// Build 데이터
+        //Debug.Log("==== BuildCon_Data ====");
+        //foreach (var kvp in buildDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, SubType: {kvp.Value.subType}, SubTypeID: {kvp.Value.subTypeID}");
+        //}
 
-        // Element 데이터
-        Debug.Log("==== ElementCon_Data ====");
-        foreach (var kvp in elementDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, SubType: {kvp.Value.subType}, SubTypeID: {kvp.Value.subTypeID}");
-        }
+        //// Element 데이터
+        //Debug.Log("==== ElementCon_Data ====");
+        //foreach (var kvp in elementDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, SubType: {kvp.Value.subType}, SubTypeID: {kvp.Value.subTypeID}");
+        //}
 
-        // Equipment
-        Debug.Log("==== EquipmentCon_Data ====");
-        foreach (var kvp in equipmentDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
-        }
+        //// Equipment
+        //Debug.Log("==== EquipmentCon_Data ====");
+        //foreach (var kvp in equipmentDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
+        //}
 
-        // Restaurant
-        Debug.Log("==== RestaurantCon_Data ====");
-        foreach (var kvp in restaurantDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
+        //// Restaurant
+        //Debug.Log("==== RestaurantCon_Data ====");
+        //foreach (var kvp in restaurantDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
 
-        }
+        //}
 
-        // Demolish
-        Debug.Log("==== DemolishCon_Data ====");
-        foreach (var kvp in demolishDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
-        }
+        //// Demolish
+        //Debug.Log("==== DemolishCon_Data ====");
+        //foreach (var kvp in demolishDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
+        //}
 
-        // Road
-        Debug.Log("==== RoadCon_Data ====");
-        foreach (var kvp in roadDict)
-        {
-            Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
-        }
+        //// Road
+        //Debug.Log("==== RoadCon_Data ====");
+        //foreach (var kvp in roadDict)
+        //{
+        //    Debug.Log($"ID: {kvp.Key}, Size: {kvp.Value.blockSize[0]}x{kvp.Value.blockSize[1]}");
+        //}
     }
 
     private void SetConstructionDatListDict()
@@ -211,10 +211,9 @@ public class DataManager : SingletonBase<DataManager>
 
             case ConstructionType.Element:
                 if (!elementDict.TryGetValue(typeID, out var elementData)) return null;
-                Debug.Log($"Element Data: {elementData.id}, SubType: {elementData.subType}, SubTypeID: {elementData.subTypeID}");
-
+                //Debug.Log($"Element Data: {elementData.id}, SubType: {elementData.subType}, SubTypeID: {elementData.subTypeID}");
                 if (!Enum.TryParse(elementData.subType, out ElementType elementType)) return null;
-                Debug.Log($"Parsed ElementType: {elementType}");
+                //Debug.Log($"Parsed ElementType: {elementType}");
 
                 switch (elementType)
                 {

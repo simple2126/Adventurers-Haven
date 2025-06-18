@@ -43,8 +43,7 @@ public class ItemBox : UIBase
 
     private void CreateItem()
     {
-        Vector2Int size = Vector2Int.right * subData.BlockSize[0] + Vector2Int.up * subData.BlockSize[1];
-        PlacerManager.Instance.StartPlacing(data, size);
+        PlacerManager.Instance.StartPlacing(data, subData);
         UIManager.Instance.Hide<ConstructionPanel>();
         UIManager.Instance.Hide<MenuButtons>();
     }

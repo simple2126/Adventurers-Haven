@@ -54,6 +54,7 @@ public class RoadPlacer : BasePlacer
     {
         PlaceRoadLine(roadStart, roadEnd);
         ReturnRoadList();
+        PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         notPlaceableIndicator.SetActive(false);
         Exit();
     }
@@ -86,21 +87,20 @@ public class RoadPlacer : BasePlacer
             current = MapManager.Instance.ElementTilemap.WorldToCell(current);
             Vector3Int vecInt = Vector3Int.right * Mathf.CeilToInt(current.x) + Vector3Int.up * Mathf.CeilToInt(current.y);
 
-            if (MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag)
-                || !MapManager.Instance.CanPlaceBuilding(vecInt, buildingSize, previewConstruction))
+            Debug.Log($"[DEBUG] vecInt={vecInt}, IsSameRoadData={MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag)}, CanPlace={MapManager.Instance.CanPlaceBuilding(vecInt, buildingSize, previewConstruction)}");
+
+            if (!MapManager.Instance.IsSameRoadData(vecInt, buildingSize, previewRoadList[i].Tag)
+                && MapManager.Instance.CanPlaceBuilding(vecInt, buildingSize, previewConstruction))
             {
-                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
+                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewRoadList[i]);
             }
             else
             {
-                MapManager.Instance.SetBuildingArea(vecInt, buildingSize, previewRoadList[i]);
+                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
             }
             previewRoadList.RemoveAt(i);
             i--;
         }
-
-        if (previewRoadList.Count > 0)
-            PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
     }
 
     private bool PreviewRoadLine(Vector3Int start, Vector3Int end)

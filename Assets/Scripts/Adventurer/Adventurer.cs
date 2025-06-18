@@ -34,6 +34,8 @@ public class Adventurer : MonoBehaviour
             bool success = pathfinder.TryFindPathToRandomBuild(
                 startCell, out buildCenterPos, out path);
 
+            Debug.Log($"{LogTag} Path search result: {success}, buildCenterPos={buildCenterPos}");
+
             if (success && path.Count > 0)
             {
                 Debug.Log($"{LogTag} Found path {path.Count} → {buildCenterPos}");

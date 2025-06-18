@@ -215,15 +215,23 @@ public class MapManager : SingletonBase<MapManager>
             tilemapPainter.PlaceTiles(elementTilemap, origin, size, construction.PatternType);
         }
 
+        var list = new List<Vector3Int>();
         foreach (var pos in GetCells(origin, size))
         {
             // 사전에 무조건 key가 있다고 가정(이미 CanPlaceBuilding 으로 검증됨)
-            Debug.Log($"SetBuildingArea {pos} {construction.Tag} {construction.Type} {construction.SubType}");
+            //Debug.Log($"SetBuildingArea {pos} {construction.Tag} {construction.Type} {construction.SubType}");
             tileDict[pos].SetTileData(construction);
             if (!construction.IsRoad() && !SpawnerManager.Instance.gameObject.activeSelf)
             {
                 SpawnerManager.Instance.gameObject.SetActive(true);
             }
+            //Debug.Log($"SetBuildingArea {pos} {tileDict[pos].IsOccupied} {tileDict[pos].Construction?.Tag}");
+            list.Add(pos);
+        }
+
+        Debug.Log("SetBuildingArea");
+        foreach (var pos in list)
+        {
             Debug.Log($"SetBuildingArea {pos} {tileDict[pos].IsOccupied} {tileDict[pos].Construction?.Tag}");
         }
     }
