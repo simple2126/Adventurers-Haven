@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SpawnerManager : SingletonBase<SpawnerManager>
 {
-    [SerializeField] private PoolManager.PoolConfig poolConfigs;
+    [SerializeField] private PoolManager.PoolConfig[] poolConfigs;
     [SerializeField] private Transform[] spawnPositions;
 
     private List<Adventurer> adventurerList = new List<Adventurer>();
@@ -26,7 +26,8 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
             if (!SpawnerManager.Instance.gameObject.activeSelf) return;
             spawnInterval = 0f;
             int rand = Random.Range(0, spawnPositions.Length);
-            var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs.Tag, spawnPositions[rand].position, Quaternion.identity);
+            int randAdventurer = Random.Range(0, poolConfigs.Length);
+            var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
             adventurerList.Add(obj);
             obj.InitRandomBuildPath();
             spawnCount++;

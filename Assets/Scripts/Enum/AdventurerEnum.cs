@@ -4,4 +4,11 @@ using GoogleSheet.Core.Type;
 public enum AdventurerType
 {
     Archer,
+    ArmoredAxeman,
+    Knight,
+    KnightTemplar,
+    Priest,
+    Soldier,
+    Swordsman,
+    Wizard,
 }

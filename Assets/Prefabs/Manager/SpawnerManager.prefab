@@ -109,8 +109,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolConfigs:
-    Tag: Archer
+  - Tag: Archer
     Prefab: {fileID: 378449449983969704, guid: 830d8a71fcdd1354ba7adc0be254fa04, type: 3}
+    Size: 0
+  - Tag: ArmoredAxeman
+    Prefab: {fileID: 7071720434591292885, guid: aa7db663362d6e14cbb495c0a92c83e8, type: 3}
+    Size: 0
+  - Tag: Knight
+    Prefab: {fileID: 378449449983969704, guid: 76aed0b3b60d56a4c814d6bb5a4de5a3, type: 3}
+    Size: 0
+  - Tag: KnightTemplar
+    Prefab: {fileID: 926531521879722172, guid: 9f7fbe33c0a1c7c48b81d9c739ab3c5f, type: 3}
+    Size: 0
+  - Tag: Priest
+    Prefab: {fileID: 5047637374569878559, guid: af6b811bc3ce4114dad5312f603e28a4, type: 3}
+    Size: 0
+  - Tag: Soldier
+    Prefab: {fileID: 4794192812167567530, guid: 694db2c7624a2f34ab085400c2324f0c, type: 3}
+    Size: 0
+  - Tag: Swordsman
+    Prefab: {fileID: 6582212765681330806, guid: f629851daba3a2f448669e2b1b6ec1d2, type: 3}
+    Size: 0
+  - Tag: Wizard
+    Prefab: {fileID: 8415211711421157222, guid: ccdc8e80fd3d8524c96abf2aa972d3ce, type: 3}
     Size: 0
   spawnPositions:
   - {fileID: 983268894822033569}
