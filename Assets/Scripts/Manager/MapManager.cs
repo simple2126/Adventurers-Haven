@@ -229,11 +229,11 @@ public class MapManager : SingletonBase<MapManager>
             list.Add(pos);
         }
 
-        Debug.Log("SetBuildingArea");
-        foreach (var pos in list)
-        {
-            Debug.Log($"SetBuildingArea {pos} {tileDict[pos].IsOccupied} {tileDict[pos].Construction?.Tag}");
-        }
+        //Debug.Log("SetBuildingArea");
+        //foreach (var pos in list)
+        //{
+        //    Debug.Log($"SetBuildingArea {pos} {tileDict[pos].IsOccupied} {tileDict[pos].Construction?.Tag}");
+        //}
     }
 
     public void RemoveBuildingArea(Vector3Int origin, Construction construction)

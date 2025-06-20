@@ -23,7 +23,7 @@ public class ItemBox : UIBase
     {
         image.sprite = sprite;
 
-        var subDate = DataManager.Instance.GetDeepConstructionData(data.constructionType, data.subTypeID);
+        var subDate = DataManager.Instance.Construction.GetDeepConstructionData(data.constructionType, data.subTypeID);
 
         itemName.text = subDate.Name;
         blockSize.text = $"{subDate.BlockSize[0] * subDate.BlockSize[1]}칸";

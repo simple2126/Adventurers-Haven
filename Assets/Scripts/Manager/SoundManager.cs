@@ -105,14 +105,14 @@ public class SoundManager : SingletonBase<SoundManager>
             bgmList,
             bgmDataDict,
             bgmVolumeList,
-            DataManager.Instance.GetIndvidualBgmVolumeDict()
+            DataManager.Instance.Sound.GetIndvidualBgmVolumeDict()
         );
 
         SetSoundData<SfxType, SfxData, SfxVolume>(
             sfxList,
             sfxDataDict,
             sfxVolumeList,
-            DataManager.Instance.GetIndvidualSfxVolumeDict()
+            DataManager.Instance.Sound.GetIndvidualSfxVolumeDict()
         );
 
         PoolManager.Instance.AddPools<SfxSoundSource>(Poolconfigs);

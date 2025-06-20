@@ -139,7 +139,7 @@ public abstract class BasePlacer : IPlacerContext
     // 배치 확정: MapManager에 저장, 새 preview 생성
     public virtual void OnConfirm()
     {
-        var subData = DataManager.Instance.GetDeepConstructionData(data.constructionType, data.subTypeID);
+        var subData = DataManager.Instance.Construction.GetDeepConstructionData(data.constructionType, data.subTypeID);
         string conTag = subData.Tag;
         Place();
         Exit();

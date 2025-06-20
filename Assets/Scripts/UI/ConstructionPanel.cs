@@ -50,12 +50,12 @@ public class ConstructionPanel : UIBase
 
     private void SetItemList(ConstructionType type, List<GameObject> itemList)
     {
-        var dataList = DataManager.Instance.GetConstructionDataList(type);
+        var dataList = DataManager.Instance.Construction.GetConstructionDataList(type);
 
         foreach (var data in dataList)
         {
             var item = Instantiate(itemBoxObj, content.transform);
-            var subData = DataManager.Instance.GetDeepConstructionData(type, data.subTypeID);
+            var subData = DataManager.Instance.Construction.GetDeepConstructionData(type, data.subTypeID);
             if (poolSpriteDict.ContainsKey(subData.Tag))
             {
                 ItemBox itemBox = item.GetComponent<ItemBox>();

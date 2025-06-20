@@ -13,8 +13,8 @@ public class Construction : MonoBehaviour
 
     public void Init(ConstructionType type, string typeID)
     {
-        var data = DataManager.Instance.GetDeepConstructionData(type, typeID);
-        var subType = DataManager.Instance.GetMiddleSubType(type, typeID);
+        var data = DataManager.Instance.Construction.GetDeepConstructionData(type, typeID);
+        var subType = DataManager.Instance.Construction.GetMiddleSubType(type, typeID);
 
         if (data == null || subType == null) return;
 
