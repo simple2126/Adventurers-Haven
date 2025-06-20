@@ -17,7 +17,7 @@ using UnityEngine;
 namespace AdventurersHaven
 {
     [GoogleSheet.Attribute.TableStruct]
-    public partial class RoadCon_Data : ITable, IConstructionSubData
+    public partial class RoadCon_Data : ITable
     { 
 
         public delegate void OnLoadedFromGoogleSheets(List<RoadCon_Data> loadedList, Dictionary<string, RoadCon_Data> loadedDictionary);
@@ -66,19 +66,9 @@ namespace AdventurersHaven
 		public System.Int32 upgradeCost;
 		public System.Int32 costIncrement;
 		public System.Int32 maxLevel;
+  
 
-        public string ID => id;
-        public string Tag => tag;
-        public string Name => name;
-        public int[] BlockSize => blockSize?.ToArray() ?? new int[0];
-        public int BuildCost => buildCost;
-        public int Sales => sales;
-        public int SalesIncrement => salesIncrement;
-        public int UpgradeCost => upgradeCost;
-        public int CostIncrement => costIncrement;
-        public int MaxLevel => maxLevel;
-
-        #region fuctions
+#region fuctions
 
 
         public static void Load(bool forceReload = false)

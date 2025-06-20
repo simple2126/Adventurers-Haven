@@ -4,20 +4,104 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public abstract class ConstructionSubDataWrapper<T> : IConstructionSubData
+{
+    protected T data;
+
+    public ConstructionSubDataWrapper(T data)
+    {
+        this.data = data;
+    }
+
+    public abstract string ID { get; }
+    public abstract string Tag { get; }
+    public abstract string Name { get; }
+    public abstract int BuildCost { get; }
+    public abstract int[] BlockSize { get; }
+    public abstract int Sales { get; }
+    public abstract int SalesIncrement { get; }
+    public abstract int UpgradeCost { get; }
+    public abstract int CostIncrement { get; }
+    public abstract int MaxLevel { get; }
+}
+
 public interface IConstructionSubData
 {
-    string ID { get; }         
-    string Tag { get; }        
-    string Name { get; }       
-    int BuildCost { get; }  
-    int[] BlockSize { get; } 
-    int Sales { get; } 
-    int SalesIncrement { get; } 
+    string ID { get; }
+    string Tag { get; }
+    string Name { get; }
+    int BuildCost { get; }
+    int[] BlockSize { get; }
+    int Sales { get; }
+    int SalesIncrement { get; }
     int UpgradeCost { get; }
     int CostIncrement { get; }
     int MaxLevel { get; }
 }
 
+public class EquipmentDataWrapper : ConstructionSubDataWrapper<EquipmentCon_Data>
+{
+    public EquipmentDataWrapper(EquipmentCon_Data data) : base(data) { }
+
+    public override string ID => data.id;
+    public override string Tag => data.tag;
+    public override string Name => data.name;
+    public override int BuildCost => data.buildCost;
+    public override int[] BlockSize => data.blockSize?.ToArray() ?? new int[0];
+    public override int Sales => data.sales;
+    public override int SalesIncrement => data.salesIncrement;
+    public override int UpgradeCost => data.upgradeCost;
+    public override int CostIncrement => data.costIncrement;
+    public override int MaxLevel => data.maxLevel;
+}
+
+public class RestaurantDataWrapper : ConstructionSubDataWrapper<RestaurantCon_Data>
+{
+    public RestaurantDataWrapper(RestaurantCon_Data data) : base(data) { }
+
+    public override string ID => data.id;
+    public override string Tag => data.tag;
+    public override string Name => data.name;
+    public override int BuildCost => data.buildCost;
+    public override int[] BlockSize => data.blockSize?.ToArray() ?? new int[0];
+    public override int Sales => data.sales;
+    public override int SalesIncrement => data.salesIncrement;
+    public override int UpgradeCost => data.upgradeCost;
+    public override int CostIncrement => data.costIncrement;
+    public override int MaxLevel => data.maxLevel;
+}
+
+public class DemolishDataWrapper : ConstructionSubDataWrapper<DemolishCon_Data>
+{
+    public DemolishDataWrapper(DemolishCon_Data data) : base(data) { }
+
+    public override string ID => data.id;
+    public override string Tag => data.tag;
+    public override string Name => data.name;
+    public override int BuildCost => data.buildCost;
+    public override int[] BlockSize => data.blockSize?.ToArray() ?? new int[0];
+    public override int Sales => data.sales;
+    public override int SalesIncrement => data.salesIncrement;
+    public override int UpgradeCost => data.upgradeCost;
+    public override int CostIncrement => data.costIncrement;
+    public override int MaxLevel => data.maxLevel;
+}
+
+public class RoadDataWrapper : ConstructionSubDataWrapper<RoadCon_Data>
+{
+    public RoadDataWrapper(RoadCon_Data data) : base(data) { }
+
+    public override string ID => data.id;
+    public override string Tag => data.tag;
+    public override string Name => data.name;
+    public override int BuildCost => data.buildCost;
+    public override int[] BlockSize => data.blockSize?.ToArray() ?? new int[0];
+    public override int Sales => data.sales;
+    public override int SalesIncrement => data.salesIncrement;
+    public override int UpgradeCost => data.upgradeCost;
+    public override int CostIncrement => data.costIncrement;
+    public override int MaxLevel => data.maxLevel;
+}
 
 public class DataManager : SingletonBase<DataManager>
 {
@@ -38,6 +122,8 @@ public class DataManager : SingletonBase<DataManager>
     Dictionary<string, DemolishCon_Data> demolishDict;
     Dictionary<string, RoadCon_Data> roadDict;
 
+    private Dictionary<string, IConstructionSubData> constructionWrapperDict = new Dictionary<string, IConstructionSubData>();
+
     private Dictionary<AdventurerType, List<Adventurer_Data>> adventurerDataDict;
     
     protected override void Awake()
@@ -48,6 +134,7 @@ public class DataManager : SingletonBase<DataManager>
         SetIndividualBgmVolumeDict();
         SetAllConstructionData();
         SetConstructionDatListDict();
+        SetAllConstructionWrappers();
         SetAdventurerDataDict();
         DontDestroyOnLoad(gameObject);
     }
@@ -187,45 +274,74 @@ public class DataManager : SingletonBase<DataManager>
         return new List<Construction_Data>();
     }
 
-    public IConstructionSubData GetDeepConstructionData(ConstructionType type, string typeID)
+    private string GenerateCacheKey(ConstructionType type, string typeID)
     {
-        if (constructionDict == null) { SetAllConstructionData(); }
+        return $"{type}_{typeID}";
+    }
 
-        switch (type)
+    private void SetAllConstructionWrappers()
+    {
+        if (buildDict != null)
         {
-            case ConstructionType.Build:
-                if (!buildDict.TryGetValue(typeID, out var buildData)) return null;
-                if (!Enum.TryParse(buildData.subType, out BuildType buildType)) return null;
+            foreach (var kvp in buildDict)
+            {
+                var buildData = kvp.Value;
+                if (!Enum.TryParse(buildData.subType, out BuildType buildType)) continue;
 
+                IConstructionSubData wrapper = null;
                 switch (buildType)
                 {
                     case BuildType.Equipment:
-                        return equipmentDict.TryGetValue(buildData.subTypeID, out var eqData)
-                            ? eqData as IConstructionSubData : null;
-
+                        if (equipmentDict.TryGetValue(buildData.subTypeID, out var eqData))
+                            wrapper = new EquipmentDataWrapper(eqData);
+                        break;
                     case BuildType.Restaurant:
-                        return restaurantDict.TryGetValue(buildData.subTypeID, out var resData)
-                            ? resData as IConstructionSubData : null;
+                        if (restaurantDict.TryGetValue(buildData.subTypeID, out var resData))
+                            wrapper = new RestaurantDataWrapper(resData);
+                        break;
                 }
-                break;
+                if (wrapper != null)
+                    constructionWrapperDict[GenerateCacheKey(ConstructionType.Build, kvp.Key)] = wrapper;
+            }
+        }
 
-            case ConstructionType.Element:
-                if (!elementDict.TryGetValue(typeID, out var elementData)) return null;
-                //Debug.Log($"Element Data: {elementData.id}, SubType: {elementData.subType}, SubTypeID: {elementData.subTypeID}");
-                if (!Enum.TryParse(elementData.subType, out ElementType elementType)) return null;
-                //Debug.Log($"Parsed ElementType: {elementType}");
+        if (elementDict != null)
+        {
+            foreach (var kvp in elementDict)
+            {
+                var elementData = kvp.Value;
+                if (!Enum.TryParse(elementData.subType, out ElementType elementType)) continue;
 
+                IConstructionSubData wrapper = null;
                 switch (elementType)
                 {
                     case ElementType.Demolish:
-                        return demolishDict.TryGetValue(elementData.subTypeID, out var demoData)
-                            ? demoData as IConstructionSubData : null;
+                        if (demolishDict.TryGetValue(elementData.subTypeID, out var demoData))
+                            wrapper = new DemolishDataWrapper(demoData);
+                        break;
                     case ElementType.Road:
-                        return roadDict.TryGetValue(elementData.subTypeID, out var roadData)
-                            ? roadData as IConstructionSubData : null;
+                        if (roadDict.TryGetValue(elementData.subTypeID, out var roadData))
+                            wrapper = new RoadDataWrapper(roadData);
+                        break;
                 }
-                break;
+                if (wrapper != null)
+                    constructionWrapperDict[GenerateCacheKey(ConstructionType.Element, kvp.Key)] = wrapper;
+            }
         }
+    }
+
+    // GetDeepConstructionData 수정: 캐시에서 반환
+    public IConstructionSubData GetDeepConstructionData(ConstructionType type, string typeID)
+    {
+        if (constructionWrapperDict == null || constructionWrapperDict.Count == 0)
+        {
+            SetAllConstructionData();
+            SetAllConstructionWrappers();
+        }
+
+        string key = GenerateCacheKey(type, typeID);
+        if (constructionWrapperDict.TryGetValue(key, out var wrapper))
+            return wrapper;
 
         return null;
     }
