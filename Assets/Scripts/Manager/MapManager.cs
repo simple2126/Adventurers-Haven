@@ -62,6 +62,8 @@ public class MapManager : SingletonBase<MapManager>
         baseRoadCon.Init(conType, typeID);
         SetTileDict(BuildingTilemap, BuildTileDict);
         SetTileDict(ElementTilemap, ElementTileDict);
+
+        SpawnerManager.Instance.gameObject.SetActive(true);
     }
 
     private void SetTileDict(Tilemap tilemap, Dictionary<Vector3Int, CustomTileData> tileDict)
@@ -221,12 +223,13 @@ public class MapManager : SingletonBase<MapManager>
             // 사전에 무조건 key가 있다고 가정(이미 CanPlaceBuilding 으로 검증됨)
             //Debug.Log($"SetBuildingArea {pos} {construction.Tag} {construction.Type} {construction.SubType}");
             tileDict[pos].SetTileData(construction);
-            if (!construction.IsRoad() && !SpawnerManager.Instance.gameObject.activeSelf)
-            {
-                SpawnerManager.Instance.gameObject.SetActive(true);
-            }
             //Debug.Log($"SetBuildingArea {pos} {tileDict[pos].IsOccupied} {tileDict[pos].Construction?.Tag}");
             list.Add(pos);
+        }
+
+        if (SpawnerManager.Instance.gameObject.activeSelf && construction.Type == ConstructionType.Build)
+        {
+            SpawnerManager.Instance.Spawn();
         }
 
         //Debug.Log("SetBuildingArea");

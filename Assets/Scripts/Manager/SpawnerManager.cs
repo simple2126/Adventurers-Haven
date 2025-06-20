@@ -18,22 +18,22 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
         gameObject.SetActive(false); // 스폰 매니저는 비활성화 상태로 시작
     }
 
-    private void Update()
-    {
-        spawnInterval += Time.deltaTime;
-        if(spawnCount < 1 && spawnInterval > spawnTime)
-        {
-            if (!SpawnerManager.Instance.gameObject.activeSelf) return;
-            spawnInterval = 0f;
-            int rand = Random.Range(0, spawnPositions.Length);
-            int randAdventurer = Random.Range(0, poolConfigs.Length);
-            var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
-            adventurerList.Add(obj);
-            obj.InitRandomBuildPath();
-            spawnCount++;
-            Debug.Log($"Spawn");
-        }
-    }
+    //private void Update()
+    //{
+    //    spawnInterval += Time.deltaTime;
+    //    if(spawnCount < 1 && spawnInterval > spawnTime)
+    //    {
+    //        if (!SpawnerManager.Instance.gameObject.activeSelf) return;
+    //        spawnInterval = 0f;
+    //        int rand = Random.Range(0, spawnPositions.Length);
+    //        int randAdventurer = Random.Range(0, poolConfigs.Length);
+    //        var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
+    //        adventurerList.Add(obj);
+    //        obj.InitRandomBuildPath();
+    //        spawnCount++;
+    //        Debug.Log($"Spawn");
+    //    }
+    //}
 
     public void SearchPathAllAdventurer()
     {
@@ -47,5 +47,14 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
                 adventurer.InitRandomBuildPath();
             }
         }
+    }
+
+    public void Spawn()
+    {
+        Debug.Log($"[SpawnerManager] Spawn Adventurer");
+        int rand = Random.Range(0, spawnPositions.Length);
+        int randAdventurer = Random.Range(0, poolConfigs.Length);
+        var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
+        obj.InitRandomBuildPath();
     }
 }

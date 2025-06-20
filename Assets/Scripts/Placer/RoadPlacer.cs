@@ -96,7 +96,7 @@ public class RoadPlacer : BasePlacer
             }
             else
             {
-                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
+                PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewRoadList[i]);
             }
             previewRoadList.RemoveAt(i);
             i--;

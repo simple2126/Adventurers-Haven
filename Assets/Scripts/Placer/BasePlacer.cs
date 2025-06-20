@@ -41,8 +41,9 @@ public abstract class BasePlacer : IPlacerContext
     // ----- protected 필드 -----
     protected Construction_Data data;
     protected Camera mainCamera;
-    protected SpriteRenderer previewRenderer;
     protected Construction previewConstruction;
+    protected SpriteRenderer previewRenderer;
+    protected BoxCollider2D previewCollider;
     protected Vector2Int buildingSize;
     protected Vector3Int gridPos;
 
@@ -106,6 +107,8 @@ public abstract class BasePlacer : IPlacerContext
         previewConstruction = construction;
         previewConstruction.transform.position = Vector3.zero;
         previewRenderer = previewConstruction.gameObject.GetComponent<SpriteRenderer>();
+        previewConstruction.TryGetComponent<BoxCollider2D>(out previewCollider);
+        if(previewCollider != null) previewCollider.enabled = false; // Collider 비활성화 (배치 전 충돌 방지)
         buildingSize = construction.Size;
 
         // 버튼 범위 계산 및 메시 설정
@@ -158,6 +161,7 @@ public abstract class BasePlacer : IPlacerContext
 
     protected virtual void Place()
     {
+        if(previewCollider != null) previewCollider.enabled = true; // 배치 확정 시 Collider 활성화
         MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewConstruction);
     }
 

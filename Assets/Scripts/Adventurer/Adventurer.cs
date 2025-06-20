@@ -7,9 +7,12 @@ using UnityEngine;
 // =======================================================================
 public class Adventurer : MonoBehaviour
 {
+    private Animator anim;
+    private Rigidbody2D rb;
+    private SpriteRenderer sprite;
+
     private const string LogTag = "[Adventurer]";
-    [SerializeField] private float stepInterval = 0.25f;
-    [SerializeField] private float retryInterval = 0.2f;
+    [SerializeField] private float moveSpeed = 2f; // ← 이동 속도
 
     [SerializeField] private List<Vector3> path;          // ← 도로 경로(월드좌표)
     [SerializeField] private Vector3 buildCenterPos;      // ← 건물 중심(월드좌표)
@@ -17,6 +20,25 @@ public class Adventurer : MonoBehaviour
     private RoadPathfinder pathfinder;
     private int pathIdx;
     private bool isMoving;
+
+    private void Awake()
+    {
+        anim = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        sprite = GetComponent<SpriteRenderer>();
+
+        gameObject.SetActive(false); // Adventurer는 비활성화 상태로 시작
+    }
+
+    private void LateUpdate()
+    {
+        anim.SetFloat("Walk", rb.velocity.magnitude);
+
+        if(rb.velocity.magnitude != 0)
+        {
+            sprite.flipX = rb.velocity.x < 0; // 좌우 반전   
+        }
+    }
 
     public void InitRandomBuildPath()
     {
@@ -43,7 +65,6 @@ public class Adventurer : MonoBehaviour
                 yield break; // 일단 걷기 시작하면 루프 종료
             }
 
-            Debug.LogWarning($"{LogTag} Path not found. Retrying in {retryInterval} sec...");
             yield return null;
             // while 루프로 자동 반복됨
         }
@@ -56,39 +77,27 @@ public class Adventurer : MonoBehaviour
             Debug.LogError($"{LogTag} path null");
             yield break;
         }
+
         isMoving = true;
         pathIdx = 0;
+
         while (pathIdx < path.Count)
         {
             Vector3 target = path[pathIdx];
-            Vector3 start = transform.position;
-            float t = 0;
-            while (t < 1f)
+            while ((transform.position - target).sqrMagnitude > 0.001f)
             {
-                t += Time.deltaTime / stepInterval;
-                transform.position = Vector3.Lerp(start, target, t);
+                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
                 yield return null;
             }
+
             transform.position = target;
             pathIdx++;
         }
-        // 마지막으로 건물 중심까지 이동
-        {
-            Vector3 s = transform.position;
-            float tt = 0;
-            while (tt < 1f)
-            {
-                tt += Time.deltaTime / stepInterval;
-                transform.position = Vector3.Lerp(s, buildCenterPos, tt);
-                yield return null;
-            }
-            transform.position = buildCenterPos;
-        }
+
         isMoving = false;
         Debug.Log($"{LogTag} Arrived at build {buildCenterPos}");
     }
 
-    public bool IsMoving() => isMoving;
 
     private void OnDrawGizmos()
     {
@@ -110,11 +119,13 @@ public class Adventurer : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        collision.TryGetComponent<Construction>(out var construction);
+        if(!collision.TryGetComponent<Construction>(out var construction)) return;
+
         if (construction.Type == ConstructionType.Build)
         {
             gameObject.SetActive(false); // 건물 안에 들어가면 Adventurer 비활성화
-            path = null; // 경로 초기화
+            StopAllCoroutines();
+            path.Clear();
         }
     }
 }

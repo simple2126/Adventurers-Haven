@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 5043959216828759040}
   - component: {fileID: 363885256834953333}
   - component: {fileID: 2923094031116468518}
-  - component: {fileID: 6526086255809525344}
   - component: {fileID: 6124498711085409960}
   - component: {fileID: 2725459997384278849}
+  - component: {fileID: 6526086255809525344}
   m_Layer: 0
   m_Name: Soldier
   m_TagString: Untagged
@@ -109,22 +109,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &6526086255809525344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4794192812167567530}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b45f53ed9477e814fb96cd7d790495f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stepInterval: 0.25
-  retryInterval: 0.5
-  path: []
-  buildCenterPos: {x: 0, y: 0, z: 0}
 --- !u!61 &6124498711085409960
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -197,3 +181,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 7
+--- !u!114 &6526086255809525344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4794192812167567530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b45f53ed9477e814fb96cd7d790495f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stepInterval: 0.25
+  retryInterval: 0.5
+  path: []
+  buildCenterPos: {x: 0, y: 0, z: 0}

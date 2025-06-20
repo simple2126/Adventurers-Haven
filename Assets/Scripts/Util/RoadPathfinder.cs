@@ -47,6 +47,7 @@ public class RoadPathfinder
     private Dictionary<Vector3Int, CustomTileData> elemDict => MapManager.Instance.ElementTileDict;
     private Dictionary<Vector3Int, CustomTileData> buildDict => MapManager.Instance.BuildTileDict;
     private Tilemap elementTilemap => MapManager.Instance.ElementTilemap;
+    private Tilemap buildingTilemap => MapManager.Instance.BuildingTilemap;
 
     readonly Vector2Int roadSize = new(2, 2);
     static readonly Vector3Int[] Dir4 = { Vector3Int.right, Vector3Int.left, Vector3Int.up, Vector3Int.down };
@@ -81,12 +82,52 @@ public class RoadPathfinder
                 bestLen = path.Count;
             }
         }
+
         Debug.Log($"Found {neighborRoads.Count} outer roads, best path length: {bestLen}");
         if (bestPath != null)
         {
             worldPath = PathToWorld(bestPath);
             buildCenter = buildCon.transform.position;
-            worldPath.Add(buildCenter); // 마지막에 건물 중심 추가
+
+            var lastRoadCenter = worldPath[^1];
+            var dir = (buildCenter - lastRoadCenter).normalized;
+
+            // 타일 크기 정보
+            var elementTilemapSize = elementTilemap.cellSize;
+            var buildTilemapSize = buildingTilemap.cellSize;
+
+            // 건물 크기 (타일 수 단위)
+            var conSize = buildCon.Size;
+
+            // 방향 보정 (직교 방향으로)
+            Vector3 fixedDir;
+            float roadHalf, buildHalf;
+
+            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) // 가로 방향
+            {
+                fixedDir = Vector3.right * Mathf.Sign(dir.x);
+                roadHalf = (roadSize.x * elementTilemapSize.x) / 2f;
+                buildHalf = (conSize.x * buildTilemapSize.x) / 2f;
+            }
+            else // 세로 방향
+            {
+                fixedDir = Vector3.up * Mathf.Sign(dir.y);
+                roadHalf = (roadSize.y * elementTilemapSize.y) / 2f;
+                buildHalf = (conSize.y * buildTilemapSize.y) / 2f;
+            }
+
+            float totalOffset = roadHalf + buildHalf;
+
+            // 건물 기준으로 한 칸 앞 위치 계산
+            var stopBeforeBuild = buildCenter - fixedDir * totalOffset;
+
+            if (Vector3.Dot(dir, fixedDir) > 0f)
+                worldPath.RemoveAt(worldPath.Count - 1);
+
+            // 경로에 추가
+            worldPath.Add(stopBeforeBuild);
+            worldPath.Add(buildCenter);
+
             return true;
         }
         return false;
@@ -220,12 +261,17 @@ public class RoadPathfinder
     List<Vector3Int> GetRandomBuildCells(out Construction con)
     {
         var map = new Dictionary<Construction, List<Vector3Int>>();
+        
         foreach (var kv in buildDict)
             if (kv.Value?.IsOccupied == true && kv.Value.Construction != null)
                 (map.TryGetValue(kv.Value.Construction, out var l) ? l : map[kv.Value.Construction] = new List<Vector3Int>()).Add(kv.Key);
+
         if (map.Count == 0) { con = null; return null; }
+        
         var cons = new List<Construction>(map.Keys);
-        con = cons[Random.Range(0, cons.Count)];
+        var rand = Random.Range(0, cons.Count);
+        Debug.Log($"Random Con {rand}");
+        con = cons[rand];
         return map[con];
     }
 
