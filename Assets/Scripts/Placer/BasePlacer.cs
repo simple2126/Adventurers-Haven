@@ -1,10 +1,11 @@
 using AdventurersHaven;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Tilemaps;
-using TMPro;
+using GoogleSheet.Type;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public enum PlacementState
 {
@@ -119,6 +120,7 @@ public abstract class BasePlacer : IPlacerContext
 
         Vector2 pos = previewConstruction.transform.position;
         gridPos = Vector3Int.right * Mathf.CeilToInt(pos.x) + Vector3Int.up * Mathf.CeilToInt(pos.y);
+        previewConstruction.transform.position = GetSnappedPosition(GetTilemap(), gridPos);
         UpdatePlacement();
         TransitionTo(PlacementState.Idle); // 초기 상태 설정
     }
@@ -155,14 +157,16 @@ public abstract class BasePlacer : IPlacerContext
 
     public virtual void OnCancel()
     {
+        if (previewConstruction.Type == ConstructionType.Build) previewConstruction.OnCancel?.Invoke();
         PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
-        Exit(); 
+        Exit();
     }
 
     protected virtual void Place()
     {
         if(previewCollider != null) previewCollider.enabled = true; // 배치 확정 시 Collider 활성화
         MapManager.Instance.SetBuildingArea(gridPos, buildingSize, previewConstruction);
+        previewConstruction.OnPlace?.Invoke();
     }
 
     protected virtual void Exit()

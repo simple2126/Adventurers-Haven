@@ -2,9 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// =======================================================================
-// Adventurer : 경로 따라 이동 후 건물 중앙으로 입장
-// =======================================================================
 public class Adventurer : MonoBehaviour
 {
     private Animator anim;
@@ -17,9 +14,8 @@ public class Adventurer : MonoBehaviour
     [SerializeField] private List<Vector3> path;          // ← 도로 경로(월드좌표)
     [SerializeField] private Vector3 buildCenterPos;      // ← 건물 중심(월드좌표)
 
-    private RoadPathfinder pathfinder;
     private int pathIdx;
-    private bool isMoving;
+    private bool isMoving = false;
 
     private void Awake()
     {
@@ -42,7 +38,6 @@ public class Adventurer : MonoBehaviour
 
     public void InitRandomBuildPath()
     {
-        pathfinder = new RoadPathfinder();
         StartCoroutine(SearchRoutine());
     }
 
@@ -53,9 +48,14 @@ public class Adventurer : MonoBehaviour
             Vector3Int startCell = MapManager.Instance.ElementTilemap.WorldToCell(transform.position);
             Debug.Log($"{LogTag} Searching path from {startCell}");
 
-            bool success = pathfinder.TryFindPathToRandomBuild(
+            bool success = RoadPathfinder.Instance.TryFindPathToRandomBuild(
                 startCell, out buildCenterPos, out path);
-
+            
+            if(!success)
+            {
+                PoolManager.Instance.ReturnToPool<Adventurer>(this.gameObject.name, this);
+            }
+            
             Debug.Log($"{LogTag} Path search result: {success}, buildCenterPos={buildCenterPos}");
 
             if (success && path.Count > 0)

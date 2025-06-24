@@ -57,7 +57,7 @@ public class MapManager : SingletonBase<MapManager>
 
     private void Start()
     {
-        PoolManager.Instance.AddPools<Construction>(poolConfig);
+        PoolManager.Instance.AddPool<Construction>(poolConfig);
         baseRoadCon = poolConfig.Prefab.GetComponent<Construction>();
         baseRoadCon.Init(conType, typeID);
         SetTileDict(BuildingTilemap, BuildTileDict);
@@ -275,6 +275,7 @@ public class MapManager : SingletonBase<MapManager>
 
                     if (!removedConstructions.Contains(buildCon))
                     {
+                        buildCon.OnCancel?.Invoke();
                         PoolManager.Instance.ReturnToPool<Construction>(buildCon.Tag, buildCon);
                         removedConstructions.Add(buildCon);
                     }
@@ -404,5 +405,18 @@ public class MapManager : SingletonBase<MapManager>
                 tile.Construction.gameObject.SetActive(isShow);
             }
         }
+    }
+
+    public List<Vector3Int> GetBuildCells(Construction con)
+    {
+        if (con == null) return new List<Vector3Int>();
+
+        var cells = new List<Vector3Int>();
+        foreach (var kv in BuildTileDict)
+        {
+            if (kv.Value?.IsOccupied == true && kv.Value.Construction == con)
+                cells.Add(kv.Key);
+        }
+        return cells;
     }
 }

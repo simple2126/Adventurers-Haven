@@ -1,8 +1,9 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Construction : MonoBehaviour
 {
-    // 게임 오브젝트 이름
     public Vector2Int Size { get; private set; } // 건물 크기
     public string Tag { get; private set; }
     public ConstructionType Type { get; private set; }
@@ -10,6 +11,10 @@ public class Construction : MonoBehaviour
     public BuildType? BuildType { get; private set; }
     public ElementType? ElementType { get; private set; }
     public PatternType PatternType { get; private set; }
+
+    private NotRoadSign notRoadSign;
+    public Action OnPlace;
+    public Action OnCancel;
 
     public void Init(ConstructionType type, string typeID)
     {
@@ -24,6 +29,40 @@ public class Construction : MonoBehaviour
         SubType = subType;
         SetSubType();
         SetPatternType();
+
+        if (Type != ConstructionType.Build) return;
+        SetBuild();
+    }
+    
+    private void SetBuild()
+    {
+        OnPlace = null;
+        OnPlace += ChangeNotRoadSign;
+        OnCancel = null;
+        OnCancel += ReturnNotRoadSign;
+    }
+
+    private void ChangeNotRoadSign()
+    {
+        var outRoadCells = RoadPathfinder.Instance.GetOuterRoadCells(this, MapManager.Instance.GetBuildCells(this));
+        notRoadSign = PoolManager.Instance.SpawnFromPool<NotRoadSign>("NotRoadSign");
+        notRoadSign.transform.position = transform.position;
+
+        if (outRoadCells == null || outRoadCells.Count == 0)
+        {
+            notRoadSign.gameObject.SetActive(true);
+        }
+        else
+        {
+            notRoadSign.gameObject.SetActive(false);
+        }
+    }
+
+    private void ReturnNotRoadSign()
+    {
+        if (notRoadSign == null) return;
+        PoolManager.Instance.ReturnToPool("NotRoadSign", notRoadSign);
+        notRoadSign = null;
     }
 
     private void SetSubType()

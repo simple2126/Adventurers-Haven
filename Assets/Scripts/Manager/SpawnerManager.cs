@@ -7,9 +7,9 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
     [SerializeField] private Transform[] spawnPositions;
 
     private List<Adventurer> adventurerList = new List<Adventurer>();
-    private float spawnInterval = 0f;
-    private float spawnTime = 1f;
-    private int spawnCount = 0;
+    //private float spawnInterval = 0f;
+    //private float spawnTime = 1f;
+    //private int spawnCount = 0;
 
     protected override void Awake()
     {
@@ -18,22 +18,24 @@ public class SpawnerManager : SingletonBase<SpawnerManager>
         gameObject.SetActive(false); // 스폰 매니저는 비활성화 상태로 시작
     }
 
-    //private void Update()
-    //{
-    //    spawnInterval += Time.deltaTime;
-    //    if(spawnCount < 1 && spawnInterval > spawnTime)
-    //    {
-    //        if (!SpawnerManager.Instance.gameObject.activeSelf) return;
-    //        spawnInterval = 0f;
-    //        int rand = Random.Range(0, spawnPositions.Length);
-    //        int randAdventurer = Random.Range(0, poolConfigs.Length);
-    //        var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
-    //        adventurerList.Add(obj);
-    //        obj.InitRandomBuildPath();
-    //        spawnCount++;
-    //        Debug.Log($"Spawn");
-    //    }
-    //}
+    private void Update()
+    {
+        if (InputManager.Instance.SpawnInput()) Spawn();
+
+        //spawnInterval += Time.deltaTime;
+        //if (spawnCount < 1 && spawnInterval > spawnTime)
+        //{
+        //    if (!SpawnerManager.Instance.gameObject.activeSelf) return;
+        //    spawnInterval = 0f;
+        //    int rand = Random.Range(0, spawnPositions.Length);
+        //    int randAdventurer = Random.Range(0, poolConfigs.Length);
+        //    var obj = PoolManager.Instance.SpawnFromPool<Adventurer>(poolConfigs[randAdventurer].Tag, spawnPositions[rand].position, Quaternion.identity);
+        //    adventurerList.Add(obj);
+        //    obj.InitRandomBuildPath();
+        //    spawnCount++;
+        //    Debug.Log($"Spawn");
+        //}
+    }
 
     public void SearchPathAllAdventurer()
     {

@@ -37,18 +37,6 @@ public class PoolManager : SingletonBase<PoolManager>
         GameObject _poolObject = new GameObject($"Pool_{tag}"); // 풀 관리할 빈 게임오브젝트 생성하고 태그로 이름 구별
         _poolObject.transform.SetParent(transform); // PoolManager의 자식으로 설정
 
-        //UI일 시
-        if (typeof(UIBase).IsAssignableFrom(typeof(T)))
-        {
-            var canvas = _poolObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-            var canvasScaler = _poolObject.AddComponent<CanvasScaler>();
-            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            canvasScaler.referenceResolution = new Vector2(UIManager.ScreenWidth, UIManager.ScreenHeight);
-            canvasScaler.matchWidthOrHeight = 1f;
-        }
-
         // Inspector에서 받아온 설정 정보 기반으로 새로운 오브젝트 풀 생성
         IObjectPool<T> _objectPool = new ObjectPool<T>(
             createFunc: () =>
@@ -83,7 +71,7 @@ public class PoolManager : SingletonBase<PoolManager>
         }
     }
 
-    public void AddPools<T>(PoolConfig newPool) where T : Component
+    public void AddPool<T>(PoolConfig newPool) where T : Component
     {
         if (newPool == null) return;
 

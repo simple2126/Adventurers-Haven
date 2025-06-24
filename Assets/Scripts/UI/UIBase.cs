@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
-using System;
 
 public class UIBase : MonoBehaviour
 {
     public Canvas Canvas;
-    public RenderMode RenderMode;
 
     [System.Serializable]
     public class ButtonSfxPair
@@ -15,8 +13,7 @@ public class UIBase : MonoBehaviour
         public SfxType SfxType;
     }
 
-    [SerializeField]
-    private SfxType[] sfxTypeArr;
+    [SerializeField] private SfxType[] sfxTypeArr;
 
     public List<ButtonSfxPair> ButtonSfxPairList = new List<ButtonSfxPair>();
 
@@ -42,11 +39,6 @@ public class UIBase : MonoBehaviour
         if (!Application.isPlaying) return;
         if (UIManager.Instance == null || !UIManager.Instance.ContainsData(gameObject.name)) return;
         Hide();
-    }
-
-    public virtual void Opened(params object[] param)
-    {
-        Canvas.renderMode = RenderMode;
     }
 
     public void Hide()

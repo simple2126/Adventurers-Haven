@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,14 +9,13 @@ public class MenuButtons : UIBase
     [Header("Menu Child")]
     private bool isVisible = false; // 현재 보여져야 하는지 여부
     [SerializeField] private Button[] childBtns;
-    [SerializeField] private CanvasGroup[] canvasGroups;
+    [SerializeField] private List<Image> btnImageList;
 
     protected override void Awake()
     {
         base.Awake();
 
         childBtns = GetComponentsInChildren<Button>(true).ToArray();
-        canvasGroups = new CanvasGroup[childBtns.Length];
 
         for (int i = 0; i < childBtns.Length; i++)
         {
@@ -36,10 +36,7 @@ public class MenuButtons : UIBase
     private void SetChildButton(int index)
     {
         int idx = index;
-        CanvasGroup group = childBtns[idx].gameObject.AddComponent<CanvasGroup>();
-        group.alpha = 0f;
-        canvasGroups[idx] = group;
-
+        btnImageList.Add(childBtns[idx].GetComponent<Image>());
         childBtns[idx].onClick.AddListener(() => ClickChildBtn(idx));
     }
 
@@ -72,10 +69,10 @@ public class MenuButtons : UIBase
         Vector3 offsetY = (isVisible ? Vector3.up : Vector3.down) * 10;
         Vector3 targetPos = childBtns[index].transform.localPosition + offsetY;
 
-        canvasGroups[index].alpha = isVisible ? 0 : 1;
+        var alpha = isVisible ? 0 : 1;
 
         seq.Append(childBtns[idx].transform.DOLocalMove(targetPos, 1))
-            .Join(canvasGroups[idx].DOFade(isVisible ? 1 : 0, 1f))
+            .Join(btnImageList[idx].DOFade(isVisible ? 1 : 0, 1f))
             .SetLink(childBtns[idx].gameObject);
 
         seq.OnComplete(() =>

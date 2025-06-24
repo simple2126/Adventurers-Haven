@@ -44,3 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5726a1eeec557449500bea9ad717fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  poolConfig:
+    Tag: NotRoadSign
+    Prefab: {fileID: 7068525172233750289, guid: e5ea578477216ab47944b03f69f4dd63, type: 3}
+    Size: 0

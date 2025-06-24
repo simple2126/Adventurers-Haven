@@ -1,19 +1,25 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : SingletonBase<UIManager>
 {
-    public static float ScreenWidth { get; private set; } = 1080;
-    public static float ScreenHeight { get; private set; } = 1920;
+    public float ScreenWidth { get; private set; } = 1080;
+    public float ScreenHeight { get; private set; } = 1920;
 
-    [SerializeField]
-    private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
+    [SerializeField] private Dictionary<string, UIBase> uiDict = new Dictionary<string, UIBase>();
+    [SerializeField] private PoolManager.PoolConfig poolConfig;
 
     protected override void Awake()
     {
         base.Awake();
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        PoolManager.Instance.AddPool<UIBase>(poolConfig);
     }
 
     public T Show<T>(params object[] param) where T : UIBase
@@ -23,7 +29,7 @@ public class UIManager : SingletonBase<UIManager>
         UIBase _go = Resources.Load<UIBase>("UI/" + _uiName);
         var _ui = Load<T>(_go, _uiName);
         uiDict[_uiName] = _ui;
-        _ui.Opened(param);
+        //_ui.Opened(param);
         return (T)_ui;
     }
 

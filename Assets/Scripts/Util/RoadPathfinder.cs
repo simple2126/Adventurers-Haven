@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class RoadPathfinder
+public class RoadPathfinder : SingletonBase<RoadPathfinder>
 {
     private class Node
     {
@@ -286,17 +286,82 @@ public class RoadPathfinder
         return anchorCell;
     }
 
-    List<Vector3Int> GetOuterRoadCells(Construction buildCon, List<Vector3Int> buildCells)
+    public List<Vector3Int> GetOuterRoadCells(Construction builcon, Vector3Int buildCell)
+    {
+        return GetOuterRoadCells(builcon, new List<Vector3Int> { buildCell });
+    }
+
+    public List<Vector3Int> GetOuterRoadCells(Construction buildCon, List<Vector3Int> buildCells)
     {
         var set = new HashSet<Vector3Int>(buildCells);
-        var dirToNeighbors = new Dictionary<Vector3Int, List<Vector3Int>>()
-        {
-            { Vector3Int.up, new List<Vector3Int>() },
-            { Vector3Int.down, new List<Vector3Int>() },
-            { Vector3Int.left, new List<Vector3Int>() },
-            { Vector3Int.right, new List<Vector3Int>() }
-        };
 
+        // 건물 중심 월드 위치
+        Vector3 buildCenter = buildCon.transform.position;
+
+        // 건물 크기 (타일 단위)
+        Vector2Int buildSize = buildCon.Size;
+
+        // 도로 크기 (타일 단위)
+        Vector2Int roadSize = new Vector2Int(2, 2); // 필요하면 인자로 받거나 멤버변수 사용
+
+        // 타일 크기 (월드 단위)
+        Vector3 cellSizeElement = elementTilemap.cellSize;
+        Vector3 cellSizeBuild = buildingTilemap.cellSize;
+
+        // 건물 기준 타일 위치 (기준점은 건물 위치 그대로 사용)
+        Vector3Int buildCenterCell = elementTilemap.WorldToCell(buildCenter);
+
+        // 기준 위치를 도로 방향으로 보정할 변수 (도로가 붙는 방향을 임시로 상하좌우 중 찾기)
+        // 여기선 예시로 "건물 중심과 도로 셀 중 가장 가까운 도로 방향"을 찾기 위해 주변 도로 확인
+        // 실제 상황에 따라 다르게 구할 수도 있음
+
+        // 주변 4방향 체크용
+        Vector3Int[] dirs = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        // 인접한 도로 셀 방향 찾기 (가장 가까운 방향 하나)
+        Vector3Int? roadDir = null;
+
+        foreach (var dir in dirs)
+        {
+            var checkCell = buildCenterCell + new Vector3Int(dir.x * (buildSize.x / 2 + roadSize.x / 2), dir.y * (buildSize.y / 2 + roadSize.y / 2), 0);
+            if (elemDict.TryGetValue(checkCell, out var data) && data.Construction != null && data.Construction.IsRoad())
+            {
+                roadDir = dir;
+                break;
+            }
+        }
+
+        if (roadDir == null)
+        {
+            // 도로 방향을 못 찾으면 기존처럼 주변 전부 체크
+            roadDir = null;
+        }
+
+        // 기준점 보정 (도로 방향이 있을 때만)
+        Vector3Int baseCell = buildCenterCell;
+        if (roadDir.HasValue)
+        {
+            Vector3Int dir = roadDir.Value;
+
+            // 보정 거리 (도로 절반 + 건물 절반)
+            float offsetX = ((roadSize.x * cellSizeElement.x) / 2f) + ((buildSize.x * cellSizeBuild.x) / 2f);
+            float offsetY = ((roadSize.y * cellSizeElement.y) / 2f) + ((buildSize.y * cellSizeBuild.y) / 2f);
+
+            Vector3 offsetWorld = new Vector3(dir.x * offsetX, dir.y * offsetY, 0f);
+            Vector3 correctedPos = buildCenter - offsetWorld;
+
+            baseCell = elementTilemap.WorldToCell(correctedPos);
+        }
+
+        var dirToNeighbors = new Dictionary<Vector3Int, List<Vector3Int>>()
+    {
+        { Vector3Int.up, new List<Vector3Int>() },
+        { Vector3Int.down, new List<Vector3Int>() },
+        { Vector3Int.left, new List<Vector3Int>() },
+        { Vector3Int.right, new List<Vector3Int>() }
+    };
+
+        // buildCells 주변 도로 셀 수집 (기존대로)
         foreach (var cell in buildCells)
         {
             foreach (var dir in Dir4)
@@ -312,16 +377,16 @@ public class RoadPathfinder
         }
 
         var outerRoads = new List<Vector3Int>();
-        var center = elementTilemap.WorldToCell(buildCon.transform.position);
 
         foreach (var pair in dirToNeighbors)
         {
             var list = pair.Value.Distinct().ToList();
             if (list.Count == 0) continue;
 
-            // 가장 중심에 가까운 셀 선택
+            // 기준 위치 보정 추가: 중심 대신 보정된 baseCell 사용
             list.Sort((a, b) =>
-                Vector3Int.Distance(a, center).CompareTo(Vector3Int.Distance(b, center)));
+                Vector3Int.Distance(a, baseCell).CompareTo(Vector3Int.Distance(b, baseCell)));
+
             outerRoads.Add(list[0]);
         }
 

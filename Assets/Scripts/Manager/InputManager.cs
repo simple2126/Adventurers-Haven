@@ -94,4 +94,9 @@ public class InputManager : SingletonBase<InputManager>
         return Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved;
 #endif
     }
+
+    public bool SpawnInput()
+    {
+        return Input.GetKeyDown(KeyCode.S);
+    }
 }
