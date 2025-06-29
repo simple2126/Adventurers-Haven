@@ -32,11 +32,11 @@ RectTransform:
   - {fileID: 7511589260468870168}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 1080, y: 2280}
+  m_Pivot: {x: 1, y: 0}
 --- !u!114 &8124394212365525934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50,9 +50,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Canvas: {fileID: 0}
-  ScreenWidth: 1080
-  ScreenHeight: 1920
-  RenderMode: 0
   sfxTypeArr: 
   ButtonSfxPairList: []
   childBtns: []
