@@ -54,9 +54,13 @@ public class RoadPlacer : BasePlacer
     {
         PlaceRoadLine(roadStart, roadEnd);
         ReturnRoadList();
+        var conTag = previewConstruction.Tag;
         PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         notPlaceableIndicator.SetActive(false);
         Exit();
+        var con = PoolManager.Instance.SpawnFromPool<Construction>(conTag);
+        con.Init(data.constructionType, data.subTypeID);
+        StartPlacing(data, con);
     }
 
     public override void OnCancel()

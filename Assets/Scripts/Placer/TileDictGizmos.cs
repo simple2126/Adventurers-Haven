@@ -102,6 +102,7 @@ public class TileDictGizmos : MonoBehaviour
             Vector3Int[] dirs = { new(size.x, 0, 0), new(0, size.y, 0) };
             foreach (var dir in dirs)
             {
+                if (dir.x != 0 && dir.y != 0) continue;
                 var neighborOrigin = origin + dir;
                 if (!originToCenter.TryGetValue(neighborOrigin, out var neighborCenter)) continue;
 

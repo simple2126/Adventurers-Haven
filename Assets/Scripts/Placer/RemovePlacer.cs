@@ -39,8 +39,13 @@ public class RemovePlacer : BasePlacer
     public override void OnConfirm()
     {
         Place();
+        var conTag = previewConstruction.Tag;
         PoolManager.Instance.ReturnToPool<Construction>(previewConstruction.Tag, previewConstruction);
         Exit();
+        // 새 preview 인스턴스 즉시 재시작
+        var con = PoolManager.Instance.SpawnFromPool<Construction>(conTag);
+        con.Init(data.constructionType, data.subTypeID);
+        StartPlacing(data, con);
     }
 
     protected override void Place()
