@@ -52,27 +52,42 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
     readonly Vector2Int roadSize = new(2, 2);
     static readonly Vector3Int[] Dir4 = { Vector3Int.right, Vector3Int.left, Vector3Int.up, Vector3Int.down };
 
-    public bool TryFindPathToRandomBuild(Vector3Int start, out Vector3 buildCenter, out List<Vector3> worldPath)
+    public bool TryFindPathToBuild(Vector3Int start, out Vector3 buildCenter, out List<Vector3> worldPath)
     {
-        buildCenter = default; worldPath = null;
+        buildCenter = default;
+        worldPath = null;
+
         if (!elemDict.TryGetValue(start, out var s) || s.Construction == null || !s.Construction.IsRoad())
-        {
-            Debug.LogWarning($"Start position {start} is not a valid road tile.");
             return false;
+
+        var candidates = new List<Construction>();
+        foreach (var data in buildDict.Values)
+        {
+            if (data?.IsOccupied != true || data.Construction == null) continue;
+            candidates.Add(data.Construction);
         }
 
-        var buildCells = GetRandomBuildCells(out var buildCon);
-        if (buildCells == null || buildCon == null)
-        {
-            Debug.Log("No valid buildings found for pathfinding.");
-            return false;
-        }
+        if (candidates.Count == 0) return false;
 
-        var neighborRoads = GetOuterRoadCells(buildCon, buildCells);
+        var targetBuild = candidates[Random.Range(0, candidates.Count)];
+        buildCenter = targetBuild.transform.position;
+
+        if (!TryGetClosestConnectedRoadPath(start, targetBuild, out worldPath))
+            return false;
+
+        return true;
+    }
+
+    private bool TryGetClosestConnectedRoadPath(Vector3Int start, Construction build, out List<Vector3> worldPath)
+    {
+        worldPath = null;
+        var roadCells = GetConnectedRoads(build);
+        if (roadCells.Count == 0) return false;
 
         List<Vector3Int> bestPath = null;
         int bestLen = int.MaxValue;
-        foreach (var goal in neighborRoads)
+
+        foreach (var goal in roadCells)
         {
             if (!elemDict.ContainsKey(goal)) continue;
 
@@ -83,70 +98,44 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
             }
         }
 
-        Debug.Log($"Found {neighborRoads.Count} outer roads, best path length: {bestLen}");
-        if (bestPath != null)
+        if (bestPath == null) return false;
+
+        worldPath = PathToWorld(bestPath);
+
+        var lastRoadCenter = worldPath[^1];
+        var dir = (build.transform.position - lastRoadCenter).normalized;
+
+        // 방향 보정
+        Vector3 fixedDir;
+        float roadHalf, buildHalf;
+
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
         {
-            worldPath = PathToWorld(bestPath);
-            buildCenter = buildCon.transform.position;
-
-            var lastRoadCenter = worldPath[^1];
-            var dir = (buildCenter - lastRoadCenter).normalized;
-
-            // 타일 크기 정보
-            var elementTilemapSize = elementTilemap.cellSize;
-            var buildTilemapSize = buildingTilemap.cellSize;
-
-            // 건물 크기 (타일 수 단위)
-            var conSize = buildCon.Size;
-
-            // 방향 보정 (직교 방향으로)
-            Vector3 fixedDir;
-            float roadHalf, buildHalf;
-
-            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) // 가로 방향
-            {
-                fixedDir = Vector3.right * Mathf.Sign(dir.x);
-                roadHalf = (roadSize.x * elementTilemapSize.x) / 2f;
-                buildHalf = (conSize.x * buildTilemapSize.x) / 2f;
-            }
-            else // 세로 방향
-            {
-                fixedDir = Vector3.up * Mathf.Sign(dir.y);
-                roadHalf = (roadSize.y * elementTilemapSize.y) / 2f;
-                buildHalf = (conSize.y * buildTilemapSize.y) / 2f;
-            }
-
-            float totalOffset = roadHalf + buildHalf;
-
-            // 건물 기준으로 한 칸 앞 위치 계산
-            var stopBeforeBuild = buildCenter - fixedDir * totalOffset;
-
-            if (Vector3.Dot(dir, fixedDir) > 0f)
-                worldPath.RemoveAt(worldPath.Count - 1);
-
-            // 경로에 추가
-            worldPath.Add(stopBeforeBuild);
-            worldPath.Add(buildCenter);
-
-            return true;
+            fixedDir = Vector3.right * Mathf.Sign(dir.x);
+            roadHalf = (roadSize.x * elementTilemap.cellSize.x) / 2f;
+            buildHalf = (build.Size.x * buildingTilemap.cellSize.x) / 2f;
         }
-        return false;
-    }
+        else
+        {
+            fixedDir = Vector3.up * Mathf.Sign(dir.y);
+            roadHalf = (roadSize.y * elementTilemap.cellSize.y) / 2f;
+            buildHalf = (build.Size.y * buildingTilemap.cellSize.y) / 2f;
+        }
 
-    Vector3 GetRoadCenterWorld(Vector3Int anchorCell)
-    {
-        Vector3 anchorWorld = elementTilemap.GetCellCenterWorld(anchorCell);
+        float totalOffset = roadHalf + buildHalf;
+        var stopBeforeBuild = build.transform.position - fixedDir * totalOffset;
 
-        if (!elemDict.TryGetValue(anchorCell, out var data) || data.Construction == null)
-            return anchorWorld;
-        
-        var roadSize = data.Construction.Size;
-        Vector3 offset = new Vector3(
-            -(roadSize.x - 1) * elementTilemap.cellSize.x / 2f,
-            -(roadSize.y - 1) * elementTilemap.cellSize.y / 2f,
-            0f
-        );
-        return anchorWorld + offset;
+        var lastWorld = worldPath[^1];
+        var lastCell = elementTilemap.WorldToCell(lastWorld);
+
+        if (Vector3.Dot(dir, fixedDir) > 0f)
+        {
+            worldPath.RemoveAt(worldPath.Count - 1);
+        }
+
+        worldPath.Add(stopBeforeBuild);
+        worldPath.Add(build.transform.position);
+        return true;
     }
 
     List<Vector3> PathToWorld(List<Vector3Int> path)
@@ -157,7 +146,23 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         return result;
     }
 
-    bool AStar(Vector3Int start, Vector3Int goal, out List<Vector3Int> result)
+    private Vector3 GetRoadCenterWorld(Vector3Int cell)
+    {
+        Vector3 anchorWorld = elementTilemap.GetCellCenterWorld(cell);
+
+        if (!elemDict.TryGetValue(cell, out var data) || data.Construction == null)
+            return anchorWorld;
+
+        var roadSize = data.Construction.Size;
+        Vector3 offset = new Vector3(
+            -(roadSize.x - 1) * elementTilemap.cellSize.x / 2f,
+            -(roadSize.y - 1) * elementTilemap.cellSize.y / 2f,
+            0f
+        );
+        return anchorWorld + offset;
+    }
+
+    private bool AStar(Vector3Int start, Vector3Int goal, out List<Vector3Int> result)
     {
         result = null;
         if (!elemDict.TryGetValue(start, out var s) || s.Construction == null || !s.Construction.IsRoad()) return false;
@@ -167,26 +172,26 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         var openDict = new Dictionary<Vector3Int, Node>();
         var closed = new HashSet<Vector3Int>();
         var startNode = new Node(start, 0, Heur(start, goal), null);
-        
-        open.Push(startNode); 
+
+        open.Push(startNode);
         openDict[start] = startNode;
 
         while (open.Count > 0)
         {
-            var curr = open.Pop(); 
+            var curr = open.Pop();
             openDict.Remove(curr.Pos);
-            
-            if (curr.Pos == goal) 
-            { 
-                result = Reconstruct(curr); 
-                return true; 
+
+            if (curr.Pos == goal)
+            {
+                result = Reconstruct(curr);
+                return true;
             }
 
             closed.Add(curr.Pos);
             foreach (var n in Neighbors(curr.Pos))
             {
                 if (closed.Contains(n)) continue;
-                
+
                 int gScore = curr.G + CalcStepCost(curr.Pos, n);
                 if (openDict.TryGetValue(n, out var ex))
                 {
@@ -195,7 +200,7 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
                 else
                 {
                     var node = new Node(n, gScore, Heur(n, goal), curr);
-                    open.Push(node); 
+                    open.Push(node);
                     openDict[n] = node;
                 }
             }
@@ -203,193 +208,123 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         return false;
     }
 
-    int Heur(Vector3Int a, Vector3Int b)
+    private int Heur(Vector3Int a, Vector3Int b)
     {
-        // a, b 각각의 도로 크기를 가져옴
-        elemDict.TryGetValue(a, out var aData);
-        elemDict.TryGetValue(b, out var bData);
-        var sizeA = (aData?.Construction != null) ? aData.Construction.Size : Vector2Int.one;
-        var sizeB = (bData?.Construction != null) ? bData.Construction.Size : Vector2Int.one;
-
-        // 두 좌표간 중심점끼리의 맨해튼 거리로 변경
-        int dx = Mathf.Abs(a.x - b.x) / sizeA.x;
-        int dy = Mathf.Abs(a.y - b.y) / sizeA.y;
-        return dx + dy;
+        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
-    List<Vector3Int> Neighbors(Vector3Int c)
+    private List<Vector3Int> Neighbors(Vector3Int c)
     {
         var n = new List<Vector3Int>();
         if (!elemDict.TryGetValue(c, out var data) || data.Construction == null) return n;
-        
+
         var size = data.Construction.Size;
         foreach (var d in Dir4)
         {
             var step = new Vector3Int(d.x * size.x, d.y * size.y, 0);
             var nc = c + step;
-            //Debug.Log($"Checking neighbor of {c}: {nc}");
 
             if (n.Contains(nc)) continue; // 중복 방지
             if (elemDict.TryGetValue(nc, out var neighborData) &&
                 neighborData.Construction != null && neighborData.Construction.IsRoad())
             {
-                //Debug.Log($"  => Valid neighbor road at {nc}");
                 n.Add(nc);
             }
         }
         return n;
     }
 
-    int CalcStepCost(Vector3Int from, Vector3Int to)
+    private int CalcStepCost(Vector3Int from, Vector3Int to)
     {
         if (!elemDict.TryGetValue(from, out var data) || data.Construction == null)
             return 1;
         var size = data.Construction.Size;
-        // 방향에 따라 x 또는 y 사용
-        if (from.x != to.x) return size.x;
-        if (from.y != to.y) return size.y;
+
+        int dx = Mathf.Abs(from.x - to.x);
+        int dy = Mathf.Abs(from.y - to.y);
+
+        if (dx > 0) return size.x;
+        if (dy > 0) return size.y;
         return 1;
     }
 
-    List<Vector3Int> Reconstruct(Node n)
+    private List<Vector3Int> Reconstruct(Node n)
     {
         var rev = new List<Vector3Int>();
         while (n != null) { rev.Add(n.Pos); n = n.Parent; }
         rev.Reverse(); return rev;
     }
 
-    List<Vector3Int> GetRandomBuildCells(out Construction con)
+    private bool SamePosition(Vector3 a, Vector3 b)
     {
-        var map = new Dictionary<Construction, List<Vector3Int>>();
-        
-        foreach (var kv in buildDict)
-            if (kv.Value?.IsOccupied == true && kv.Value.Construction != null)
-                (map.TryGetValue(kv.Value.Construction, out var l) ? l : map[kv.Value.Construction] = new List<Vector3Int>()).Add(kv.Key);
-
-        if (map.Count == 0) { con = null; return null; }
-        
-        var cons = new List<Construction>(map.Keys);
-        var rand = Random.Range(0, cons.Count);
-        Debug.Log($"Random Con {rand}");
-        con = cons[rand];
-        return map[con];
+        return elementTilemap.WorldToCell(a) == elementTilemap.WorldToCell(b);
     }
 
-    Vector3Int GetAnchorCell(Vector3Int cell)
+    public List<Vector3Int> GetConnectedRoads(Construction build)
     {
-        if (!elemDict.TryGetValue(cell, out var data) || data.Construction == null)
-            return cell;
+        var result = new HashSet<Vector3Int>();
+        var buildPos = build.transform.position;
+        var buildSize = build.Size;
+        var buildTileSize = buildingTilemap.cellSize;
+        var roadTileSize = elementTilemap.cellSize;
 
-        var worldPos = data.Construction.transform.position;
-        var anchorCell = elementTilemap.WorldToCell(worldPos);
-
-        return anchorCell;
-    }
-
-    public List<Vector3Int> GetOuterRoadCells(Construction builcon, Vector3Int buildCell)
-    {
-        return GetOuterRoadCells(builcon, new List<Vector3Int> { buildCell });
-    }
-
-    public List<Vector3Int> GetOuterRoadCells(Construction buildCon, List<Vector3Int> buildCells)
-    {
-        var set = new HashSet<Vector3Int>(buildCells);
-
-        // 건물 중심 월드 위치
-        Vector3 buildCenter = buildCon.transform.position;
-
-        // 건물 크기 (타일 단위)
-        Vector2Int buildSize = buildCon.Size;
-
-        // 도로 크기 (타일 단위)
-        Vector2Int roadSize = new Vector2Int(2, 2); // 필요하면 인자로 받거나 멤버변수 사용
-
-        // 타일 크기 (월드 단위)
-        Vector3 cellSizeElement = elementTilemap.cellSize;
-        Vector3 cellSizeBuild = buildingTilemap.cellSize;
-
-        // 건물 기준 타일 위치 (기준점은 건물 위치 그대로 사용)
-        Vector3Int buildCenterCell = elementTilemap.WorldToCell(buildCenter);
-
-        // 기준 위치를 도로 방향으로 보정할 변수 (도로가 붙는 방향을 임시로 상하좌우 중 찾기)
-        // 여기선 예시로 "건물 중심과 도로 셀 중 가장 가까운 도로 방향"을 찾기 위해 주변 도로 확인
-        // 실제 상황에 따라 다르게 구할 수도 있음
-
-        // 주변 4방향 체크용
-        Vector3Int[] dirs = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
-
-        // 인접한 도로 셀 방향 찾기 (가장 가까운 방향 하나)
-        Vector3Int? roadDir = null;
-
-        foreach (var dir in dirs)
+        foreach (var dir in Dir4)
         {
-            var checkCell = buildCenterCell + new Vector3Int(dir.x * (buildSize.x / 2 + roadSize.x / 2), dir.y * (buildSize.y / 2 + roadSize.y / 2), 0);
-            if (elemDict.TryGetValue(checkCell, out var data) && data.Construction != null && data.Construction.IsRoad())
+            Vector3 buildOffset = new Vector3(
+                dir.x * (buildSize.x * buildTileSize.x / 2f),
+                dir.y * (buildSize.y * buildTileSize.y / 2f),
+                0f
+            );
+
+            Vector3 roadOffset = new Vector3(
+                dir.x * (roadSize.x * roadTileSize.x / 2f),
+                dir.y * (roadSize.y * roadTileSize.y / 2f),
+                0f
+            );
+
+            Vector3 checkPos = buildPos + buildOffset + roadOffset;
+            Vector3Int checkCell = elementTilemap.WorldToCell(checkPos);
+
+            if (elemDict.TryGetValue(checkCell, out var roadData) && roadData.Construction?.IsRoad() == true)
             {
-                roadDir = dir;
-                break;
+                var roadPos = roadData.Construction.transform.position;
+
+                if (SamePosition(checkPos, roadPos))
+                {
+                    result.Add(checkCell);
+                    continue;
+                }
+
+                AddClosestRoadCellAround(checkPos, checkCell, roadPos, result);
             }
         }
 
-        if (roadDir == null)
-        {
-            // 도로 방향을 못 찾으면 기존처럼 주변 전부 체크
-            roadDir = null;
-        }
+        return result.ToList();
+    }
 
-        // 기준점 보정 (도로 방향이 있을 때만)
-        Vector3Int baseCell = buildCenterCell;
-        if (roadDir.HasValue)
-        {
-            Vector3Int dir = roadDir.Value;
-
-            // 보정 거리 (도로 절반 + 건물 절반)
-            float offsetX = ((roadSize.x * cellSizeElement.x) / 2f) + ((buildSize.x * cellSizeBuild.x) / 2f);
-            float offsetY = ((roadSize.y * cellSizeElement.y) / 2f) + ((buildSize.y * cellSizeBuild.y) / 2f);
-
-            Vector3 offsetWorld = new Vector3(dir.x * offsetX, dir.y * offsetY, 0f);
-            Vector3 correctedPos = buildCenter - offsetWorld;
-
-            baseCell = elementTilemap.WorldToCell(correctedPos);
-        }
-
-        var dirToNeighbors = new Dictionary<Vector3Int, List<Vector3Int>>()
+    private void AddClosestRoadCellAround(Vector3 checkPos, Vector3Int centerCell, Vector3 roadPos, HashSet<Vector3Int> result)
     {
-        { Vector3Int.up, new List<Vector3Int>() },
-        { Vector3Int.down, new List<Vector3Int>() },
-        { Vector3Int.left, new List<Vector3Int>() },
-        { Vector3Int.right, new List<Vector3Int>() }
-    };
-
-        // buildCells 주변 도로 셀 수집 (기존대로)
-        foreach (var cell in buildCells)
+        foreach (var offset in Dir4)
         {
-            foreach (var dir in Dir4)
+            Vector3Int neighborCell = centerCell + offset;
+
+            if (elemDict.TryGetValue(neighborCell, out var neighborData) && neighborData.Construction?.IsRoad() == true)
             {
-                var neighbor = cell + dir;
-                if (!set.Contains(neighbor) &&
-                    elemDict.TryGetValue(neighbor, out var data) &&
-                    data.Construction != null && data.Construction.IsRoad())
+                Vector3 neighborPos = neighborData.Construction.transform.position;
+
+                Vector3 closerPos = Vector3.SqrMagnitude(checkPos - roadPos) < Vector3.SqrMagnitude(checkPos - neighborPos)
+                    ? roadPos
+                    : neighborPos;
+
+                Vector3Int closerCell = elementTilemap.WorldToCell(closerPos);
+
+                if (elemDict.TryGetValue(closerCell, out var closerData) &&
+                    closerData.Construction?.IsRoad() == true &&
+                    !result.Contains(closerCell))
                 {
-                    dirToNeighbors[dir].Add(GetAnchorCell(neighbor));
+                    result.Add(closerCell);
                 }
             }
         }
-
-        var outerRoads = new List<Vector3Int>();
-
-        foreach (var pair in dirToNeighbors)
-        {
-            var list = pair.Value.Distinct().ToList();
-            if (list.Count == 0) continue;
-
-            // 기준 위치 보정 추가: 중심 대신 보정된 baseCell 사용
-            list.Sort((a, b) =>
-                Vector3Int.Distance(a, baseCell).CompareTo(Vector3Int.Distance(b, baseCell)));
-
-            outerRoads.Add(list[0]);
-        }
-
-        return outerRoads;
     }
 }

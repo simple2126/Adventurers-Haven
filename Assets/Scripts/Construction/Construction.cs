@@ -44,7 +44,7 @@ public class Construction : MonoBehaviour
 
     private void ChangeNotRoadSign()
     {
-        var outRoadCells = RoadPathfinder.Instance.GetOuterRoadCells(this, MapManager.Instance.GetBuildCells(this));
+        var outRoadCells = RoadPathfinder.Instance.GetConnectedRoads(this);
         notRoadSign = PoolManager.Instance.SpawnFromPool<NotRoadSign>("NotRoadSign");
         notRoadSign.transform.position = transform.position;
 
@@ -55,6 +55,10 @@ public class Construction : MonoBehaviour
         else
         {
             notRoadSign.gameObject.SetActive(false);
+            foreach (var cell in outRoadCells)
+            {
+                Debug.Log($"ChangeNotRoadSign Pos {cell}");
+            }
         }
     }
 
