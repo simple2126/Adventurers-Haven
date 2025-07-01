@@ -24,16 +24,7 @@ public class Adventurer : MonoBehaviour
         sprite = GetComponent<SpriteRenderer>();
 
         gameObject.SetActive(false); // Adventurer는 비활성화 상태로 시작
-    }
-
-    private void LateUpdate()
-    {
-        anim.SetFloat("Walk", rb.velocity.magnitude);
-
-        if(rb.velocity.magnitude != 0)
-        {
-            sprite.flipX = rb.velocity.x < 0; // 좌우 반전   
-        }
+        Debug.Log($"[Adventurer] Current Animator State: {anim.GetCurrentAnimatorStateInfo(0).IsName("Walk")}");
     }
 
     public void InitRandomBuildPath()
@@ -46,7 +37,7 @@ public class Adventurer : MonoBehaviour
         while (true)
         {
             Vector3Int startCell = MapManager.Instance.ElementTilemap.WorldToCell(transform.position);
-            Debug.Log($"{LogTag} Searching path from {startCell}");
+            //Debug.Log($"{LogTag} Searching path from {startCell}");
 
             bool success = RoadPathfinder.Instance.TryFindPathToBuild(
                 startCell, out buildCenterPos, out path);
@@ -56,11 +47,13 @@ public class Adventurer : MonoBehaviour
                 PoolManager.Instance.ReturnToPool<Adventurer>(this.gameObject.name, this);
             }
             
-            Debug.Log($"{LogTag} Path search result: {success}, buildCenterPos={buildCenterPos}");
+            //Debug.Log($"{LogTag} Path search result: {success}, buildCenterPos={buildCenterPos}");
 
             if (success && path.Count > 0)
             {
-                Debug.Log($"{LogTag} Found path {path.Count} → {buildCenterPos}");
+                //Debug.Log($"{LogTag} Found path {path.Count} → {buildCenterPos}");
+                anim.SetBool("Walk", true);
+                Debug.Log($"[Adventurer] Current Animator State: {anim.GetCurrentAnimatorStateInfo(0).IsName("Walk")}");
                 StartCoroutine(WalkRoutine());
                 yield break; // 일단 걷기 시작하면 루프 종료
             }
@@ -84,6 +77,7 @@ public class Adventurer : MonoBehaviour
         while (pathIdx < path.Count)
         {
             Vector3 target = path[pathIdx];
+            sprite.flipX = target.x < transform.position.x;
             while ((transform.position - target).sqrMagnitude > 0.001f)
             {
                 transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
@@ -95,7 +89,8 @@ public class Adventurer : MonoBehaviour
         }
 
         isMoving = false;
-        Debug.Log($"{LogTag} Arrived at build {buildCenterPos}");
+        anim.SetBool("Walk", false);
+        //Debug.Log($"{LogTag} Arrived at build {buildCenterPos}");
     }
 
 

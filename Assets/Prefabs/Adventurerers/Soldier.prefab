@@ -193,7 +193,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b45f53ed9477e814fb96cd7d790495f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stepInterval: 0.25
-  retryInterval: 0.5
+  moveSpeed: 0.5
   path: []
   buildCenterPos: {x: 0, y: 0, z: 0}

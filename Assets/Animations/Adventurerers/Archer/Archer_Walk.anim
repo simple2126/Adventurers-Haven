@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Attack02
+  m_Name: Archer_Walk
   serializedVersion: 7
   m_Legacy: 0
   m_Compressed: 0
@@ -21,31 +21,23 @@ AnimationClip:
   - serializedVersion: 2
     curve:
     - time: 0
-      value: {fileID: -3368350897116734418, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.10000014
-      value: {fileID: 7699709495587653573, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.20000005
-      value: {fileID: -6633502707096943345, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+      value: {fileID: 2926445396516364843, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+    - time: 0.099999964
+      value: {fileID: 4629780066253606070, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+    - time: 0.19999999
+      value: {fileID: -3703104630632528321, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
     - time: 0.29999995
-      value: {fileID: -4436621247842633318, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.4000001
-      value: {fileID: -2153428377789590222, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+      value: {fileID: 8913899798816734238, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+    - time: 0.39999998
+      value: {fileID: -4502444368463159815, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
     - time: 0.5
-      value: {fileID: -3426426424881051783, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.60000014
-      value: {fileID: -8437583025010059719, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.70000005
-      value: {fileID: 5788855088833067341, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+      value: {fileID: -9091184846247518354, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+    - time: 0.6
+      value: {fileID: 5000535466438252816, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+    - time: 0.6999999
+      value: {fileID: 5884102512943168953, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
     - time: 0.79999995
-      value: {fileID: -2469638153831337933, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 0.9000001
-      value: {fileID: 6479600687498441185, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 1
-      value: {fileID: -1863806505474148354, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 1.1000001
-      value: {fileID: -9017805193230125162, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
-    - time: 1.2000002
-      value: {fileID: -9017805193230125162, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
+      value: {fileID: 5884102512943168953, guid: ff89e9c3eda79cf4aa312cf8103900f5, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -64,7 +56,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 1.2100002
+    m_StopTime: 0.80999994
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
