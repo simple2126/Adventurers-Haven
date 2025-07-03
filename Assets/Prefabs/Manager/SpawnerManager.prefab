@@ -108,6 +108,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19aed6ed005828448b5375efb6148a7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SpawnPositions:
+  - {fileID: 983268894822033569}
+  - {fileID: 4240542754214462256}
   poolConfigs:
   - Tag: Archer
     Prefab: {fileID: 378449449983969704, guid: 830d8a71fcdd1354ba7adc0be254fa04, type: 3}
@@ -133,6 +136,3 @@ MonoBehaviour:
   - Tag: Wizard
     Prefab: {fileID: 8415211711421157222, guid: ccdc8e80fd3d8524c96abf2aa972d3ce, type: 3}
     Size: 0
-  spawnPositions:
-  - {fileID: 983268894822033569}
-  - {fileID: 4240542754214462256}

@@ -143,7 +143,7 @@ public class MapManager : SingletonBase<MapManager>
     }
 
     /// 지정된 origin/size 영역의 셀 좌표를 열거
-    private IEnumerable<Vector3Int> GetCells(Vector3Int origin, Vector2Int size)
+    public IEnumerable<Vector3Int> GetCells(Vector3Int origin, Vector2Int size)
     {
         int offsetX = size.x / 2;
         int offsetY = size.y / 2;

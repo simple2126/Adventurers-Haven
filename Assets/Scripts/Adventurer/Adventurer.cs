@@ -39,7 +39,7 @@ public class Adventurer : MonoBehaviour
             Vector3Int startCell = MapManager.Instance.ElementTilemap.WorldToCell(transform.position);
             //Debug.Log($"{LogTag} Searching path from {startCell}");
 
-            bool success = RoadPathfinder.Instance.TryFindPathToBuild(
+            bool success = RoadPathfinder.Instance.TryFindPathToRandomBuild(
                 startCell, out buildCenterPos, out path);
             
             if(!success)

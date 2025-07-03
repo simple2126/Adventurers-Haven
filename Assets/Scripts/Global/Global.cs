@@ -14,5 +14,7 @@ public class Global : SingletonBase<Global>
     public static readonly Vector3Int[] Dir4 = {
         Vector3Int.right, Vector3Int.left, Vector3Int.up, Vector3Int.down
     };
+
+    public Transform[] SpawnPositions => SpawnerManager.Instance.SpawnPositions;
 }
 

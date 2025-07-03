@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Construction : MonoBehaviour
@@ -44,22 +43,10 @@ public class Construction : MonoBehaviour
 
     private void ChangeNotRoadSign()
     {
-        var outRoadCells = RoadPathfinder.Instance.GetConnectedRoads(this);
+        bool isConnected = RoadPathfinder.Instance.IsConnectRoad(this);
         notRoadSign = PoolManager.Instance.SpawnFromPool<NotRoadSign>("NotRoadSign");
         notRoadSign.transform.position = transform.position;
-
-        if (outRoadCells == null || outRoadCells.Count == 0)
-        {
-            notRoadSign.gameObject.SetActive(true);
-        }
-        else
-        {
-            notRoadSign.gameObject.SetActive(false);
-            foreach (var cell in outRoadCells)
-            {
-                Debug.Log($"ChangeNotRoadSign Pos {cell}");
-            }
-        }
+        notRoadSign.gameObject.SetActive(!isConnected);
     }
 
     private void ReturnNotRoadSign()
