@@ -9,10 +9,10 @@ public class Adventurer : MonoBehaviour
     private SpriteRenderer sprite;
 
     private const string LogTag = "[Adventurer]";
-    [SerializeField] private float moveSpeed = 2f; // ← 이동 속도
+    [SerializeField] private float moveSpeed;
 
-    [SerializeField] private List<Vector3> path;          // ← 도로 경로(월드좌표)
-    [SerializeField] private Vector3 buildCenterPos;      // ← 건물 중심(월드좌표)
+    [SerializeField] private List<Vector3> path;          // 도로 경로(월드좌표)
+    [SerializeField] private Vector3 buildCenterPos;      // 건물 중심(월드좌표)
 
     private int pathIdx;
     private bool isMoving = false;
@@ -23,8 +23,12 @@ public class Adventurer : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
 
-        gameObject.SetActive(false); // Adventurer는 비활성화 상태로 시작
         Debug.Log($"[Adventurer] Current Animator State: {anim.GetCurrentAnimatorStateInfo(0).IsName("Walk")}");
+    }
+
+    public void Init(float speed)
+    {
+        moveSpeed = speed;
     }
 
     public void InitRandomBuildPath()
@@ -84,12 +88,10 @@ public class Adventurer : MonoBehaviour
                 yield return null;
             }
 
-            transform.position = target;
             pathIdx++;
         }
 
         isMoving = false;
-        anim.SetBool("Walk", false);
         //Debug.Log($"{LogTag} Arrived at build {buildCenterPos}");
     }
 
@@ -119,6 +121,7 @@ public class Adventurer : MonoBehaviour
         if (construction.Type == ConstructionType.Build)
         {
             gameObject.SetActive(false); // 건물 안에 들어가면 Adventurer 비활성화
+            anim.SetBool("Walk", false);
             StopAllCoroutines();
             path.Clear();
         }
