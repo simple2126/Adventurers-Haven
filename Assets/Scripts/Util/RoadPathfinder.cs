@@ -14,6 +14,7 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
     private Transform[] spawnPositions => Global.Instance.SpawnPositions;
     private Vector2Int roadSize => Global.RoadSize;
     private Vector3Int[] dir4 => Global.Dir4;
+    private Vector3Int start = Vector3Int.zero;
 
     protected override void Awake()
     {
@@ -52,7 +53,8 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         return true;
     }
 
-    private List<Construction> GetValidConnectedConstructions(Vector3Int start, out Dictionary<Construction, List<Vector3Int>> paths)
+    private List<Construction> GetValidConnectedConstructions(
+        Vector3Int start, out Dictionary<Construction, List<Vector3Int>> paths)
     {
         paths = new Dictionary<Construction, List<Vector3Int>>();
         var result = new List<Construction>();
@@ -66,11 +68,9 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
             var con = data.Construction;
             if (result.Contains(con)) continue;
 
-            // Spawn 모두 연결되는지 확인
-            if (!AreAllSpawnsConnectedToBuild(con, out var edgeRoads))
+            if (!AreAllSpawnsConnectedToBuild(con, out var edgeRoads, false, start))
                 continue;
 
-            // Start → Edge 중 가장 가까운 도로까지의 A* 탐색
             if (GetBestGoalFromEdges(start, edgeRoads, out var path))
             {
                 paths[con] = path;
@@ -153,49 +153,64 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         return true;
     }
 
-    public bool AreAllSpawnsConnectedToBuild(Construction build, out List<Vector3Int> connectedRoads)
+    public bool AreAllSpawnsConnectedToBuild(
+        Construction build, out List<Vector3Int> connectedRoads, 
+        bool checkAllSpawns = true, Vector3Int? singleStartCell = null)
     {
         connectedRoads = new List<Vector3Int>();
 
         if (build == null)
             return false;
 
-        var spawnTransforms = spawnPositions;
-        if (spawnTransforms == null || spawnTransforms.Length == 0)
-            return false;
+        // 1. 검사할 시작점 목록 만들기
+        List<Vector3Int> startCells;
+        if (checkAllSpawns)
+        {
+            var spawnTransforms = spawnPositions;
+            if (spawnTransforms == null || spawnTransforms.Length == 0)
+                return false;
 
-        var tilemap = elementTilemap;
+            startCells = spawnTransforms
+                .Select(t => elementTilemap.WorldToCell(t.position))
+                .ToList();
+        }
+        else
+        {
+            if (!singleStartCell.HasValue)
+                return false; // 단일 모드인데 startCell 안 줬으면 실패
 
-        var spawnCells = spawnTransforms
-            .Select(t => tilemap.WorldToCell(t.position))
-            .ToList();
+            startCells = new List<Vector3Int> { singleStartCell.Value };
+        }
 
+        // 2. 경계 도로 찾기
         List<Vector3Int> edgeRoads = GetDominantEdgeRoadCells(build);
         if (edgeRoads.Count == 0)
             return false;
 
+        // 3. 연결된 Construction 수집
         List<Construction> conList = new List<Construction>();
-        foreach(var cell in edgeRoads)
+        foreach (var cell in edgeRoads)
         {
-            if(elementDict.TryGetValue(cell, out var value))
+            if (elementDict.TryGetValue(cell, out var value) && value.Construction != null)
             {
-                if(!conList.Contains(value.Construction))
+                if (!conList.Contains(value.Construction))
                 {
                     conList.Add(value.Construction);
                     var pos = value.Construction.transform.position;
                     connectedRoads.Add(elementTilemap.WorldToCell(pos));
-                } 
+                }
             }
         }
 
-        foreach (var spawnCell in spawnCells)
+        // 4. 각 시작점에서 연결 여부 검사
+        foreach (var startCell in startCells)
         {
             bool connected = false;
 
             foreach (var con in conList)
             {
                 Vector3Int cell = elementTilemap.WorldToCell(con.transform.position);
-                if (aStar.FindPath(spawnCell, cell, out _))
+                if (aStar.FindPath(startCell, cell, out _))
                 {
                     connected = true;
                     break;
@@ -204,7 +219,7 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
 
             if (!connected)
             {
-                Debug.LogWarning($"Spawn {spawnCell} is NOT connected to {build.name}");
+                Debug.LogWarning($"Start {startCell} is NOT connected to {build.name}");
                 return false;
             }
         }
@@ -212,12 +227,13 @@ public class RoadPathfinder : SingletonBase<RoadPathfinder>
         return true;
     }
 
+
     public bool IsConnectRoad(Construction con)
     {
         if (con == null)
             return false;
 
-        return AreAllSpawnsConnectedToBuild(con, out _);
+        return AreAllSpawnsConnectedToBuild(con, out _, true);
     }
 
     private bool GetBestGoalFromEdges(Vector3Int start, List<Vector3Int> edgeRoads, out List<Vector3Int> bestPath)

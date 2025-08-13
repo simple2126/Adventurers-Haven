@@ -38,7 +38,7 @@ public class PoolManager : SingletonBase<PoolManager>
         _poolObject.transform.SetParent(transform); // PoolManager의 자식으로 설정
 
         // Inspector에서 받아온 설정 정보 기반으로 새로운 오브젝트 풀 생성
-        IObjectPool<T> _objectPool = new ObjectPool<T>(
+        ObjectPool<T> _objectPool = new ObjectPool<T>(
             createFunc: () =>
             {
                 GameObject obj = Instantiate(prefab);

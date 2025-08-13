@@ -48,8 +48,8 @@ public class TileDictGizmos : MonoBehaviour
         if (map.ElementTileDict != null && map.ElementTilemap != null)
         {
             Gizmos.color = elementColor;
-            DrawRoadLines(map.ElementTileDict); // 도로 2x2 선만 (타일맵 불필요)
-            DrawDict(map.ElementTileDict, map.ElementTilemap);      // 도로 칸에 큐브 (기존 방식)
+            DrawRoadLines(map.ElementTileDict);                     // 도로 2x2 선만
+            DrawDict(map.ElementTileDict, map.ElementTilemap);      // 도로 칸에 큐브
         }
         // 2. 건물 셀 표시 (기존 그대로)
         if (map.BuildTileDict != null && map.BuildingTilemap != null)

@@ -14,7 +14,7 @@ public class PreviewState : IPlacerState
         {
             InputManager.Instance.UpdateDrag();         // 누적 드래그량 계산
             ctx.OnTouchDragUpdate();                    // gridPos 업데이트 & 스냅 이동
-            ctx.OnLineDragUpdate();     // updated gridPos로 프리뷰
+            ctx.OnLineDragUpdate();                     // updated gridPos로 프리뷰
         }
 
         if (InputManager.Instance.IsInputUp())
